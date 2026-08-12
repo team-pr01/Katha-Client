@@ -68,7 +68,7 @@ const ShopByOccasion = () => {
             Shop by Occasion
           </h2>
 
-          {/* Custom Navigation */}
+          {/* Navigation */}
           <div className="flex items-center gap-3">
             {/* Previous */}
             <button

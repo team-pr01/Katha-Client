@@ -60,7 +60,7 @@ const Navbar = () => {
                 to="/cart"
                 className="bg-neutral-20 size-10 rounded-full flex justify-center items-center text-sm font-medium text-neutral-10"
               >
-                <img src={ICONS.cart} alt="" className="size-6" />
+                <img src={ICONS.cart} alt="" className="size-5" />
               </Link>
 
               {/* Profile */}

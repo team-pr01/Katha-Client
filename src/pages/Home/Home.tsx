@@ -1,3 +1,4 @@
+import BestSeller from "../../components/HomePage/BestSeller/BestSeller";
 import Hero from "../../components/HomePage/Hero/Hero";
 import ShopByOccasion from "../../components/HomePage/ShopByOccasion/ShopByOccasion";
 
@@ -6,6 +7,7 @@ const Home = () => {
     <div>
       <Hero />
       <ShopByOccasion />
+      <BestSeller />
     </div>
   );
 };

@@ -16,6 +16,7 @@ import cart from "./icons/cart.svg";
 import profile from "./icons/profile.svg";
 import wishlist from "./icons/wishlist.svg";
 import search from "./icons/search.svg";
+import star from "./icons/star.svg";
 
 export const IMAGES = {
     logo,
@@ -36,6 +37,7 @@ export const ICONS = {
     profile,
     wishlist,
     search,
+    star,
 
 
 };
