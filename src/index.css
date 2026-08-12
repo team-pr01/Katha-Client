@@ -1,0 +1,49 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import "tailwindcss";
+
+@theme {
+  /* Fonts */
+  --font-Inter: Inter, sans-serif;
+  --font-Poppins: Poppins, sans-serif;
+  --font-Manrope: "Manrope", sans-serif;
+  --font-Playfair-Display: "Playfair Display", serif;
+
+  /* Colors */
+
+  /* Primary */
+
+  --color-primary-10: #eb9e3a;
+
+  /* secondary */
+  --color-secondary-10: #1a1f2c;
+
+  /* neutral */
+
+  --color-neutral-5: #000;
+  --color-neutral-10: #333;
+  --color-neutral-20: #F3F3F3;
+  --color-neutral-30: #6b7280;
+  --color-neutral-40: #05160b;
+  --color-neutral-45: #696767;
+  --color-neutral-50: #d4d4d4;
+  --color-neutral-55: #b0b0b0;
+
+  /* Shadows */
+  --shadow-navbar: 0 2px 32px 0 rgba(0, 0, 0, 0.10);
+
+  /* Gradients */
+  --gradient-primary-button:
+    linear-gradient(180deg, #eb9e3a 21.5%, rgba(235, 158, 58, 0.6) 82.81%),
+    #eb9e3a;
+}
+
+.gradient-primary-button {
+  background: var(--gradient-primary-button);
+}
+
+button {
+  cursor: pointer;
+}
