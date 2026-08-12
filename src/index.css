@@ -25,7 +25,7 @@
   --color-neutral-5: #000;
   --color-neutral-10: #333;
   --color-neutral-20: #F3F3F3;
-  --color-neutral-30: #6b7280;
+  --color-neutral-30: #000000d9;
   --color-neutral-40: #05160b;
   --color-neutral-45: #696767;
   --color-neutral-50: #d4d4d4;
@@ -46,4 +46,19 @@
 
 button {
   cursor: pointer;
+}
+
+.occasion-pagination .swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+  margin: 0 !important;
+  border-radius: 9999px;
+  background-color: #d4d4d4;
+  opacity: 1;
+  transition: all 0.3s ease;
+}
+
+.occasion-pagination .swiper-pagination-bullet-active {
+  background-color: #eb9e3a;
+  width: 24px;
 }

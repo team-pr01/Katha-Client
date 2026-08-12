@@ -33,7 +33,7 @@ const Hero = () => {
 
           <div className="flex gap-4">
             <Button variant="secondary" label="See More" />
-            <Button variant="primary" label="Shop Now" />
+            <Button label="Shop Now" />
           </div>
         </div>
       </div>
