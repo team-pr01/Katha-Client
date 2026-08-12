@@ -7,6 +7,7 @@ const Button = ({
   onClick,
   className = "",
   isLoading = false,
+  icon=true,
 }: {
   type?: "button" | "submit" | "reset";
   variant?: "primary" | "secondary" | "tertiary" | "outlinePrimary";
@@ -14,6 +15,7 @@ const Button = ({
   onClick?: () => void;
   className?: string;
   isLoading?: boolean;
+  icon?: boolean;
 }) => {
   return (
     <button
@@ -24,9 +26,9 @@ const Button = ({
         isLoading ? "opacity-85 cursor-not-allowed" : "cursor-pointer"
       } ${
         variant === "primary"
-          ? "border-primary-15 gradient-primary-button text-white"
+          ? "border-primary-10 gradient-primary-button text-white"
           : variant === "secondary"
-            ? "bg-white border-white text-neutral-65"
+            ? "bg-white border-white text-neutral-10"
             : variant === "outlinePrimary"
               ? "border-primary-10 bg-transparent text-neutral-65"
               : "border-white bg-none text-white"
@@ -65,7 +67,7 @@ const Button = ({
 
       {/* Right Side Arrow Icon Circle */}
       {
-        !isLoading &&
+        !isLoading && icon &&
         <div
         className={`size-7 rounded-full flex items-center justify-center transition-transform duration-300 ${
           variant === "primary" ? "bg-white" : "bg-primary-10"
@@ -75,7 +77,7 @@ const Button = ({
           src={
             variant === "primary"
               ? ICONS.arrowRight
-              : ICONS.arrowRightUpWhite
+              : ICONS.arrowRightWhite
           }
           alt="arrow"
           className="size-5"
