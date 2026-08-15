@@ -88,7 +88,7 @@ const Footer = () => {
     },
     {
       icon: ICONS.phone,
-      text: "+91 98765 00000",
+      text: "+91 98765 00000 (WhatsApp)",
       href: "tel:+919876500000",
     },
     {
@@ -110,7 +110,7 @@ const Footer = () => {
           <div className="flex flex-col lg:flex-row gap-10 lg:gap-8 xl:gap-19 justify-between">
             {/* Left Column - Brand */}
             <div className="max-w-[320px]">
-              <img src={IMAGES.logo} alt="Hanjifinance" className="w-20" />
+              <img src={IMAGES.logo} alt="Hanjifinance" className="w-70" />
               <p className="text-neutral-90 text-sm leading-5 mt-8">
                 At Katha, every handcrafted piece tells a story of India's rich
                 heritage and skilled craftsmanship. We create timeless designs

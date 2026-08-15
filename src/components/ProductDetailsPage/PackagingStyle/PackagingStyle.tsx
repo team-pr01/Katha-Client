@@ -61,7 +61,7 @@ const PackagingStyle: React.FC = () => {
   };
 
   return (
-    <div className="border-t border-[#d4d4d4] pt-4 mt-10">
+    <div className="border-t border-neutral-50 pt-4 mt-10">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-lg font-semibold text-neutral-10">

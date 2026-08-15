@@ -1,4 +1,6 @@
-import logo from "./images/logo.webp";
+// IMAGES
+import logo from "./images/logo.png";
+import favicon from "./images/favicon.webp";
 import heroImg from "./images/hero-img.webp";
 import wedding from "./images/wedding.webp";
 import anniversary from "./images/anniversary.webp";
@@ -14,7 +16,7 @@ import ringPlatterPackaging from "./images/ring-platter-packaging.webp";
 import decorativeFlowersPackaging from "./images/decorative-flowers-packaging.webp";
 import ribbonPackaging from "./images/ribbon-packaging.webp";
 
-
+// ICONS
 import arrowRight from "./icons/arrow-right.svg";
 import arrowRightWhite from "./icons/arrow-right-white.svg";
 import cart from "./icons/cart.svg";
@@ -28,6 +30,7 @@ import phone from "./icons/phone.svg";
 
 export const IMAGES = {
     logo,
+    favicon,
     heroImg,
     wedding,
     anniversary,

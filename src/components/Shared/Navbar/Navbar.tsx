@@ -29,7 +29,7 @@ const Navbar = () => {
     <div className="bg-white shadow-navbar font-Manrope py-4">
       <Container>
         <div className="flex items-center justify-between">
-          <img src={IMAGES.logo} alt="" />
+          <img src={IMAGES.logo} alt="" className="w-40" />
 
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-4">
@@ -62,11 +62,15 @@ const Navbar = () => {
               >
                 <img src={ICONS.cart} alt="" className="size-5" />
               </Link>
+              <Link
+                to="/wishlist"
+                className="bg-neutral-20 size-10 rounded-full flex justify-center items-center text-sm font-medium text-neutral-10"
+              >
+                <img src={ICONS.wishlist} alt="" className="size-5" />
+              </Link>
 
               {/* Profile */}
-              <Link to="/products">
-                <Button label="Explore Now" />
-              </Link>
+                <Button label="Register Now" />
             </div>
           </div>
         </div>

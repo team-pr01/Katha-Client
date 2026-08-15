@@ -5,6 +5,10 @@ import NotFound from "../pages/NotFound/NotFound";
 import AboutUs from "../pages/AboutUs/AboutUs";
 import Products from "../pages/Products/Products";
 import ProductDetails from "../pages/ProductDetails/ProductDetails";
+import Cart from "../pages/Cart/Cart";
+import Wishlist from "../pages/Wishlist/Wishlist";
+import PersonalizedOrders from "../pages/PersonalizedOrders/PersonalizedOrders";
+import Checkout from "../pages/Checkout/Checkout";
 
 export const router = createBrowserRouter([
   {
@@ -27,6 +31,22 @@ export const router = createBrowserRouter([
       {
         path: "/product/:id",
         element: <ProductDetails />,
+      },
+      {
+        path: "/cart",
+        element: <Cart />,
+      },
+      {
+        path: "/checkout",
+        element: <Checkout />,
+      },
+      {
+        path: "/wishlist",
+        element: <Wishlist />,
+      },
+      {
+        path: "/personalized-orders",
+        element: <PersonalizedOrders />,
       },
       {
         path: "*",
