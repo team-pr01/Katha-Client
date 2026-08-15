@@ -35,9 +35,9 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
         {label && (
           <label
             htmlFor={name}
-            className="flex flex-row items-center w-full justify-between text-white"
+            className="flex flex-row items-center w-full justify-between text-neutral-10"
           >
-            <span className="leading-4.5 text-[13px] md:text-[15px] font-medium tracking-[-0.16]">
+            <span className="leading-4.5 text-[13px] md:text-sm font-medium tracking-[-0.16]">
               {label}{" "}
               <span className="text-primary-10">{isRequired ? "*" : ""}</span>
             </span>
@@ -53,7 +53,7 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
           ref={ref}
           disabled={isDisabled}
           className={`w-full px-4 py-3.5 rounded-lg  border leading-4.5 focus:outline-none focus:border-primary-10 transition duration-300 ${isDisabled ? "cursor-not-allowed bg-white/80" : "bg-white"} ${
-            error ? "border-red-500" : "border-white"
+            error ? "border-red-500" : "border-neutral-50"
           }`}
           {...rest}
         />

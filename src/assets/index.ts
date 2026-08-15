@@ -27,6 +27,7 @@ import star from "./icons/star.svg";
 import location from "./icons/location.svg";
 import email from "./icons/email.svg";
 import phone from "./icons/phone.svg";
+import google from "./icons/google.png";
 
 export const IMAGES = {
     logo,
@@ -57,7 +58,8 @@ export const ICONS = {
     star,
     location,
     email,
-    phone
+    phone,
+    google
 
 
 };

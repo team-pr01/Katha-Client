@@ -31,7 +31,7 @@ const Checkout: React.FC = () => {
         {JSON.stringify(structuredData)}
       </script>
 
-      <div className="bg-[#F3F3F3] min-h-screen py-6 md:py-8">
+      <div className="bg-neutral-20 min-h-screen py-6 md:py-8">
         <Container>
           {/* Breadcrumbs */}
           <nav
@@ -40,19 +40,19 @@ const Checkout: React.FC = () => {
           >
             <Link
               to="/"
-              className="text-neutral-45 hover:text-[#eb9e3a] transition-colors"
+              className="text-neutral-45 hover:text-primary-10 transition-colors"
             >
               Home
             </Link>
             <span className="text-neutral-45">/</span>
             <Link
               to="/cart"
-              className="text-neutral-45 hover:text-[#eb9e3a] transition-colors"
+              className="text-neutral-45 hover:text-primary-10 transition-colors"
             >
               Cart
             </Link>
             <span className="text-neutral-45">/</span>
-            <span className="text-[#333] font-medium">Checkout</span>
+            <span className="text-neutral-10 font-medium">Checkout</span>
           </nav>
 
           <div className="flex flex-col lg:flex-row gap-6">

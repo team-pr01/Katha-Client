@@ -2,9 +2,17 @@ import { Link, useLocation } from "react-router-dom";
 import { ICONS, IMAGES } from "../../../assets";
 import Container from "../../Reusable/Container/Container";
 import Button from "../../Reusable/Button/Button";
+import Login from "../../AuthComponents/Login/Login";
+import { useState } from "react";
+import Modal from "../../Reusable/Modal copy/Modal";
+import Signup from "../../AuthComponents/Signup/Signup";
 
 const Navbar = () => {
   const pathname = useLocation().pathname;
+  const [authModalType, setAuthModalType] = useState<"login" | "signup">(
+    "login",
+  );
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
 
   const navLinks = [
     {
@@ -44,7 +52,7 @@ const Navbar = () => {
               ))}
             </div>
             {/* Search */}
-            <div className="flex py-2.5 items-center rounded-md bg-neutral-20 px-4 w-[300px]">
+            <div className="flex py-2.5 items-center rounded-md bg-neutral-20 px-4 w-75">
               <img src={ICONS.search} alt="" />
 
               <input
@@ -70,11 +78,35 @@ const Navbar = () => {
               </Link>
 
               {/* Profile */}
-                <Button label="Register Now" />
+              <Button
+                onClick={() => {
+                  setAuthModalType("signup");
+                  setIsAuthModalOpen(true);
+                }}
+                label="Register Now"
+              />
             </div>
           </div>
         </div>
       </Container>
+
+      <Modal isModalOpen={isAuthModalOpen} setIsModalOpen={setIsAuthModalOpen}>
+        <h2 className="text-2xl font-Satoshi font-semibold text-center text-neutral-5">
+          {authModalType === "login" ? "Welcome Back!" : "Create an Account"}
+        </h2>
+        <p className="text-sm text-center mt-1 mb-8">
+          {authModalType === "login"
+            ? "Enter your details to login"
+            : "Enter your details to create an account"}
+        </p>
+
+        {authModalType === "login" && (
+          <Login setAuthModalType={setAuthModalType} />
+        )}
+        {authModalType === "signup" && (
+          <Signup setAuthModalType={setAuthModalType} />
+        )}
+      </Modal>
     </div>
   );
 };

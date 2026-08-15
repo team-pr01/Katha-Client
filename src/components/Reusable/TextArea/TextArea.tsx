@@ -30,8 +30,8 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   ) => {
     return (
       <div className="flex flex-col gap-2 font-Nunito w-full">
-        <label className="flex flex-row items-center w-full justify-between text-white">
-          <span className="leading-4.5 text-[13px] md:text-[15px] font-medium tracking-[-0.16] ">
+        <label className="flex flex-row items-center w-full justify-between text-neutral-10">
+          <span className="leading-4.5 text-[13px] md:text-sm font-medium tracking-[-0.16] ">
             {label}{" "}
             <span className="text-primary-10">{isRequired ? "*" : ""}</span>
           </span>
@@ -46,7 +46,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           required={isRequired}
           className={`w-full px-4 py-3.5 rounded-lg  border leading-4.5 focus:outline-none focus:border-primary-10 transition duration-300 ${
             isDisabled ? "cursor-not-allowed bg-white/80" : "bg-white"
-          } ${error ? "border-red-500" : "border-white"}`}
+          } ${error ? "border-red-500" : "text-neutral-50"}`}
           {...rest}
         ></textarea>
         {error && (

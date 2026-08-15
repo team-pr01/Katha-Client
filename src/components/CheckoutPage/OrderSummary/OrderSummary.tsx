@@ -50,8 +50,8 @@ const OrderSummary = () => {
   return (
     <div className="lg:w-96 flex-shrink-0">
       <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-6">
-        <h2 className="text-lg font-semibold text-[#333] mb-4 flex items-center gap-2">
-          <FiPackage className="text-[#eb9e3a]" />
+        <h2 className="text-lg font-semibold text-neutral-10 mb-4 flex items-center gap-2">
+          <FiPackage className="text-primary-10" />
           Order Summary
         </h2>
 
@@ -60,15 +60,15 @@ const OrderSummary = () => {
           {cartItems.map((item) => (
             <div
               key={item.id}
-              className="flex gap-3 pb-3 border-b border-[#d4d4d4] last:border-0"
+              className="flex gap-3 pb-3 border-b border-neutral-50 last:border-0"
             >
               <img
                 src={item.image}
                 alt={item.name}
-                className="w-16 h-16 rounded-lg object-cover flex-shrink-0 bg-[#F3F3F3]"
+                className="w-16 h-16 rounded-lg object-cover flex-shrink-0 bg-neutral-20"
               />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-[#333] line-clamp-1">
+                <p className="text-sm font-medium text-neutral-10 line-clamp-1">
                   {item.name}
                 </p>
                 <div className="flex items-center gap-2 text-xs text-neutral-45 mt-0.5">
@@ -76,7 +76,7 @@ const OrderSummary = () => {
                   {item.color && <span>Color: {item.color}</span>}
                 </div>
                 <div className="flex items-center justify-between mt-1">
-                  <span className="text-sm font-bold text-[#333]">
+                  <span className="text-sm font-bold text-neutral-10">
                     ₹{item.price}
                   </span>
                   <span className="text-xs text-neutral-45">
@@ -89,12 +89,12 @@ const OrderSummary = () => {
         </div>
 
         {/* Calculations */}
-        <div className="space-y-2 border-t border-[#d4d4d4] pt-4 mb-4">
+        <div className="space-y-2 border-t border-neutral-50 pt-4 mb-4">
           <div className="flex justify-between text-sm">
             <span className="text-neutral-45">
               Subtotal ({cartItems.length} items)
             </span>
-            <span className="text-[#333] font-medium">₹{subtotal}</span>
+            <span className="text-neutral-10 font-medium">₹{subtotal}</span>
           </div>
           {totalSavings > 0 && (
             <div className="flex justify-between text-sm">
@@ -110,7 +110,7 @@ const OrderSummary = () => {
               className={
                 deliveryCharge === 0
                   ? "text-green-600 font-medium"
-                  : "text-[#333]"
+                  : "text-neutral-10"
               }
             >
               {deliveryCharge === 0 ? "Free" : `₹${deliveryCharge}`}
@@ -119,9 +119,9 @@ const OrderSummary = () => {
         </div>
 
         {/* Total */}
-        <div className="flex justify-between items-center pt-4 border-t border-[#d4d4d4] mb-4">
-          <span className="text-base font-semibold text-[#333]">Total</span>
-          <span className="text-2xl font-bold text-[#333]">
+        <div className="flex justify-between items-center pt-4 border-t border-neutral-50 mb-4">
+          <span className="text-base font-semibold text-neutral-10">Total</span>
+          <span className="text-2xl font-bold text-neutral-10">
             ₹{total.toFixed(0)}
           </span>
         </div>
@@ -132,8 +132,8 @@ const OrderSummary = () => {
                     w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2
                     ${
                       isSubmitting
-                        ? "bg-[#d4d4d4] text-neutral-45 cursor-not-allowed"
-                        : "bg-[#eb9e3a] text-white hover:bg-[#d4892a] shadow-md hover:shadow-lg"
+                        ? "bg-neutral-50 text-neutral-45 cursor-not-allowed"
+                        : "bg-primary-10 text-white hover:bg-[#d4892a] shadow-md hover:shadow-lg"
                     }
                   `}
         >
@@ -152,20 +152,20 @@ const OrderSummary = () => {
 
         {/* Trust Badges */}
         <div className="mt-4 grid grid-cols-3 gap-2">
-          <div className="flex flex-col items-center p-2 bg-[#F3F3F3] rounded-lg">
-            <FiShield className="text-[#eb9e3a] text-lg" />
+          <div className="flex flex-col items-center p-2 bg-neutral-20 rounded-lg">
+            <FiShield className="text-primary-10 text-lg" />
             <span className="text-xs text-neutral-45 mt-1 text-center">
               Secure Payment
             </span>
           </div>
-          <div className="flex flex-col items-center p-2 bg-[#F3F3F3] rounded-lg">
-            <FiTruck className="text-[#eb9e3a] text-lg" />
+          <div className="flex flex-col items-center p-2 bg-neutral-20 rounded-lg">
+            <FiTruck className="text-primary-10 text-lg" />
             <span className="text-xs text-neutral-45 mt-1 text-center">
               Free Delivery*
             </span>
           </div>
-          <div className="flex flex-col items-center p-2 bg-[#F3F3F3] rounded-lg">
-            <FiPackage className="text-[#eb9e3a] text-lg" />
+          <div className="flex flex-col items-center p-2 bg-neutral-20 rounded-lg">
+            <FiPackage className="text-primary-10 text-lg" />
             <span className="text-xs text-neutral-45 mt-1 text-center">
               Easy Returns
             </span>
@@ -173,9 +173,9 @@ const OrderSummary = () => {
         </div>
 
         {/* Shipping Info */}
-        <div className="mt-3 p-3 bg-[#F3F3F3] rounded-lg">
+        <div className="mt-3 p-3 bg-neutral-20 rounded-lg">
           <p className="text-xs text-neutral-45 text-center">
-            <FiAlertCircle className="inline mr-1 text-[#eb9e3a]" size={12} />
+            <FiAlertCircle className="inline mr-1 text-primary-10" size={12} />
             Orders are processed within 24 hours. Free delivery on orders above
             ₹500.
           </p>
