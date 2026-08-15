@@ -9,7 +9,10 @@ import festival from "./images/festival.webp";
 import housewarming from "./images/housewarming.webp";
 import footerBg from "./images/footer-bg.webp";
 import footerDivider from "./images/footer-divider.webp";
-
+import regularPackaging from "./images/regular-packaging.webp";
+import ringPlatterPackaging from "./images/ring-platter-packaging.webp";
+import decorativeFlowersPackaging from "./images/decorative-flowers-packaging.webp";
+import ribbonPackaging from "./images/ribbon-packaging.webp";
 
 
 import arrowRight from "./icons/arrow-right.svg";
@@ -34,7 +37,11 @@ export const IMAGES = {
     festival,
     housewarming,
     footerBg,
-    footerDivider
+    footerDivider,
+    regularPackaging,
+    ringPlatterPackaging,
+    decorativeFlowersPackaging,
+    ribbonPackaging
 };
 
 export const ICONS = {
