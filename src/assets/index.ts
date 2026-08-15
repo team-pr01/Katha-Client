@@ -7,6 +7,8 @@ import birthday from "./images/birthday.webp";
 import farewell from "./images/farewell.webp";
 import festival from "./images/festival.webp";
 import housewarming from "./images/housewarming.webp";
+import footerBg from "./images/footer-bg.webp";
+import footerDivider from "./images/footer-divider.webp";
 
 
 
@@ -17,6 +19,9 @@ import profile from "./icons/profile.svg";
 import wishlist from "./icons/wishlist.svg";
 import search from "./icons/search.svg";
 import star from "./icons/star.svg";
+import location from "./icons/location.svg";
+import email from "./icons/email.svg";
+import phone from "./icons/phone.svg";
 
 export const IMAGES = {
     logo,
@@ -27,7 +32,9 @@ export const IMAGES = {
     birthday,
     farewell,
     festival,
-    housewarming
+    housewarming,
+    footerBg,
+    footerDivider
 };
 
 export const ICONS = {
@@ -38,6 +45,9 @@ export const ICONS = {
     wishlist,
     search,
     star,
+    location,
+    email,
+    phone
 
 
 };
