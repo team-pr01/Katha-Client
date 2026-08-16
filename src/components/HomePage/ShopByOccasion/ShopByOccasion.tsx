@@ -7,57 +7,16 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-import { ICONS, IMAGES } from "../../../assets";
+import { ICONS } from "../../../assets";
 import Button from "../../Reusable/Button/Button";
 import Container from "../../Reusable/Container/Container";
+import { useGetAllOccasionsQuery } from "../../../redux/Features/Occation/occasionApi";
+import type { TOccasion } from "../../../types/occasion.type";
 
 const ShopByOccasion = () => {
+  const { data } = useGetAllOccasionsQuery({});
+  const occasions = data?.data?.data || [];
   const swiperRef = useRef<SwiperType | null>(null);
-
-  const occasions = [
-    {
-      image: IMAGES.wedding,
-      label: "Wedding",
-      description: "Crafted keepsakes for timeless celebrations.",
-      collections: "+40 Collections",
-    },
-    {
-      image: IMAGES.birthday,
-      label: "Birthday",
-      description: "Thoughtful gifts for unforgettable birthdays.",
-      collections: "+40 Collections",
-    },
-    {
-      image: IMAGES.anniversary,
-      label: "Anniversary",
-      description: "Celebrate every milestone with heartfelt memories.",
-      collections: "+40 Collections",
-    },
-    {
-      image: IMAGES.festival,
-      label: "Festival",
-      description: "Bring warmth and tradition to every celebration.",
-      collections: "+40 Collections",
-    },
-    {
-      image: IMAGES.babyShower,
-      label: "Baby Shower",
-      description: "Welcome new beginnings with heartfelt gifts.",
-      collections: "+40 Collections",
-    },
-    {
-      image: IMAGES.housewarming,
-      label: "Housewarming",
-      description: "Make every new home feel truly special.",
-      collections: "+40 Collections",
-    },
-    {
-      image: IMAGES.farewell,
-      label: "Farewell",
-      description: "Meaningful gifts for lasting memories.",
-      collections: "+40 Collections",
-    },
-  ];
 
   return (
     <Container>
@@ -123,13 +82,13 @@ const ShopByOccasion = () => {
             }}
             className="shop-occasion-swiper"
           >
-            {occasions.map((occasion) => (
-              <SwiperSlide key={occasion.label}>
+            {occasions?.map((occasion: TOccasion) => (
+              <SwiperSlide key={occasion?._id}>
                 <div className="relative h-full overflow-hidden rounded-2xl">
                   {/* Image */}
                   <img
-                    src={occasion.image}
-                    alt={occasion.label}
+                    src={occasion?.imageUrl}
+                    alt={occasion?.name}
                     className="aspect-4/3 h-full w-full object-cover"
                   />
 
@@ -138,18 +97,19 @@ const ShopByOccasion = () => {
 
                   {/* Collections Badge */}
                   <div className="absolute right-3 top-3 z-10 rounded-full bg-white/70 px-4 py-2 text-xs text-neutral-10 backdrop-blur-sm">
-                    {occasion.collections}
+                    {occasion?.productCount} Collection
+                    {occasion?.productCount > 1 ? "s" : ""}
                   </div>
 
                   {/* Content */}
                   <div className="absolute bottom-0 left-0 right-0 z-10 flex items-end justify-between gap-4 px-6 py-5">
                     <div>
                       <h3 className="text-xl font-semibold text-white">
-                        {occasion.label}
+                        {occasion?.name}
                       </h3>
 
                       <p className="mt-2 max-w-75 text-sm leading-tight text-white/90">
-                        {occasion.description}
+                        {occasion?.description}
                       </p>
                     </div>
 

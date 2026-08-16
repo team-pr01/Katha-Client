@@ -347,7 +347,7 @@ const Filters: React.FC<FiltersProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-6">
+    <div className="bg-white rounded-2xl shadow-sm p-6 font-Manrope">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-neutral-10">Filters</h2>
         {activeFilterCount > 0 && (
