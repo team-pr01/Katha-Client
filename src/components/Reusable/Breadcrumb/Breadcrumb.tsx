@@ -1,9 +1,7 @@
-// components/Reusable/Breadcrumb/Breadcrumb.tsx
-import { Link } from "react-router-dom";
-import { IoHomeOutline } from "react-icons/io5";
-import { MdNavigateNext } from "react-icons/md";
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-interface BreadcrumbItem {
+export interface BreadcrumbItem {
   label: string;
   path?: string;
   isActive?: boolean;
@@ -11,42 +9,51 @@ interface BreadcrumbItem {
 
 interface BreadcrumbProps {
   items: BreadcrumbItem[];
+  separator?: string;
   className?: string;
   homeLabel?: string;
-  separator?: React.ReactNode;
 }
 
-const Breadcrumb = ({
+const Breadcrumb: React.FC<BreadcrumbProps> = ({
   items,
-  className = "",
-  homeLabel = "Home",
-  separator = <MdNavigateNext className="w-4 h-4 text-gray-400" />,
-}: BreadcrumbProps) => {
-  return (
-    <nav className={`flex items-center text-sm font-GeneralSans ${className}`}>
-      <Link
-        to="/"
-        className="flex items-center gap-1 text-gray-500 hover:text-primary-5 transition-colors"
-      >
-        <IoHomeOutline className="w-4 h-4" />
-        {homeLabel}
-      </Link>
+  separator = '/',
+  className = '',
+  homeLabel = 'Home',
+}) => {
+  // If no items provided, show default home
+  const breadcrumbItems = items.length > 0 ? items : [{ label: homeLabel, path: '/' }];
 
-      {items.map((item, index) => (
-        <div key={index} className="flex items-center">
-          {separator}
-          {item.path && !item.isActive ? (
-            <Link
-              to={item.path}
-              className="text-gray-500 hover:text-primary-5 transition-colors"
-            >
-              {item.label}
-            </Link>
-          ) : (
-            <span className="text-primary-5 font-medium">{item?.label}</span>
-          )}
-        </div>
-      ))}
+  return (
+    <nav
+      className={`flex items-center gap-2 text-sm mb-6 ${className}`}
+      aria-label="Breadcrumb"
+    >
+      {breadcrumbItems.map((item, index) => {
+        const isLast = index === breadcrumbItems.length - 1;
+
+        return (
+          <React.Fragment key={index}>
+            {index > 0 && (
+              <span className="text-neutral-45" aria-hidden="true">
+                {separator}
+              </span>
+            )}
+            
+            {item.path && !isLast ? (
+              <Link
+                to={item.path}
+                className="text-neutral-45 hover:text-primary-10 transition-colors"
+              >
+                {item.label}
+              </Link>
+            ) : (
+              <span className={isLast ? 'text-neutral-10 font-medium' : 'text-neutral-45'}>
+                {item.label}
+              </span>
+            )}
+          </React.Fragment>
+        );
+      })}
     </nav>
   );
 };

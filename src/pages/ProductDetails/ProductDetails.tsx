@@ -23,6 +23,7 @@ import Container from "../../components/Reusable/Container/Container";
 import { IMAGES } from "../../assets";
 import YouMayAlsoLike from "../../components/ProductDetailsPage/YouMayAlsoLike/YouMayAlsoLike";
 import PackagingStyle from "../../components/ProductDetailsPage/PackagingStyle/PackagingStyle";
+import { Link } from "react-router-dom";
 
 // Types
 interface ProductImage {
@@ -254,7 +255,7 @@ const ProductDetails: React.FC = () => {
   };
 
   return (
-    <div className="bg-neutral-20 min-h-screen py-8">
+    <div className="bg-neutral-20 min-h-screen py-8 font-Manrope">
       <Container>
         {/* Main Product Section */}
         <div className="bg-white rounded-2xl shadow-sm p-4 md:p-8">
@@ -311,7 +312,7 @@ const ProductDetails: React.FC = () => {
                   <button
                     key={image.id}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                    className={`shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
                       currentImageIndex === index
                         ? "border-primary-10"
                         : "border-transparent"
@@ -334,10 +335,16 @@ const ProductDetails: React.FC = () => {
                 Home / Products / Brass Elephant
               </div>
 
-              {/* Title */}
-              <h1 className="text-2xl md:text-3xl font-bold text-neutral-10 mb-2">
-                The Jewel Embedded Brass Elephant
-              </h1>
+              <div className="flex justify-between mb-2">
+                {/* Title */}
+                <h1 className="text-2xl md:text-3xl font-bold text-neutral-10 max-w-[80%]">
+                  The Jewel Embedded Brass Elephant
+                </h1>
+
+                <button className="p-2 border border-neutral-50 rounded-lg hover:bg-neutral-20 transition-colors h-fit">
+                  <FiShare2 size={16} />
+                </button>
+              </div>
 
               {/* Rating */}
               <div className="flex items-center gap-3 mb-4">
@@ -362,7 +369,9 @@ const ProductDetails: React.FC = () => {
               {/* Price */}
               <div className="mb-4">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl font-bold text-neutral-10">₹200</span>
+                  <span className="text-2xl font-bold text-neutral-10">
+                    ₹200
+                  </span>
                   <span className="text-lg text-neutral-45 line-through">
                     ₹2000
                   </span>
@@ -399,7 +408,9 @@ const ProductDetails: React.FC = () => {
 
               {/* Quantity */}
               <div className="flex items-center gap-4 mb-4">
-                <label className="text-sm font-medium text-neutral-10">Qty:</label>
+                <label className="text-sm font-medium text-neutral-10">
+                  Qty:
+                </label>
                 <div className="flex items-center border border-neutral-50 rounded-lg overflow-hidden">
                   <button
                     onClick={() => handleQuantityChange(-1)}
@@ -436,9 +447,10 @@ const ProductDetails: React.FC = () => {
                   <FiShoppingCart size={18} />
                   Add to Cart
                 </button>
-                <button className="p-2.5 border border-neutral-50 rounded-lg hover:bg-neutral-20 transition-colors">
+                <Link to="/product/customize/1" className="p-2.5 border border-neutral-50 rounded-lg hover:bg-neutral-20 transition-colors">
                   <FiShare2 size={18} />
-                </button>
+                   Customize
+                </Link>
               </div>
 
               {/* Packaging Options */}
@@ -655,7 +667,7 @@ const ProductDetails: React.FC = () => {
                     className="border-b border-neutral-50 pb-6 last:border-0"
                   >
                     <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-full bg-primary-10/10 flex items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-primary-10/10 flex items-center justify-center shrink-0">
                         <FiUser className="text-primary-10" size={18} />
                       </div>
                       <div className="flex-1">

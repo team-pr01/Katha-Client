@@ -3,9 +3,6 @@ import {
   FiTrash2,
   FiMinus,
   FiPlus,
-  FiGift,
-  FiTruck,
-  FiShield,
   FiArrowLeft,
   FiArrowRight,
   FiX,
@@ -273,28 +270,6 @@ const CartItems = ({ cartItems }) => {
             Proceed to Checkout
             <FiArrowRight size={18} />
           </Link>
-
-          {/* Trust Badges */}
-          <div className="mt-4 grid grid-cols-3 gap-2">
-            <div className="flex flex-col items-center p-2 bg-neutral-20 rounded-lg">
-              <FiTruck className="text-primary-10 text-lg" />
-              <span className="text-xs text-neutral-45 mt-1 text-center">
-                Free Delivery
-              </span>
-            </div>
-            <div className="flex flex-col items-center p-2 bg-neutral-20 rounded-lg">
-              <FiShield className="text-primary-10 text-lg" />
-              <span className="text-xs text-neutral-45 mt-1 text-center">
-                Secure Payment
-              </span>
-            </div>
-            <div className="flex flex-col items-center p-2 bg-neutral-20 rounded-lg">
-              <FiGift className="text-primary-10 text-lg" />
-              <span className="text-xs text-neutral-45 mt-1 text-center">
-                Gift Options
-              </span>
-            </div>
-          </div>
         </div>
       </div>
     </div>

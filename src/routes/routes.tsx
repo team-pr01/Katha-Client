@@ -9,6 +9,8 @@ import Cart from "../pages/Cart/Cart";
 import Wishlist from "../pages/Wishlist/Wishlist";
 import PersonalizedOrders from "../pages/PersonalizedOrders/PersonalizedOrders";
 import Checkout from "../pages/Checkout/Checkout";
+import CustomizeProduct from "../pages/CustomizeProduct/CustomizeProduct";
+import BulkOrders from "../pages/BulkOrders/BulkOrders";
 
 export const router = createBrowserRouter([
   {
@@ -33,6 +35,10 @@ export const router = createBrowserRouter([
         element: <ProductDetails />,
       },
       {
+        path: "/product/customize/:id",
+        element: <CustomizeProduct />,
+      },
+      {
         path: "/cart",
         element: <Cart />,
       },
@@ -47,6 +53,10 @@ export const router = createBrowserRouter([
       {
         path: "/personalized-orders",
         element: <PersonalizedOrders />,
+      },
+      {
+        path: "/bulk-orders",
+        element: <BulkOrders />,
       },
       {
         path: "*",

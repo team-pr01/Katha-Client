@@ -1,5 +1,4 @@
 import React, { useState, useRef } from "react";
-import { Link } from "react-router-dom";
 import Container from "../../components/Reusable/Container/Container";
 import StepPreferences from "../../components/PersonalizedOrdersPage/StepPreferences/StepPreferences";
 import OrderSuccess from "../../components/PersonalizedOrdersPage/OrderSuccess/OrderSuccess";
@@ -9,6 +8,7 @@ import StepGiftDetails from "../../components/PersonalizedOrdersPage/StepGiftDet
 import StepContactInfo from "../../components/PersonalizedOrdersPage/StepContactInfo/StepContactInfo";
 import StepCustomization from "../../components/PersonalizedOrdersPage/StepCustomization/StepCustomization";
 import { FiClock, FiGift } from "react-icons/fi";
+import Breadcrumb from "../../components/Reusable/Breadcrumb/Breadcrumb";
 
 const PersonalizedOrders: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -141,39 +141,34 @@ const PersonalizedOrders: React.FC = () => {
 
       <div className="bg-neutral-20 min-h-screen py-6 md:py-8 font-Manrope">
         <Container>
-          {/* Breadcrumbs */}
-          <nav
-            className="flex items-center gap-2 text-sm mb-6"
-            aria-label="Breadcrumb"
-          >
-            <Link
-              to="/"
-              className="text-neutral-45 hover:text-primary-10 transition-colors"
-            >
-              Home
-            </Link>
-            <span className="text-neutral-45">/</span>
-            <span className="text-neutral-10 font-medium">Personalized Orders</span>
-          </nav>
+          <Breadcrumb
+            items={[
+              { label: "Home", path: "/" },
+              { label: "Personalized Orders", isActive: true },
+            ]}
+          />
 
           {/* Header */}
           <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 mb-6">
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-neutral-10 flex items-center gap-3">
-            <FiGift className="text-primary-10" size={28} />
-            Personalized Orders
-          </h1>
-          <p className="text-neutral-45 mt-1">
-            Tell us what you need, and we'll create the perfect personalized gift for any occasion
-          </p>
-        </div>
-        <div className="flex items-center gap-2 bg-neutral-20 px-4 py-2 rounded-lg">
-          <FiClock className="text-primary-10" />
-          <span className="text-sm text-neutral-45">Estimated Response: 12 hrs</span>
-        </div>
-      </div>
-    </div>
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+              <div className="flex-1">
+                <h1 className="text-2xl font-bold text-neutral-10 flex items-center gap-3">
+                  <FiGift className="text-primary-10" size={28} />
+                  Personalized Orders
+                </h1>
+                <p className="text-neutral-45 mt-1">
+                  Tell us what you need, and we'll create the perfect
+                  personalized gift for any occasion
+                </p>
+              </div>
+              <div className="flex items-center gap-2 bg-neutral-20 px-4 py-2 rounded-lg">
+                <FiClock className="text-primary-10" />
+                <span className="text-sm text-neutral-45">
+                  Estimated Response: 12 hrs
+                </span>
+              </div>
+            </div>
+          </div>
 
           {/* Progress Steps */}
           <OrderProgress currentStep={currentStep} />

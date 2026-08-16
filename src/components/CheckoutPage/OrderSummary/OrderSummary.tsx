@@ -48,7 +48,7 @@ const OrderSummary = () => {
   const deliveryCharge = subtotal > 500 ? 0 : 49;
   const total = subtotal + deliveryCharge;
   return (
-    <div className="lg:w-96 flex-shrink-0">
+    <div className="lg:w-96 shrink-0">
       <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-6">
         <h2 className="text-lg font-semibold text-neutral-10 mb-4 flex items-center gap-2">
           <FiPackage className="text-primary-10" />
@@ -65,7 +65,7 @@ const OrderSummary = () => {
               <img
                 src={item.image}
                 alt={item.name}
-                className="w-16 h-16 rounded-lg object-cover flex-shrink-0 bg-neutral-20"
+                className="w-16 h-16 rounded-lg object-cover shrink-0 bg-neutral-20"
               />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-neutral-10 line-clamp-1">

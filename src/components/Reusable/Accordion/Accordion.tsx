@@ -48,9 +48,9 @@ const Accordion = ({
           key={index}
           className={`${
             isAccordingOpen === index
-              ? "bg-white text-white shadow-accordion-card border-primary-10"
-              : "text-neutral-20 border-neutral-95"
-          } bg-neutral-96 rounded-3xl p-6 border py-5 hover:border-primary-10 transform duration-300`}
+              ? "bg-white text-neutral-5 border-primary-10"
+              : "text-neutral-10 border-neutral-45/20"
+          } rounded-3xl p-6 border py-5 hover:border-primary-10 transform duration-300`}
           variants={itemVariants}
           layout
         >
@@ -58,7 +58,7 @@ const Accordion = ({
             className="flex gap-2 cursor-pointer items-center justify-between w-full"
             onClick={() => handleClick(index)}
           >
-            <h2 className="text-neutral-65 font-semibold text-lg lg:text-xl leading-5.5">
+            <h2 className="text-neutral-65 font-semibold leading-5.5">
               {according.title}
             </h2>
             <p>

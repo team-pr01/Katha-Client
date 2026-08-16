@@ -1,7 +1,7 @@
-import { Link } from "react-router-dom";
 import Container from "../../components/Reusable/Container/Container";
 import { FiShoppingBag, FiTrash2 } from "react-icons/fi";
 import ProductCard from "../../components/HomePage/BestSeller/ProductCard";
+import Breadcrumb from "../../components/Reusable/Breadcrumb/Breadcrumb";
 
 const Wishlist: React.FC = () => {
   // SEO Structured Data
@@ -42,19 +42,12 @@ const Wishlist: React.FC = () => {
       <div className="bg-neutral-20 min-h-screen py-6 md:py-8">
         <Container>
           {/* Breadcrumbs */}
-          <nav
-            className="flex items-center gap-2 text-sm mb-6"
-            aria-label="Breadcrumb"
-          >
-            <Link
-              to="/"
-              className="text-neutral-45 hover:text-primary-10 transition-colors"
-            >
-              Home
-            </Link>
-            <span className="text-neutral-45">/</span>
-            <span className="text-neutral-10 font-medium">Wishlist</span>
-          </nav>
+          <Breadcrumb
+            items={[
+              { label: "Home", path: "/" },
+              { label: "Wishlist", isActive: true },
+            ]}
+          />
 
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -77,12 +70,11 @@ const Wishlist: React.FC = () => {
             )}
           </div>
 
-
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6">
-                {[1, 2, 3, 4, 5, 6].map((item: number) => (
-                  <ProductCard key={item} />
-                ))}
-              </div>
+            {[1, 2, 3, 4, 5, 6].map((item: number) => (
+              <ProductCard key={item} />
+            ))}
+          </div>
         </Container>
       </div>
     </>

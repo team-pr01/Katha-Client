@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { FiTrash2, FiShoppingBag } from "react-icons/fi";
-import { Link } from "react-router-dom";
 import Container from "../../components/Reusable/Container/Container";
 import { IMAGES } from "../../assets";
 import CartItems from "../../components/CartPage/CartItems/CartItems";
 import EmptyCart from "../../components/CartPage/EmptyCart/EmptyCart";
+import Breadcrumb from "../../components/Reusable/Breadcrumb/Breadcrumb";
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState<any>([
@@ -85,20 +85,12 @@ const Cart = () => {
 
       <div className="bg-neutral-20 min-h-screen py-6 md:py-8 font-Manrope">
         <Container>
-          {/* Breadcrumbs */}
-          <nav
-            className="flex items-center gap-2 text-sm mb-6"
-            aria-label="Breadcrumb"
-          >
-            <Link
-              to="/"
-              className="text-neutral-45 hover:text-primary-10 transition-colors"
-            >
-              Home
-            </Link>
-            <span className="text-neutral-45">/</span>
-            <span className="text-neutral-10 font-semibold">Cart</span>
-          </nav>
+          <Breadcrumb
+            items={[
+              { label: "Home", path: "/" },
+              { label: "Cart", isActive: true },
+            ]}
+          />
 
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
