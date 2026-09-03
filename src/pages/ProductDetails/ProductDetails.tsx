@@ -21,11 +21,12 @@ import VariantCard from "../../components/ProductDetailsPage/VariantCard/Variant
 import type { TProductVariant } from "../../types/product.type";
 import { useCart } from "../../providers/CartProvider/CartProvider";
 import toast from "react-hot-toast";
+import ProductDetailsSkeletonLoader from "../../components/ProductDetailsPage/ProductDetailsSkeletonLoader/ProductDetailsSkeletonLoader";
 
 const ProductDetails: React.FC = () => {
   const { slug } = useParams();
   const { addToCart } = useCart();
-  const { data } = useGetSingleProductBySlugQuery(slug);
+  const { data, isLoading } = useGetSingleProductBySlugQuery(slug);
   const productData = data?.data || {};
 
   // State
@@ -111,6 +112,7 @@ const ProductDetails: React.FC = () => {
     toast.success("Product added to cart!");
   };
 
+  if (isLoading) return <ProductDetailsSkeletonLoader />;
   return (
     <div className="bg-neutral-20 min-h-screen py-8 font-Manrope">
       <Container>
