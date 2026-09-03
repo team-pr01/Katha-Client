@@ -6,6 +6,7 @@ import Login from "../../AuthComponents/Login/Login";
 import { useState, useEffect, useRef } from "react";
 import Modal from "../../Reusable/Modal copy/Modal";
 import Signup from "../../AuthComponents/Signup/Signup";
+import { useCart } from "../../../providers/CartProvider/CartProvider";
 
 const Navbar = () => {
   const pathname = useLocation().pathname;
@@ -13,7 +14,7 @@ const Navbar = () => {
     "login",
   );
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
-  
+
   // Search placeholder animation
   const [productIndex, setProductIndex] = useState<number>(0);
   const [displayText, setDisplayText] = useState<string>("Search for ");
@@ -85,7 +86,7 @@ const Navbar = () => {
       // Only delete if text is longer than the static prefix
       if (displayText.length > staticPrefix.length) {
         const timeout = setTimeout(() => {
-          setDisplayText(prev => prev.slice(0, -1));
+          setDisplayText((prev) => prev.slice(0, -1));
         }, 30);
         typingTimeoutRef.current = timeout;
         return () => {
@@ -106,7 +107,7 @@ const Navbar = () => {
     // If typing
     if (displayText.length < fullText.length) {
       const timeout = setTimeout(() => {
-        setDisplayText(prev => fullText.slice(0, prev.length + 1));
+        setDisplayText((prev) => fullText.slice(0, prev.length + 1));
       }, 60);
       typingTimeoutRef.current = timeout;
       return () => {
@@ -133,6 +134,8 @@ const Navbar = () => {
     setIsDeleting(false);
     setIsPaused(false);
   }, []);
+
+  const { getCartItemCount } = useCart();
 
   return (
     <div className="bg-white shadow-navbar font-Manrope py-4">
@@ -163,15 +166,13 @@ const Navbar = () => {
                 aria-label="Search for handcrafted products"
               />
               {/* Animated placeholder overlay */}
-              <div 
-                className="absolute left-10 text-sm text-neutral-500 pointer-events-none whitespace-nowrap"
-              >
+              <div className="absolute left-10 text-sm text-neutral-500 pointer-events-none whitespace-nowrap">
                 <span className="inline-block">
                   {displayText}
-                  <span 
+                  <span
                     className="inline-block w-0.5 h-4 ml-0.5 bg-neutral-500 animate-blink"
                     style={{
-                      display: 'inline-block',
+                      display: "inline-block",
                       opacity: isDeleting ? 0 : 1,
                     }}
                   />
@@ -183,10 +184,15 @@ const Navbar = () => {
               {/* Cart */}
               <Link
                 to="/cart"
-                className="bg-neutral-20 size-10 rounded-full flex justify-center items-center text-sm font-medium text-neutral-10 hover:bg-neutral-50 transition-colors"
+                className="bg-neutral-20 size-10 rounded-full flex justify-center items-center text-sm font-medium text-neutral-10 hover:bg-neutral-50 transition-colors relative"
                 aria-label="Cart"
               >
                 <img src={ICONS.cart} alt="Cart" className="size-5" />
+                {getCartItemCount() > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-semibold rounded-full w-4 h-4 flex items-center justify-center">
+                    {getCartItemCount()}
+                  </span>
+                )}
               </Link>
               <Link
                 to="/wishlist"

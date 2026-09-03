@@ -20,6 +20,7 @@ export const baseApi = createApi({
     "occasion",
     "category",
     "product",
+    "couponCode"
   ],
   endpoints: () => ({}),
 });

@@ -19,22 +19,22 @@ import { renderRatingStars } from "../../utils/renderRatingStars";
 import { calculateProductDiscountedPercentage } from "../../utils/calculateProductDiscountedPercentage";
 import VariantCard from "../../components/ProductDetailsPage/VariantCard/VariantCard";
 import type { TProductVariant } from "../../types/product.type";
-
+import { useCart } from "../../providers/CartProvider/CartProvider";
+import toast from "react-hot-toast";
 
 const ProductDetails: React.FC = () => {
   const { slug } = useParams();
+  const { addToCart } = useCart();
   const { data } = useGetSingleProductBySlugQuery(slug);
   const productData = data?.data || {};
 
   // State
-  const [selectedVariant, setSelectedVariant] = useState<TProductVariant | null>(null);
+  const [selectedVariant, setSelectedVariant] =
+    useState<TProductVariant | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
   const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
 
-  // Get variants from product data
   const variants: TProductVariant[] = productData?.variants || [];
-
-  // Calculate discount percentage for a variant
 
   // Set default variant when component loads
   React.useEffect(() => {
@@ -90,6 +90,25 @@ const ProductDetails: React.FC = () => {
   // Check if variant is in stock
   const isInStock = (variant: TProductVariant): boolean => {
     return variant.stock > 0;
+  };
+
+  const handleAddProductToCart = () => {
+    if (!slug) return;
+
+    const payload = {
+      productId: productData?._id,
+      name: productData?.name,
+      image: selectedVariant?.images?.[0] || "",
+      basePrice: selectedVariant?.basePrice as number,
+      discountedPrice: selectedVariant?.discountedPrice as number,
+      category: productData?.category,
+      size: selectedVariant?.size ?? "",
+      color: selectedVariant?.color ?? "",
+      quantity: quantity,
+      maxQuantity: selectedVariant?.stock ?? 0,
+    };
+    addToCart(payload);
+    toast.success("Product added to cart!");
   };
 
   return (
@@ -204,8 +223,6 @@ const ProductDetails: React.FC = () => {
                 </div>
               </div>
 
-              
-
               {/* Quantity */}
               <div className="flex items-center gap-4 mb-4">
                 <label className="text-sm font-medium text-neutral-10">
@@ -256,6 +273,7 @@ const ProductDetails: React.FC = () => {
                 </button>
                 <button
                   className="flex-1 flex items-center justify-center gap-2 px-6 py-2.5 bg-primary-10 text-white rounded-lg hover:bg-[#d4892a] transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleAddProductToCart}
                   disabled={!selectedVariant || !isInStock(selectedVariant)}
                 >
                   <FiShoppingCart size={18} />

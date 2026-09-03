@@ -1,60 +1,17 @@
-import { useState } from "react";
 import { FiTrash2, FiShoppingBag } from "react-icons/fi";
 import Container from "../../components/Reusable/Container/Container";
-import { IMAGES } from "../../assets";
 import CartItems from "../../components/CartPage/CartItems/CartItems";
 import EmptyCart from "../../components/CartPage/EmptyCart/EmptyCart";
 import Breadcrumb from "../../components/Reusable/Breadcrumb/Breadcrumb";
+import { useCart } from "../../providers/CartProvider/CartProvider";
 
 const Cart = () => {
-  const [cartItems, setCartItems] = useState<any>([
-    {
-      id: "1",
-      name: "The Jewel Embedded Brass Elephant",
-      image: IMAGES.anniversary,
-      price: 200,
-      originalPrice: 2000,
-      quantity: 1,
-      size: "Medium",
-      color: "Brass",
-      inStock: true,
-      maxQuantity: 10,
-    },
-    {
-      id: "2",
-      name: "Handcrafted Brass Diya Set",
-      image: IMAGES.anniversary,
-      price: 899,
-      quantity: 2,
-      size: "Classic",
-      color: "Brass",
-      inStock: true,
-      maxQuantity: 5,
-    },
-    {
-      id: "3",
-      name: "Brass Peacock Showpiece",
-      image: IMAGES.anniversary,
-      price: 3499,
-      originalPrice: 4200,
-      quantity: 1,
-      size: "Large",
-      color: "Brass",
-      inStock: false,
-      maxQuantity: 3,
-    },
-  ]);
 
-  const handleClearCart = (): void => {
-    if (window.confirm("Are you sure you want to clear your cart?")) {
-      setCartItems([]);
-    }
-  };
-
-  const itemCount = cartItems.reduce(
-    (sum: any, item: any) => sum + item.quantity,
-    0,
-  );
+  const {
+    cartItems,
+    clearCart,
+    getCartItemCount,
+  } = useCart();
 
   // SEO Structured Data
   const structuredData = {
@@ -100,14 +57,14 @@ const Cart = () => {
                 Shopping Cart
               </h1>
               <p className="text-sm text-neutral-45 mt-1">
-                {cartItems.length > 0
-                  ? `${itemCount} item${itemCount > 1 ? "s" : ""} in your cart`
+                {cartItems?.length > 0
+                  ? `${getCartItemCount()} item${getCartItemCount() > 1 ? "s" : ""} in your cart`
                   : "Your cart is empty"}
               </p>
             </div>
-            {cartItems.length > 0 && (
+            {cartItems?.length > 0 && (
               <button
-                onClick={handleClearCart}
+                onClick={clearCart}
                 className="text-sm text-red-500 hover:text-red-600 flex items-center gap-1 transition-colors"
               >
                 <FiTrash2 size={16} />
@@ -116,7 +73,7 @@ const Cart = () => {
             )}
           </div>
 
-          {cartItems.length > 0 ? (
+          {cartItems?.length > 0 ? (
             <CartItems cartItems={cartItems} />
           ) : (
             <EmptyCart />
