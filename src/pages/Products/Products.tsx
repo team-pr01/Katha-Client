@@ -3,6 +3,8 @@ import { FiSliders, FiChevronDown, FiX } from "react-icons/fi";
 import Filters from "../../components/ProductsPage/Filters/Filters";
 import ProductCard from "../../components/HomePage/BestSeller/ProductCard";
 import Container from "../../components/Reusable/Container/Container";
+import { useGetAllProductsQuery } from "../../redux/Features/Product/productApi";
+import type { TProduct } from "../../types/product.type";
 
 // Types
 interface SortOption {
@@ -13,6 +15,13 @@ interface SortOption {
 const Products: React.FC = () => {
   // Filter states
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
+  const [selectedSubOccasions, setSelectedSubOccasions] = useState<string[]>(
+    [],
+  );
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>(
+    [],
+  );
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
   const [selectedAvailability, setSelectedAvailability] = useState<string[]>(
@@ -32,6 +41,19 @@ const Products: React.FC = () => {
     { value: "rating", label: "Top Rated" },
   ];
 
+  const { data, isLoading, isFetching } = useGetAllProductsQuery({
+    category: selectedCategories,
+    subCategory: selectedSubCategories,
+    occasionNames : selectedOccasions,
+    subOccasionNames : selectedSubOccasions,
+    material: selectedMaterials,
+    keyword: searchQuery,
+    minPrice: minPrice as any,
+    maxPrice: maxPrice as any,
+  });
+  console.log(data);
+  const products = data?.data?.data || [];
+
   const getActiveFilterCount = (): number => {
     return (
       selectedOccasions.length +
@@ -45,12 +67,17 @@ const Products: React.FC = () => {
 
   const clearAllFilters = (): void => {
     setSelectedOccasions([]);
+    setSelectedSubOccasions([]);
     setMinPrice("");
     setMaxPrice("");
     setSelectedAvailability([]);
     setSelectedMaterials([]);
     setSelectedColors([]);
   };
+
+  if (isLoading || isFetching) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="bg-neutral-20 min-h-screen font-Manrope">
@@ -59,9 +86,7 @@ const Products: React.FC = () => {
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-neutral-10">
-                Products
-              </h1>
+              <h1 className="text-2xl font-bold text-neutral-10">Products</h1>
               <p className="text-sm text-neutral-45 mt-1">
                 Discover our curated collection
               </p>
@@ -107,12 +132,18 @@ const Products: React.FC = () => {
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Desktop Filters */}
             <div className="hidden lg:block w-72 shrink-0">
-              <div className="sticky top-6 max-h-[calc(100vh-2rem)] overflow-y-auto">
+              <div className="sticky top-6 max-h-[calc(100vh-2rem)] overflow-y-auto custom-filter-scrollbar">
                 <Filters
                   searchQuery={searchQuery}
                   onSearchChange={setSearchQuery}
                   selectedOccasions={selectedOccasions}
                   setSelectedOccasions={setSelectedOccasions}
+                  selectedSubOccasions={selectedSubOccasions}
+                  setSelectedSubOccasions={setSelectedSubOccasions}
+                  selectedCategories={selectedCategories}
+                  setSelectedCategories={setSelectedCategories}
+                  selectedSubCategories={selectedSubCategories}
+                  setSelectedSubCategories={setSelectedSubCategories}
                   minPrice={minPrice}
                   setMinPrice={setMinPrice}
                   maxPrice={maxPrice}
@@ -142,8 +173,8 @@ const Products: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
-                {[1, 2, 3, 4, 5, 6].map((item: number) => (
-                  <ProductCard key={item} />
+                {products?.map((product: TProduct) => (
+                  <ProductCard key={product?._id} product={product} />
                 ))}
               </div>
 
@@ -186,7 +217,9 @@ const Products: React.FC = () => {
           <div className="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-white shadow-2xl overflow-y-auto p-6 animate-slide-in">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-lg font-semibold text-neutral-10">Filters</h2>
+                <h2 className="text-lg font-semibold text-neutral-10">
+                  Filters
+                </h2>
                 {getActiveFilterCount() > 0 && (
                   <p className="text-xs text-neutral-45 mt-0.5">
                     {getActiveFilterCount()} filters active
@@ -205,6 +238,12 @@ const Products: React.FC = () => {
               onSearchChange={setSearchQuery}
               selectedOccasions={selectedOccasions}
               setSelectedOccasions={setSelectedOccasions}
+              selectedSubOccasions={selectedSubOccasions}
+              setSelectedSubOccasions={setSelectedSubOccasions}
+              selectedCategories={selectedCategories}
+              setSelectedCategories={setSelectedCategories}
+              selectedSubCategories={selectedSubCategories}
+              setSelectedSubCategories={setSelectedSubCategories}
               minPrice={minPrice}
               setMinPrice={setMinPrice}
               maxPrice={maxPrice}

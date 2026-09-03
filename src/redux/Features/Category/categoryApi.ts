@@ -1,8 +1,8 @@
 import { baseApi } from "../../Api/baseApi";
 
-const occasionApi = baseApi.injectEndpoints({
+const categoryApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAllOccasions: builder.query({
+    getAllCategories: builder.query({
       query: ({
         limit,
         page,
@@ -23,16 +23,16 @@ const occasionApi = baseApi.injectEndpoints({
         // Handle skip
         if (typeof skip === "number") params.append("skip", skip.toString());
         return {
-          url: `/occasion?${params.toString()}`,
+          url: `/category?${params.toString()}`,
           method: "GET",
           credentials: "include",
         };
       },
-      providesTags: ["occasion"],
+      providesTags: ["category"],
     }),
   }),
 });
 
 export const {
-  useGetAllOccasionsQuery,
-} = occasionApi;
+  useGetAllCategoriesQuery,
+} = categoryApi;

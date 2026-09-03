@@ -18,7 +18,8 @@ export const baseApi = createApi({
   refetchOnFocus: true,
   tagTypes: [
     "occasion",
-    "scheduledCalls",
+    "category",
+    "product",
   ],
   endpoints: () => ({}),
 });

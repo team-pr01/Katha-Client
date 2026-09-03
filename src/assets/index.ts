@@ -15,6 +15,7 @@ import regularPackaging from "./images/regular-packaging.webp";
 import ringPlatterPackaging from "./images/ring-platter-packaging.webp";
 import decorativeFlowersPackaging from "./images/decorative-flowers-packaging.webp";
 import ribbonPackaging from "./images/ribbon-packaging.webp";
+import productPlaceholder from "./images/product-placeholder.webp";
 
 // ICONS
 import arrowRight from "./icons/arrow-right.svg";
@@ -28,6 +29,7 @@ import location from "./icons/location.svg";
 import email from "./icons/email.svg";
 import phone from "./icons/phone.svg";
 import google from "./icons/google.png";
+import customize from "./icons/customize.svg";
 
 export const IMAGES = {
     logo,
@@ -45,7 +47,8 @@ export const IMAGES = {
     regularPackaging,
     ringPlatterPackaging,
     decorativeFlowersPackaging,
-    ribbonPackaging
+    ribbonPackaging,
+    productPlaceholder,
 };
 
 export const ICONS = {
@@ -59,7 +62,8 @@ export const ICONS = {
     location,
     email,
     phone,
-    google
+    google,
+    customize
 
 
 };

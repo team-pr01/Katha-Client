@@ -1,10 +1,36 @@
 import React, { useState } from "react";
-import { FiSearch, FiX, FiChevronDown, FiChevronUp } from "react-icons/fi";
+import {
+  FiSearch,
+  FiX,
+  FiChevronDown,
+  FiChevronUp,
+  FiPlus,
+  FiMinus,
+} from "react-icons/fi";
+import { useGetAllOccasionsQuery } from "../../../redux/Features/Occation/occasionApi";
+import { useGetAllCategoriesQuery } from "../../../redux/Features/Category/categoryApi";
 
 // Types
 interface FilterOption {
   label: string;
   count: number;
+}
+
+interface SubItem {
+  name: string;
+  productCount: number;
+}
+
+interface OccasionFilterOption {
+  name: string;
+  productCount: number;
+  subOccasions?: SubItem[];
+}
+
+interface CategoryFilterOption {
+  name: string;
+  productCount: number;
+  subCategories?: SubItem[];
 }
 
 interface FilterSectionProps {
@@ -32,6 +58,12 @@ interface FiltersProps {
   onSearchChange: (value: string) => void;
   selectedOccasions: string[];
   setSelectedOccasions: React.Dispatch<React.SetStateAction<string[]>>;
+  selectedSubOccasions: string[];
+  setSelectedSubOccasions: React.Dispatch<React.SetStateAction<string[]>>;
+  selectedCategories: string[];
+  setSelectedCategories: React.Dispatch<React.SetStateAction<string[]>>;
+  selectedSubCategories: string[];
+  setSelectedSubCategories: React.Dispatch<React.SetStateAction<string[]>>;
   minPrice: string;
   setMinPrice: React.Dispatch<React.SetStateAction<string>>;
   maxPrice: string;
@@ -131,6 +163,75 @@ const FilterCheckbox: React.FC<FilterCheckboxProps> = ({
   </label>
 );
 
+// Generic Item with Sub-Items Component
+interface FilterItemWithSubProps {
+  item: {
+    name: string;
+    productCount: number;
+    subItems?: SubItem[];
+  };
+  selectedParents: string[];
+  selectedChildren: string[];
+  onParentChange: (name: string) => void;
+  onChildChange: (name: string) => void;
+  childKey: string;
+}
+
+const FilterItemWithSub: React.FC<FilterItemWithSubProps> = ({
+  item,
+  selectedParents,
+  selectedChildren,
+  onParentChange,
+  onChildChange,
+}) => {
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const hasSubItems = item.subItems && item.subItems.length > 0;
+
+  const handleParentToggle = () => {
+    onParentChange(item.name);
+  };
+
+  return (
+    <div className="space-y-1.5">
+      {/* Main Parent Checkbox */}
+      <div className="flex items-center justify-between group">
+        <FilterCheckbox
+          label={item.name}
+          count={item.productCount}
+          checked={selectedParents.includes(item.name)}
+          onChange={handleParentToggle}
+        />
+
+        {/* Expand/Collapse Button for Sub-Items */}
+        {hasSubItems && (
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="ml-2 p-0.5 text-neutral-45 hover:text-primary-10 transition-colors"
+            aria-label={isExpanded ? "Collapse" : "Expand"}
+          >
+            {isExpanded ? <FiMinus size={14} /> : <FiPlus size={14} />}
+          </button>
+        )}
+      </div>
+
+      {/* Sub-Items */}
+      {hasSubItems && isExpanded && (
+        <div className="ml-6 pl-3 border-l-2 border-neutral-50 space-y-1.5">
+          {item.subItems!.map((sub) => (
+            <FilterCheckbox
+              key={sub.name}
+              label={sub.name}
+              count={sub.productCount}
+              checked={selectedChildren.includes(sub.name)}
+              onChange={() => onChildChange(sub.name)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Price Range Component
 const PriceRange: React.FC<PriceRangeProps> = ({
   minPrice,
@@ -138,31 +239,6 @@ const PriceRange: React.FC<PriceRangeProps> = ({
   onMinChange,
   onMaxChange,
 }) => {
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-
-  const minVal: number = parseInt(minPrice) || 0;
-  const maxVal: number = parseInt(maxPrice) || 5000;
-  const totalRange: number = 5000;
-
-  const minPercent: number = (minVal / totalRange) * 100;
-  const maxPercent: number = (maxVal / totalRange) * 100;
-
-  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value);
-    const maxValNum = parseInt(maxPrice) || 5000;
-    if (val <= maxValNum) {
-      onMinChange(val.toString());
-    }
-  };
-
-  const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value);
-    const minValNum = parseInt(minPrice) || 0;
-    if (val >= minValNum) {
-      onMaxChange(val.toString());
-    }
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
@@ -202,77 +278,6 @@ const PriceRange: React.FC<PriceRangeProps> = ({
           </div>
         </div>
       </div>
-
-      {/* Custom Range Slider */}
-      <div className="relative pt-2">
-        <div className="relative h-1.5 bg-neutral-50 rounded-full">
-          {/* Selected range */}
-          <div
-            className="absolute h-full bg-primary-10 rounded-full"
-            style={{
-              left: `${minPercent}%`,
-              right: `${100 - maxPercent}%`,
-            }}
-          />
-        </div>
-        <div className="relative">
-          {/* Min thumb */}
-          <input
-            type="range"
-            min="0"
-            max="5000"
-            value={minPrice || 0}
-            onChange={handleMinChange}
-            onMouseDown={() => setIsDragging(true)}
-            onMouseUp={() => setIsDragging(false)}
-            className="absolute top-0 -translate-y-1/2 w-full h-1.5 appearance-none bg-transparent pointer-events-none"
-            style={{
-              zIndex: 3,
-            }}
-          />
-          {/* Max thumb */}
-          <input
-            type="range"
-            min="0"
-            max="5000"
-            value={maxPrice || 5000}
-            onChange={handleMaxChange}
-            onMouseDown={() => setIsDragging(true)}
-            onMouseUp={() => setIsDragging(false)}
-            className="absolute top-0 -translate-y-1/2 w-full h-1.5 appearance-none bg-transparent pointer-events-none"
-            style={{
-              zIndex: 3,
-            }}
-          />
-          {/* Custom thumbs */}
-          <div
-            className={`absolute top-0 -translate-y-1/2 w-4 h-4 rounded-full border-2 bg-white shadow-md transition-transform ${
-              isDragging ? "scale-110" : ""
-            }`}
-            style={{
-              left: `${minPercent}%`,
-              transform: `translate(-50%, -50%) scale(${isDragging ? 1.1 : 1})`,
-              borderColor: "#eb9e3a",
-              zIndex: 4,
-            }}
-          />
-          <div
-            className={`absolute top-0 -translate-y-1/2 w-4 h-4 rounded-full border-2 bg-white shadow-md transition-transform ${
-              isDragging ? "scale-110" : ""
-            }`}
-            style={{
-              left: `${maxPercent}%`,
-              transform: `translate(-50%, -50%) scale(${isDragging ? 1.1 : 1})`,
-              borderColor: "#eb9e3a",
-              zIndex: 4,
-            }}
-          />
-        </div>
-        <div className="flex justify-between mt-2">
-          <span className="text-xs text-neutral-45">$0</span>
-          <span className="text-xs text-neutral-45">$5,000+</span>
-        </div>
-      </div>
     </div>
   );
 };
@@ -283,6 +288,12 @@ const Filters: React.FC<FiltersProps> = ({
   onSearchChange,
   selectedOccasions,
   setSelectedOccasions,
+  selectedSubOccasions,
+  setSelectedSubOccasions,
+  selectedCategories,
+  setSelectedCategories,
+  selectedSubCategories,
+  setSelectedSubCategories,
   minPrice,
   setMinPrice,
   maxPrice,
@@ -296,22 +307,20 @@ const Filters: React.FC<FiltersProps> = ({
   onClearFilters,
   activeFilterCount,
 }) => {
-  // Mock data - Replace with actual data from API
-  const occasions: FilterOption[] = [
-    { label: "Wedding", count: 136 },
-    { label: "Anniversary", count: 89 },
-    { label: "Birthday Party", count: 250 },
-    { label: "Corporate Event", count: 95 },
-    { label: "Baby Shower", count: 180 },
-    { label: "Farewell", count: 67 },
-    { label: "Festival", count: 145 },
-    { label: "Housewarming", count: 112 },
-  ];
+  const [showAllOccasions, setShowAllOccasions] = useState(false);
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [showAllMaterials, setShowAllMaterials] = useState(false);
+  const [showAllColors, setShowAllColors] = useState(false);
+
+  const { data: occasionData } = useGetAllOccasionsQuery({});
+  const { data: categoryData } = useGetAllCategoriesQuery({});
+
+  const occasions = occasionData?.data?.data || [];
+  const categories = categoryData?.data?.data || [];
 
   const availabilityOptions: FilterOption[] = [
     { label: "In Stock", count: 136 },
     { label: "Out of Stock", count: 136 },
-    { label: "Undeliverable on Pin", count: 180 },
   ];
 
   const materials: FilterOption[] = [
@@ -332,6 +341,8 @@ const Filters: React.FC<FiltersProps> = ({
     { label: "Yellow", count: 136 },
     { label: "Purple", count: 85 },
     { label: "Orange", count: 100 },
+    { label: "Teal", count: 50 },
+    { label: "White", count: 90 },
   ];
 
   const handleCheckboxChange = (
@@ -346,13 +357,41 @@ const Filters: React.FC<FiltersProps> = ({
     }
   };
 
+  const handleOccasionChange = (name: string): void => {
+    handleCheckboxChange(selectedOccasions, setSelectedOccasions, name);
+  };
+
+  const handleSubOccasionChange = (name: string): void => {
+    handleCheckboxChange(selectedSubOccasions, setSelectedSubOccasions, name);
+  };
+
+  const handleCategoryChange = (name: string): void => {
+    handleCheckboxChange(selectedCategories, setSelectedCategories, name);
+  };
+
+  const handleSubCategoryChange = (name: string): void => {
+    handleCheckboxChange(selectedSubCategories, setSelectedSubCategories, name);
+  };
+
+  // Get total active filter count including sub-occasions and sub-categories
+  const totalActiveFilters =
+    activeFilterCount +
+    selectedSubOccasions.length +
+    selectedSubCategories.length;
+
+  const handleClearAll = () => {
+    onClearFilters();
+    setSelectedSubOccasions([]);
+    setSelectedSubCategories([]);
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-sm p-6 font-Manrope">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-neutral-10">Filters</h2>
-        {activeFilterCount > 0 && (
+        {totalActiveFilters > 0 && (
           <span className="text-xs bg-primary-10 text-white px-2 py-0.5 rounded-full">
-            {activeFilterCount} active
+            {totalActiveFilters} active
           </span>
         )}
       </div>
@@ -374,29 +413,73 @@ const Filters: React.FC<FiltersProps> = ({
         />
       </div>
 
+      {/* Occasion Filter */}
       <FilterSection title="Occasion">
-        {occasions.slice(0, 7).map((item: FilterOption) => (
-          <FilterCheckbox
-            key={item.label}
-            label={item.label}
-            count={item.count}
-            checked={selectedOccasions.includes(item.label)}
-            onChange={() =>
-              handleCheckboxChange(
-                selectedOccasions,
-                setSelectedOccasions,
-                item.label,
-              )
-            }
-          />
-        ))}
-        {occasions.length > 7 && (
-          <button className="text-sm text-primary-10 hover:text-[#d4892a] font-medium mt-1 transition-colors">
-            +{occasions.length - 7} more
-          </button>
-        )}
+        <div className="space-y-2">
+          {occasions
+            ?.slice(0, showAllOccasions ? occasions.length : 7)
+            .map((item: OccasionFilterOption) => (
+              <FilterItemWithSub
+                key={item.name}
+                item={{
+                  name: item.name,
+                  productCount: item.productCount,
+                  subItems: item.subOccasions,
+                }}
+                selectedParents={selectedOccasions}
+                selectedChildren={selectedSubOccasions}
+                onParentChange={handleOccasionChange}
+                onChildChange={handleSubOccasionChange}
+                childKey="subOccasions"
+              />
+            ))}
+          {occasions.length > 7 && (
+            <button
+              type="button"
+              onClick={() => setShowAllOccasions((prev) => !prev)}
+              className="text-sm text-primary-10 hover:text-[#d4892a] font-medium mt-1 transition-colors"
+            >
+              {showAllOccasions ? "Show less" : `+${occasions.length - 7} more`}
+            </button>
+          )}
+        </div>
       </FilterSection>
 
+      {/* Category Filter */}
+      <FilterSection title="Category">
+        <div className="space-y-2">
+          {categories
+            ?.slice(0, showAllCategories ? categories.length : 7)
+            .map((item: CategoryFilterOption) => (
+              <FilterItemWithSub
+                key={item.name}
+                item={{
+                  name: item.name,
+                  productCount: item.productCount,
+                  subItems: item.subCategories,
+                }}
+                selectedParents={selectedCategories}
+                selectedChildren={selectedSubCategories}
+                onParentChange={handleCategoryChange}
+                onChildChange={handleSubCategoryChange}
+                childKey="subCategories"
+              />
+            ))}
+          {categories.length > 7 && (
+            <button
+              type="button"
+              onClick={() => setShowAllCategories((prev) => !prev)}
+              className="text-sm text-primary-10 hover:text-[#d4892a] font-medium mt-1 transition-colors"
+            >
+              {showAllCategories
+                ? "Show less"
+                : `+${categories.length - 7} more`}
+            </button>
+          )}
+        </div>
+      </FilterSection>
+
+      {/* Price Filter */}
       <FilterSection title="Price">
         <PriceRange
           minPrice={minPrice}
@@ -406,6 +489,7 @@ const Filters: React.FC<FiltersProps> = ({
         />
       </FilterSection>
 
+      {/* Availability Filter */}
       <FilterSection title="Availability">
         {availabilityOptions.map((item: FilterOption) => (
           <FilterCheckbox
@@ -424,60 +508,74 @@ const Filters: React.FC<FiltersProps> = ({
         ))}
       </FilterSection>
 
+      {/* Material Filter */}
       <FilterSection title="Material">
-        {materials.slice(0, 7).map((item: FilterOption) => (
-          <FilterCheckbox
-            key={item.label}
-            label={item.label}
-            count={item.count}
-            checked={selectedMaterials.includes(item.label)}
-            onChange={() =>
-              handleCheckboxChange(
-                selectedMaterials,
-                setSelectedMaterials,
-                item.label,
-              )
-            }
-          />
-        ))}
+        {materials
+          .slice(0, showAllMaterials ? materials.length : 7)
+          .map((item: FilterOption) => (
+            <FilterCheckbox
+              key={item.label}
+              label={item.label}
+              count={item.count}
+              checked={selectedMaterials.includes(item.label)}
+              onChange={() =>
+                handleCheckboxChange(
+                  selectedMaterials,
+                  setSelectedMaterials,
+                  item.label,
+                )
+              }
+            />
+          ))}
         {materials.length > 7 && (
-          <button className="text-sm text-primary-10 hover:text-[#d4892a] font-medium mt-1 transition-colors">
-            +{materials.length - 7} more
+          <button
+            type="button"
+            onClick={() => setShowAllMaterials((prev) => !prev)}
+            className="text-sm text-primary-10 hover:text-[#d4892a] font-medium mt-1 transition-colors"
+          >
+            {showAllMaterials ? "Show less" : `+${materials.length - 7} more`}
           </button>
         )}
       </FilterSection>
 
+      {/* Color Filter */}
       <FilterSection title="Color">
-        {colors.slice(0, 6).map((item: FilterOption) => (
-          <FilterCheckbox
-            key={item.label}
-            label={item.label}
-            count={item.count}
-            checked={selectedColors.includes(item.label)}
-            onChange={() =>
-              handleCheckboxChange(
-                selectedColors,
-                setSelectedColors,
-                item.label,
-              )
-            }
-          />
-        ))}
-        {colors.length > 6 && (
-          <button className="text-sm text-primary-10 hover:text-[#d4892a] font-medium mt-1 transition-colors">
-            +{colors.length - 6} more
+        {colors
+          .slice(0, showAllColors ? colors.length : 7)
+          .map((item: FilterOption) => (
+            <FilterCheckbox
+              key={item.label}
+              label={item.label}
+              count={item.count}
+              checked={selectedColors.includes(item.label)}
+              onChange={() =>
+                handleCheckboxChange(
+                  selectedColors,
+                  setSelectedColors,
+                  item.label,
+                )
+              }
+            />
+          ))}
+        {colors.length > 7 && (
+          <button
+            type="button"
+            onClick={() => setShowAllColors((prev) => !prev)}
+            className="text-sm text-primary-10 hover:text-[#d4892a] font-medium mt-1 transition-colors"
+          >
+            {showAllColors ? "Show less" : `+${colors.length - 7} more`}
           </button>
         )}
       </FilterSection>
 
       {/* Clear Filters */}
-      {activeFilterCount > 0 && (
+      {totalActiveFilters > 0 && (
         <button
-          onClick={onClearFilters}
+          onClick={handleClearAll}
           className="mt-6 text-sm text-primary-10 hover:text-[#d4892a] font-medium flex items-center gap-1.5 transition-colors"
         >
           <FiX size={16} />
-          Clear all filters ({activeFilterCount})
+          Clear all filters ({totalActiveFilters})
         </button>
       )}
     </div>

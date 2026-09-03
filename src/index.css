@@ -61,3 +61,28 @@ button {
   background-color: #eb9e3a;
   width: 24px;
 }
+
+/* Custom Filter Scrollbar */
+.custom-filter-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #d6d6d6 transparent;
+}
+
+/* Chrome, Edge, Safari */
+.custom-filter-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-filter-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-filter-scrollbar::-webkit-scrollbar-thumb {
+  background: #d6d6d6;
+  border-radius: 999px;
+  transition: background 0.2s ease;
+}
+
+.custom-filter-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #b8b8b8;
+}
