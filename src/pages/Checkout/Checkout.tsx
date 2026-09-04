@@ -1,12 +1,11 @@
-import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useRef } from "react";
 import Container from "../../components/Reusable/Container/Container";
-import OrderSuccess from "../../components/CheckoutPage/OrderSuccess/OrderSuccess";
 import OrderSummary from "../../components/CheckoutPage/OrderSummary/OrderSummary";
-import CheckoutForm from "../../components/CheckoutPage/CheckoutForm/CheckoutForm";
+import CheckoutForm, { type CheckoutFormRef } from "../../components/CheckoutPage/CheckoutForm/CheckoutForm";
 
 const Checkout: React.FC = () => {
-  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const formRef = useRef<CheckoutFormRef>(null);
 
   // SEO Structured Data
   const structuredData = {
@@ -15,10 +14,6 @@ const Checkout: React.FC = () => {
     name: "Checkout - Complete Your Order",
     description: "Review your order and complete your purchase securely.",
   };
-
-  if (isSubmitted) {
-    return <OrderSuccess />;
-  }
 
   return (
     <>
@@ -57,10 +52,10 @@ const Checkout: React.FC = () => {
 
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Left Column - Form */}
-            <CheckoutForm />
+            <CheckoutForm ref={formRef} />
 
             {/* Right Column - Order Summary */}
-            <OrderSummary />
+            <OrderSummary formRef={formRef} />
           </div>
         </Container>
       </div>

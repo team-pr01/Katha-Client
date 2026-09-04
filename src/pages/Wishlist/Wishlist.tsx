@@ -1,6 +1,5 @@
 import Container from "../../components/Reusable/Container/Container";
 import { FiShoppingBag, FiTrash2 } from "react-icons/fi";
-import ProductCard from "../../components/HomePage/BestSeller/ProductCard";
 import Breadcrumb from "../../components/Reusable/Breadcrumb/Breadcrumb";
 
 const Wishlist: React.FC = () => {
@@ -70,11 +69,11 @@ const Wishlist: React.FC = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6">
+          {/* <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6">
             {[1, 2, 3, 4, 5, 6].map((item: number) => (
               <ProductCard key={item} />
             ))}
-          </div>
+          </div> */}
         </Container>
       </div>
     </>

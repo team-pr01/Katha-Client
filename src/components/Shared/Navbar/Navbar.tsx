@@ -194,13 +194,13 @@ const Navbar = () => {
                   </span>
                 )}
               </Link>
-              <Link
+              {/* <Link
                 to="/wishlist"
                 className="bg-neutral-20 size-10 rounded-full flex justify-center items-center text-sm font-medium text-neutral-10 hover:bg-neutral-50 transition-colors"
                 aria-label="Wishlist"
               >
                 <img src={ICONS.wishlist} alt="Wishlist" className="size-5" />
-              </Link>
+              </Link> */}
 
               {/* Profile */}
               <Button

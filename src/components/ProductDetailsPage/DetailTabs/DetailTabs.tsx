@@ -5,7 +5,6 @@ import ReviewsTab from "./ReviewsTab/ReviewsTab";
 type TDetailTabsProps = {
   totalReviews: number;
   description: string;
-  material: string[];
   tags: string[];
 };
 
@@ -18,7 +17,6 @@ type TTab = {
 const DetailTabs = ({
   totalReviews,
   description,
-  material,
   tags,
 }: TDetailTabsProps) => {
   const [activeTab, setActiveTab] = useState<"details" | "reviews">("details");
@@ -30,7 +28,6 @@ const DetailTabs = ({
       component: (
         <ProductDetailsTab
           description={description}
-          material={material}
           tags={tags}
         />
       ),

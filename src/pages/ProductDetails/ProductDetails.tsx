@@ -1,14 +1,8 @@
 import React, { useState } from "react";
-import {
-  FiHeart,
-  FiShoppingCart,
-  FiShare2,
-  FiMinus,
-  FiPlus,
-} from "react-icons/fi";
+import { FiShoppingCart, FiShare2, FiMinus, FiPlus } from "react-icons/fi";
 import Container from "../../components/Reusable/Container/Container";
 import PackagingStyle from "../../components/ProductDetailsPage/PackagingStyle/PackagingStyle";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useGetSingleProductBySlugQuery } from "../../redux/Features/Product/productApi";
 import Breadcrumb from "../../components/Reusable/Breadcrumb/Breadcrumb";
 import ProductImages from "../../components/ProductDetailsPage/ProductImages/ProductImages";
@@ -67,6 +61,7 @@ const packagingOptions: TPackagingOption[] = [
 
 const ProductDetails: React.FC = () => {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const { addToCart } = useCart();
   const { data, isLoading } = useGetSingleProductBySlugQuery(slug);
   const productData = data?.data || {};
@@ -78,7 +73,6 @@ const ProductDetails: React.FC = () => {
     packagingOptions[0],
   );
   const [quantity, setQuantity] = useState<number>(1);
-  const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
 
   const variants: TProductVariant[] = productData?.variants || [];
 
@@ -114,7 +108,7 @@ const ProductDetails: React.FC = () => {
       label: "Package Contents",
       value: selectedVariant?.packageContents?.join(", "),
     },
-    { label: "Pack Size", value: selectedVariant?.packSize },
+    { label: "Number of Items", value: selectedVariant?.packSize },
     {
       label: "Occasions",
       value: productData?.occasionNames?.join(", ") || "All",
@@ -138,7 +132,7 @@ const ProductDetails: React.FC = () => {
     return variant.stock > 0;
   };
 
-  const handleAddProductToCart = () => {
+  const handleAddProductToCart = (variant: "buy" | "cart") => {
     if (!slug) return;
 
     const payload = {
@@ -158,6 +152,8 @@ const ProductDetails: React.FC = () => {
     };
     addToCart(payload);
     toast.success("Product added to cart!");
+
+    variant === "buy" && navigate("/cart");
   };
 
   if (isLoading) return <ProductDetailsSkeletonLoader />;
@@ -311,23 +307,19 @@ const ProductDetails: React.FC = () => {
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-3 mb-6">
                 <button
-                  onClick={() => setIsWishlisted(!isWishlisted)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all ${
-                    isWishlisted
-                      ? "bg-red-50 border-red-200 text-red-500"
-                      : "bg-white border-neutral-50 text-neutral-10 hover:border-primary-10"
-                  }`}
+                  onClick={() => handleAddProductToCart("cart")}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all bg-white border-neutral-50 text-neutral-10 hover:border-primary-10`}
                 >
-                  <FiHeart className={isWishlisted ? "fill-current" : ""} />
-                  Wishlist
+                  <FiShoppingCart />
+                  Add to Cart
                 </button>
                 <button
                   className="flex-1 flex items-center justify-center gap-2 px-6 py-2.5 bg-primary-10 text-white rounded-lg hover:bg-[#d4892a] transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={handleAddProductToCart}
+                  onClick={() => handleAddProductToCart("buy")}
                   disabled={!selectedVariant || !isInStock(selectedVariant)}
                 >
                   <FiShoppingCart size={18} />
-                  Add to Cart
+                  Buy Now
                 </button>
               </div>
 
@@ -365,8 +357,7 @@ const ProductDetails: React.FC = () => {
         {/* Tabs Section */}
         <DetailTabs
           totalReviews={productData?.totalReviews}
-          description={productData?.description}
-          material={productData?.material}
+          description={selectedVariant?.description as string}
           tags={productData?.tags}
         />
       </Container>

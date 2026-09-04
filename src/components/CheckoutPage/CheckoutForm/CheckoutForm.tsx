@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   FiArrowLeft,
@@ -11,12 +11,11 @@ import {
 } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import TextInput from "../../Reusable/TextInput/TextInput";
-import Button from "../../Reusable/Button/Button";
 import { useCheckoutMutation } from "../../../redux/Features/Order/orderApi";
 import { useCart } from "../../../providers/CartProvider/CartProvider";
 import toast from "react-hot-toast";
 
-interface CheckoutFormData {
+type TCheckoutFormData = {
   firstName: string;
   lastName: string;
   email: string;
@@ -26,26 +25,34 @@ interface CheckoutFormData {
   city: string;
   state: string;
   pinCode: string;
-}
+};
 
-interface PaymentMethod {
+type TPaymentMethod = {
   id: string;
   label: string;
   icon: React.ReactNode;
-}
+};
 
-const CheckoutForm = () => {
+export type CheckoutFormRef = {
+  submitForm: () => void;
+  triggerValidation: () => Promise<boolean>;
+  setCouponData: (code: string) => void;
+};
+
+const CheckoutForm = forwardRef<CheckoutFormRef>((props, ref) => {
   const navigate = useNavigate();
   const { cartItems, clearCart } = useCart();
 
-  const [checkout, { isLoading }] = useCheckoutMutation();
+  const [checkout] = useCheckoutMutation();
   const [selectedPayment, setSelectedPayment] = useState<string>("COD");
+  const [couponCode, setCouponCode] = useState<string>("");
 
   const {
     register,
     handleSubmit,
+    trigger,
     formState: { errors },
-  } = useForm<CheckoutFormData>({
+  } = useForm<TCheckoutFormData>({
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -59,7 +66,21 @@ const CheckoutForm = () => {
     },
   });
 
-  const paymentMethods: PaymentMethod[] = [
+  // Expose methods to parent via ref
+  useImperativeHandle(ref, () => ({
+    submitForm: () => {
+      handleSubmit(onSubmit)();
+    },
+    triggerValidation: async () => {
+      const result = await trigger();
+      return result;
+    },
+    setCouponData: (code: string) => {
+      setCouponCode(code);
+    },
+  }));
+
+  const paymentMethods: TPaymentMethod[] = [
     {
       id: "COD",
       label: "Cash on Delivery",
@@ -72,19 +93,19 @@ const CheckoutForm = () => {
     },
   ];
 
-  const handleCheckout = async (data: CheckoutFormData) => {
+  const onSubmit = async (data: TCheckoutFormData) => {
     try {
       // Map cart items to orderedItems array
       const orderedItems = cartItems.map((item) => ({
         productId: item.productId,
         variantId: item.variantId || "",
         quantity: item.quantity,
-        price: item.discountedPrice || item.basePrice,
         packagingName: item.packagingStyle || "",
         packagingPrice: item.packagingStylePrice || 0,
       }));
 
       const payload = {
+        couponCode: couponCode,
         orderedItems,
         paymentMethod: selectedPayment,
         shippingAddress: {
@@ -127,7 +148,7 @@ const CheckoutForm = () => {
           </span>
         </div>
 
-        <form onSubmit={handleSubmit(handleCheckout)}>
+        <form id="checkout-form" onSubmit={handleSubmit(onSubmit)}>
           {/* Personal Information */}
           <div className="mb-6">
             <h2 className="text-sm font-semibold text-neutral-10 uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -228,15 +249,15 @@ const CheckoutForm = () => {
                   })}
                 />
                 <TextInput
-                  label="pinCode"
+                  label="Pin Code"
                   placeholder="110001"
                   type="text"
                   error={errors.pinCode}
                   {...register("pinCode", {
-                    required: "pinCode is required",
+                    required: "Pin code is required",
                     pattern: {
                       value: /^[0-9]{6}$/,
-                      message: "Please enter a valid 6-digit pinCode",
+                      message: "Please enter a valid 6-digit pin code",
                     },
                   })}
                 />
@@ -277,7 +298,7 @@ const CheckoutForm = () => {
             </div>
           </div>
 
-          {/* Submit Button */}
+          {/* Back to Cart */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <Link
               to="/cart"
@@ -286,19 +307,13 @@ const CheckoutForm = () => {
               <FiArrowLeft size={16} />
               Return to Cart
             </Link>
-            <Button
-              type="submit"
-              label={isLoading ? "Processing..." : "Place Order"}
-              variant="primary"
-              className="w-full sm:w-auto px-8 py-3"
-              isLoading={isLoading}
-              isDisabled={isLoading}
-            />
           </div>
         </form>
       </div>
     </div>
   );
-};
+});
+
+CheckoutForm.displayName = "CheckoutForm";
 
 export default CheckoutForm;
