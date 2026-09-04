@@ -1,6 +1,6 @@
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import {
-  FiAlertCircle,
   FiArrowLeft,
   FiCheck,
   FiCreditCard,
@@ -9,29 +9,23 @@ import {
   FiTruck,
   FiUser,
 } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import TextInput from "../../Reusable/TextInput/TextInput";
+import Button from "../../Reusable/Button/Button";
+import { useCheckoutMutation } from "../../../redux/Features/Order/orderApi";
+import { useCart } from "../../../providers/CartProvider/CartProvider";
+import toast from "react-hot-toast";
 
-interface CheckoutForm {
+interface CheckoutFormData {
   firstName: string;
   lastName: string;
   email: string;
-  phone: string;
+  phoneNumber: string;
   address: string;
   apartment?: string;
   city: string;
   state: string;
-  pincode: string;
-  saveInfo: boolean;
-}
-
-interface CartItem {
-  id: string;
-  name: string;
-  image: string;
-  price: number;
-  quantity: number;
-  size?: string;
-  color?: string;
+  pinCode: string;
 }
 
 interface PaymentMethod {
@@ -41,90 +35,88 @@ interface PaymentMethod {
 }
 
 const CheckoutForm = () => {
-  const [formData, setFormData] = useState<CheckoutForm>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    address: "",
-    apartment: "",
-    city: "",
-    state: "",
-    pincode: "",
-    saveInfo: false,
+  const navigate = useNavigate();
+  const { cartItems, clearCart } = useCart();
+
+  const [checkout, { isLoading }] = useCheckoutMutation();
+  const [selectedPayment, setSelectedPayment] = useState<string>("COD");
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CheckoutFormData>({
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phoneNumber: "",
+      address: "",
+      apartment: "",
+      city: "",
+      state: "",
+      pinCode: "",
+    },
   });
-  const [selectedPayment, setSelectedPayment] = useState<string>("cod");
-  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
-  const [errors, setErrors] = useState<Partial<CheckoutForm>>({});
 
   const paymentMethods: PaymentMethod[] = [
     {
-      id: "cod",
+      id: "COD",
       label: "Cash on Delivery",
       icon: <FiTruck className="text-primary-10" size={20} />,
     },
     {
-      id: "upi",
+      id: "UPI",
       label: "UPI",
       icon: <FiCreditCard className="text-primary-10" size={20} />,
     },
   ];
 
-  const handleInputChange = (field: keyof CheckoutForm, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error for this field
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
-  };
+  const handleCheckout = async (data: CheckoutFormData) => {
+    try {
+      // Map cart items to orderedItems array
+      const orderedItems = cartItems.map((item) => ({
+        productId: item.productId,
+        variantId: item.variantId || "",
+        quantity: item.quantity,
+        price: item.discountedPrice || item.basePrice,
+        packagingName: item.packagingStyle || "",
+        packagingPrice: item.packagingStylePrice || 0,
+      }));
 
-  const validateForm = (): boolean => {
-    const newErrors: Partial<CheckoutForm> = {};
+      const payload = {
+        orderedItems,
+        paymentMethod: selectedPayment,
+        shippingAddress: {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email || "",
+          phoneNumber: data.phoneNumber,
+          addressLine1: data.address,
+          addressLine2: data.apartment || "",
+          city: data.city,
+          state: data.state,
+          pinCode: data.pinCode,
+        },
+      };
 
-    if (!formData.firstName.trim())
-      newErrors.firstName = "First name is required";
-    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email";
-    }
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required";
-    } else if (!/^[0-9]{10}$/.test(formData.phone.replace(/[^0-9]/g, ""))) {
-      newErrors.phone = "Please enter a valid 10-digit phone number";
-    }
-    if (!formData.address.trim()) newErrors.address = "Address is required";
-    if (!formData.city.trim()) newErrors.city = "City is required";
-    if (!formData.state.trim()) newErrors.state = "State is required";
-    if (!formData.pincode.trim()) {
-      newErrors.pincode = "Pincode is required";
-    } else if (!/^[0-9]{6}$/.test(formData.pincode)) {
-      newErrors.pincode = "Please enter a valid 6-digit pincode";
-    }
+      const response = await checkout(payload).unwrap();
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      // Scroll to first error
-      const firstError = document.querySelector(".border-red-500");
-      if (firstError) {
-        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (response?.success) {
+        toast.success("Order placed successfully!");
+        clearCart();
+        navigate(`/order-success/${response?.data?.orderId}`, {
+          state: { totalAmount: response?.data?.totalAmount },
+        });
       }
-      return;
+    } catch (err: any) {
+      console.error("Checkout error:", err);
+      toast.error(
+        err?.data?.message || "Failed to place order. Please try again.",
+      );
     }
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitted(true);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }, 2000);
   };
+
   return (
     <div className="flex-1">
       <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8">
@@ -135,7 +127,7 @@ const CheckoutForm = () => {
           </span>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(handleCheckout)}>
           {/* Personal Information */}
           <div className="mb-6">
             <h2 className="text-sm font-semibold text-neutral-10 uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -143,48 +135,22 @@ const CheckoutForm = () => {
               Personal Information
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-neutral-10 mb-1">
-                  First Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.firstName}
-                  onChange={(e) =>
-                    handleInputChange("firstName", e.target.value)
-                  }
-                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-10 focus:border-transparent transition-all
-                            ${errors.firstName ? "border-red-500" : "border-neutral-50"}`}
-                  placeholder="Enter first name"
-                />
-                {errors.firstName && (
-                  <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                    <FiAlertCircle size={12} />
-                    {errors.firstName}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-neutral-10 mb-1">
-                  Last Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.lastName}
-                  onChange={(e) =>
-                    handleInputChange("lastName", e.target.value)
-                  }
-                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-10 focus:border-transparent transition-all
-                            ${errors.lastName ? "border-red-500" : "border-neutral-50"}`}
-                  placeholder="Enter last name"
-                />
-                {errors.lastName && (
-                  <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                    <FiAlertCircle size={12} />
-                    {errors.lastName}
-                  </p>
-                )}
-              </div>
+              <TextInput
+                label="First Name"
+                placeholder="Enter first name"
+                error={errors.firstName}
+                {...register("firstName", {
+                  required: "First name is required",
+                })}
+              />
+              <TextInput
+                label="Last Name"
+                placeholder="Enter last name"
+                error={errors.lastName}
+                {...register("lastName", {
+                  required: "Last name is required",
+                })}
+              />
             </div>
           </div>
 
@@ -195,44 +161,31 @@ const CheckoutForm = () => {
               Contact Information
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-neutral-10 mb-1">
-                  Email Address <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
-                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-10 focus:border-transparent transition-all
-                            ${errors.email ? "border-red-500" : "border-neutral-50"}`}
-                  placeholder="your@email.com"
-                />
-                {errors.email && (
-                  <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                    <FiAlertCircle size={12} />
-                    {errors.email}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-neutral-10 mb-1">
-                  Phone Number <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange("phone", e.target.value)}
-                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-10 focus:border-transparent transition-all
-                            ${errors.phone ? "border-red-500" : "border-neutral-50"}`}
-                  placeholder="98765 43210"
-                />
-                {errors.phone && (
-                  <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                    <FiAlertCircle size={12} />
-                    {errors.phone}
-                  </p>
-                )}
-              </div>
+              <TextInput
+                label="Email Address"
+                placeholder="your@email.com"
+                type="email"
+                error={errors.email}
+                {...register("email", {
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Please enter a valid email",
+                  },
+                })}
+              />
+              <TextInput
+                label="Phone Number"
+                placeholder="98765 43210"
+                type="tel"
+                error={errors.phoneNumber}
+                {...register("phoneNumber", {
+                  required: "Phone number is required",
+                  pattern: {
+                    value: /^[0-9]{10}$/,
+                    message: "Please enter a valid 10-digit phone number",
+                  },
+                })}
+              />
             </div>
           </div>
 
@@ -243,99 +196,50 @@ const CheckoutForm = () => {
               Shipping Address
             </h2>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-neutral-10 mb-1">
-                  Address <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.address}
-                  onChange={(e) => handleInputChange("address", e.target.value)}
-                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-10 focus:border-transparent transition-all
-                            ${errors.address ? "border-red-500" : "border-neutral-50"}`}
-                  placeholder="Street address"
-                />
-                {errors.address && (
-                  <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                    <FiAlertCircle size={12} />
-                    {errors.address}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-neutral-10 mb-1">
-                  Apartment, Suite, etc. (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={formData.apartment}
-                  onChange={(e) =>
-                    handleInputChange("apartment", e.target.value)
-                  }
-                  className="w-full px-4 py-2.5 border border-neutral-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-10 focus:border-transparent"
-                  placeholder="Apartment, suite, building (optional)"
-                />
-              </div>
+              <TextInput
+                label="Address"
+                placeholder="Street address"
+                error={errors.address}
+                {...register("address", {
+                  required: "Address is required",
+                })}
+              />
+              <TextInput
+                label="Apartment, Suite, etc. (Optional)"
+                placeholder="Apartment, suite, building (optional)"
+                error={errors.apartment}
+                {...register("apartment")}
+              />
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-neutral-10 mb-1">
-                    City <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.city}
-                    onChange={(e) => handleInputChange("city", e.target.value)}
-                    className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-10 focus:border-transparent transition-all
-                              ${errors.city ? "border-red-500" : "border-neutral-50"}`}
-                    placeholder="City"
-                  />
-                  {errors.city && (
-                    <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                      <FiAlertCircle size={12} />
-                      {errors.city}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-neutral-10 mb-1">
-                    State <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.state}
-                    onChange={(e) => handleInputChange("state", e.target.value)}
-                    className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-10 focus:border-transparent transition-all
-                              ${errors.state ? "border-red-500" : "border-neutral-50"}`}
-                    placeholder="State"
-                  />
-                  {errors.state && (
-                    <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                      <FiAlertCircle size={12} />
-                      {errors.state}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-neutral-10 mb-1">
-                    Pincode <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.pincode}
-                    onChange={(e) =>
-                      handleInputChange("pincode", e.target.value)
-                    }
-                    className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-10 focus:border-transparent transition-all
-                              ${errors.pincode ? "border-red-500" : "border-neutral-50"}`}
-                    placeholder="110001"
-                  />
-                  {errors.pincode && (
-                    <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                      <FiAlertCircle size={12} />
-                      {errors.pincode}
-                    </p>
-                  )}
-                </div>
+                <TextInput
+                  label="City"
+                  placeholder="City"
+                  error={errors.city}
+                  {...register("city", {
+                    required: "City is required",
+                  })}
+                />
+                <TextInput
+                  label="State"
+                  placeholder="State"
+                  error={errors.state}
+                  {...register("state", {
+                    required: "State is required",
+                  })}
+                />
+                <TextInput
+                  label="pinCode"
+                  placeholder="110001"
+                  type="text"
+                  error={errors.pinCode}
+                  {...register("pinCode", {
+                    required: "pinCode is required",
+                    pattern: {
+                      value: /^[0-9]{6}$/,
+                      message: "Please enter a valid 6-digit pinCode",
+                    },
+                  })}
+                />
               </div>
             </div>
           </div>
@@ -353,13 +257,13 @@ const CheckoutForm = () => {
                   type="button"
                   onClick={() => setSelectedPayment(method.id)}
                   className={`
-                            flex items-center gap-3 p-3 border-2 rounded-xl transition-all
-                            ${
-                              selectedPayment === method.id
-                                ? "border-primary-10 bg-primary-10/5 shadow-md"
-                                : "border-neutral-50 hover:border-primary-10"
-                            }
-                          `}
+                    flex items-center gap-3 p-3 border-2 rounded-xl transition-all
+                    ${
+                      selectedPayment === method.id
+                        ? "border-primary-10 bg-primary-10/5 shadow-md"
+                        : "border-neutral-50 hover:border-primary-10"
+                    }
+                  `}
                 >
                   {method.icon}
                   <span className="text-sm font-medium text-neutral-10">
@@ -373,31 +277,24 @@ const CheckoutForm = () => {
             </div>
           </div>
 
-          {/* Save Info */}
-          <div className="flex items-center gap-2 mb-6">
-            <input
-              type="checkbox"
-              id="saveInfo"
-              checked={formData.saveInfo}
-              onChange={(e) => handleInputChange("saveInfo", e.target.checked)}
-              className="w-4 h-4 rounded border-neutral-50 text-primary-10 focus:ring-primary-10 focus:ring-offset-0 cursor-pointer"
-            />
-            <label
-              htmlFor="saveInfo"
-              className="text-sm text-neutral-10 cursor-pointer"
+          {/* Submit Button */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <Link
+              to="/cart"
+              className="inline-flex items-center gap-2 text-sm text-neutral-45 hover:text-primary-10 transition-colors"
             >
-              Save this information for future orders
-            </label>
+              <FiArrowLeft size={16} />
+              Return to Cart
+            </Link>
+            <Button
+              type="submit"
+              label={isLoading ? "Processing..." : "Place Order"}
+              variant="primary"
+              className="w-full sm:w-auto px-8 py-3"
+              isLoading={isLoading}
+              isDisabled={isLoading}
+            />
           </div>
-
-          {/* Back to Cart */}
-          <Link
-            to="/cart"
-            className="inline-flex items-center gap-2 text-sm text-neutral-45 hover:text-primary-10 transition-colors"
-          >
-            <FiArrowLeft size={16} />
-            Return to Cart
-          </Link>
         </form>
       </div>
     </div>

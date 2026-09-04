@@ -21,6 +21,8 @@ export type TCartItem = {
   discount?: number;
   size: string;
   color: string;
+  packagingStyle: string;
+  packagingStylePrice: number;
   quantity: number;
   maxQuantity: number;
 };
@@ -36,6 +38,14 @@ type TCartContext = {
   getCartItemCount: () => number;
   isInCart: (productId: string, variantId?: string) => boolean;
   refreshCart: () => void;
+  getPackagingTotal: () => number;
+  getPackagingDetails: () => {
+    productId: string;
+    productName: string;
+    packagingStyle: string;
+    packagingStylePrice: number;
+  }[];
+  getSubTotal : () => number
 };
 
 const CartContext = createContext<TCartContext | undefined>(undefined);
@@ -147,13 +157,40 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     window.dispatchEvent(new CustomEvent('cartUpdated', { detail: [] }));
   }, []);
 
+  const getSubTotal = useCallback(() => {
+  return cartItems.reduce((total, item) => {
+    const price = item.discountedPrice || item.basePrice;
+    return total + price * item.quantity;
+  }, 0);
+}, [cartItems]);
+
   // Get cart total
   const getCartTotal = useCallback(() => {
-    return cartItems.reduce((total, item) => {
-      const price = item.discountedPrice || item.basePrice;
-      return total + price * item.quantity;
-    }, 0);
-  }, [cartItems]);
+  return cartItems.reduce((total, item) => {
+    const price = item.discountedPrice || item.basePrice;
+    const packagingPrice = item.packagingStylePrice || 0;
+    return total + (price + packagingPrice) * item.quantity;
+  }, 0);
+}, [cartItems]);
+
+const getPackagingTotal = useCallback(() => {
+  return cartItems.reduce((total, item) => {
+    const packagingPrice = item.packagingStylePrice || 0;
+    return total + packagingPrice * item.quantity;
+  }, 0);
+}, [cartItems]);
+
+
+const getPackagingDetails = useCallback(() => {
+  return cartItems.map(item => ({
+    productId: item.productId,
+    productName: item.name,
+    packagingStyle: item.packagingStyle,
+    packagingStylePrice: item.packagingStylePrice || 0,
+    quantity: item.quantity,
+    totalPackagingPrice: (item.packagingStylePrice || 0) * item.quantity,
+  }));
+}, [cartItems]);
 
   // Get total item count (sum of all quantities)
   const getCartItemCount = useCallback(() => {
@@ -209,10 +246,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     removeFromCart,
     updateQuantity,
     clearCart,
+    getSubTotal,
     getCartTotal,
     getCartItemCount,
     isInCart,
     refreshCart,
+    getPackagingTotal,
+    getPackagingDetails,
   };
 
   return (

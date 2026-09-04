@@ -11,6 +11,7 @@ import PersonalizedOrders from "../pages/PersonalizedOrders/PersonalizedOrders";
 import Checkout from "../pages/Checkout/Checkout";
 import CustomizeProduct from "../pages/CustomizeProduct/CustomizeProduct";
 import BulkOrders from "../pages/BulkOrders/BulkOrders";
+import OrderSuccess from "../components/CheckoutPage/OrderSuccess/OrderSuccess";
 
 export const router = createBrowserRouter([
   {
@@ -45,6 +46,10 @@ export const router = createBrowserRouter([
       {
         path: "/checkout",
         element: <Checkout />,
+      },
+      {
+        path: "/order-success/:orderId",
+        element: <OrderSuccess />,
       },
       {
         path: "/wishlist",

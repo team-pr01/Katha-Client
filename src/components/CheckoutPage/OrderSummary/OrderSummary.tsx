@@ -6,47 +6,17 @@ import {
   FiShield,
   FiTruck,
 } from "react-icons/fi";
+import { useCart } from "../../../providers/CartProvider/CartProvider";
 
 const OrderSummary = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const cartItems = [
-    {
-      id: "1",
-      name: "The Jewel Embedded Brass Elephant",
-      image: "/api/placeholder/80/80",
-      price: 200,
-      quantity: 1,
-      size: "Medium",
-      color: "Brass",
-    },
-    {
-      id: "2",
-      name: "Handcrafted Brass Diya Set",
-      image: "/api/placeholder/80/80",
-      price: 899,
-      quantity: 2,
-      size: "Classic",
-      color: "Brass",
-    },
-    {
-      id: "3",
-      name: "Brass Peacock Showpiece",
-      image: "/api/placeholder/80/80",
-      price: 3499,
-      quantity: 1,
-      size: "Large",
-      color: "Brass",
-    },
-  ];
-  const totalSavings = 0;
 
-  // Calculate from actual data
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0,
-  );
-  const deliveryCharge = subtotal > 500 ? 0 : 49;
-  const total = subtotal + deliveryCharge;
+  const { cartItems, getSubTotal, getPackagingTotal } = useCart();
+
+  const subtotal = getSubTotal();
+  const packagingTotal = getPackagingTotal();
+  const deliveryCharge: number = 50;
+  const total = subtotal + packagingTotal + deliveryCharge;
   return (
     <div className="lg:w-96 shrink-0">
       <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-6">
@@ -55,55 +25,20 @@ const OrderSummary = () => {
           Order Summary
         </h2>
 
-        {/* Items */}
-        <div className="space-y-3 mb-4 max-h-[300px] overflow-y-auto">
-          {cartItems.map((item) => (
-            <div
-              key={item.id}
-              className="flex gap-3 pb-3 border-b border-neutral-50 last:border-0"
-            >
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-16 h-16 rounded-lg object-cover shrink-0 bg-neutral-20"
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-neutral-10 line-clamp-1">
-                  {item.name}
-                </p>
-                <div className="flex items-center gap-2 text-xs text-neutral-45 mt-0.5">
-                  {item.size && <span>Size: {item.size}</span>}
-                  {item.color && <span>Color: {item.color}</span>}
-                </div>
-                <div className="flex items-center justify-between mt-1">
-                  <span className="text-sm font-bold text-neutral-10">
-                    ₹{item.price}
-                  </span>
-                  <span className="text-xs text-neutral-45">
-                    Qty: {item.quantity}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
         {/* Calculations */}
-        <div className="space-y-2 border-t border-neutral-50 pt-4 mb-4">
+        <div className="space-y-2 mb-4">
           <div className="flex justify-between text-sm">
             <span className="text-neutral-45">
               Subtotal ({cartItems.length} items)
             </span>
             <span className="text-neutral-10 font-medium">₹{subtotal}</span>
           </div>
-          {totalSavings > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="text-green-600">Total Savings</span>
-              <span className="text-green-600 font-medium">
-                -₹{totalSavings}
-              </span>
-            </div>
-          )}
+          <div className="flex justify-between text-sm">
+            <span className="text-neutral-45">Packaging Charges</span>
+            <span className="text-neutral-10 font-medium">
+              ₹{packagingTotal.toFixed(0)}
+            </span>
+          </div>
           <div className="flex justify-between text-sm">
             <span className="text-neutral-45">Delivery Charges</span>
             <span
@@ -161,7 +96,7 @@ const OrderSummary = () => {
           <div className="flex flex-col items-center p-2 bg-neutral-20 rounded-lg">
             <FiTruck className="text-primary-10 text-lg" />
             <span className="text-xs text-neutral-45 mt-1 text-center">
-              Free Delivery*
+              Safe Delivery*
             </span>
           </div>
           <div className="flex flex-col items-center p-2 bg-neutral-20 rounded-lg">
@@ -176,8 +111,8 @@ const OrderSummary = () => {
         <div className="mt-3 p-3 bg-neutral-20 rounded-lg">
           <p className="text-xs text-neutral-45 text-center">
             <FiAlertCircle className="inline mr-1 text-primary-10" size={12} />
-            Orders are processed within 24 hours. Free delivery on orders above
-            ₹500.
+            Orders are processed within 24 hours. Delivery may take up to 3
+            days.
           </p>
         </div>
       </div>

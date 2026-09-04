@@ -298,8 +298,6 @@ const Filters: React.FC<FiltersProps> = ({
   setMinPrice,
   maxPrice,
   setMaxPrice,
-  selectedAvailability,
-  setSelectedAvailability,
   selectedMaterials,
   setSelectedMaterials,
   selectedColors,
@@ -317,11 +315,6 @@ const Filters: React.FC<FiltersProps> = ({
 
   const occasions = occasionData?.data?.data || [];
   const categories = categoryData?.data?.data || [];
-
-  const availabilityOptions: FilterOption[] = [
-    { label: "In Stock", count: 136 },
-    { label: "Out of Stock", count: 136 },
-  ];
 
   const materials: FilterOption[] = [
     { label: "Wood", count: 136 },
@@ -487,25 +480,6 @@ const Filters: React.FC<FiltersProps> = ({
           onMinChange={setMinPrice}
           onMaxChange={setMaxPrice}
         />
-      </FilterSection>
-
-      {/* Availability Filter */}
-      <FilterSection title="Availability">
-        {availabilityOptions.map((item: FilterOption) => (
-          <FilterCheckbox
-            key={item.label}
-            label={item.label}
-            count={item.count}
-            checked={selectedAvailability.includes(item.label)}
-            onChange={() =>
-              handleCheckboxChange(
-                selectedAvailability,
-                setSelectedAvailability,
-                item.label,
-              )
-            }
-          />
-        ))}
       </FilterSection>
 
       {/* Material Filter */}

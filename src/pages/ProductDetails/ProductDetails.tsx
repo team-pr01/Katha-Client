@@ -12,7 +12,7 @@ import { Link, useParams } from "react-router-dom";
 import { useGetSingleProductBySlugQuery } from "../../redux/Features/Product/productApi";
 import Breadcrumb from "../../components/Reusable/Breadcrumb/Breadcrumb";
 import ProductImages from "../../components/ProductDetailsPage/ProductImages/ProductImages";
-import { ICONS } from "../../assets";
+import { ICONS, IMAGES } from "../../assets";
 import ProductAttributes from "../../components/ProductDetailsPage/ProductAttributes/ProductAttributes";
 import DetailTabs from "../../components/ProductDetailsPage/DetailTabs/DetailTabs";
 import { renderRatingStars } from "../../utils/renderRatingStars";
@@ -23,6 +23,48 @@ import { useCart } from "../../providers/CartProvider/CartProvider";
 import toast from "react-hot-toast";
 import ProductDetailsSkeletonLoader from "../../components/ProductDetailsPage/ProductDetailsSkeletonLoader/ProductDetailsSkeletonLoader";
 
+export type TPackagingOption = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  isPopular?: boolean;
+};
+
+const packagingOptions: TPackagingOption[] = [
+  {
+    id: "regular",
+    name: "Regular Packaging",
+    description: "Basic packaging for safe delivery",
+    price: 0,
+    image: IMAGES.regularPackaging || "/api/placeholder/400/200",
+  },
+  {
+    id: "ribbon",
+    name: "Ribbon",
+    description: "Elegant ribbon wrapping, perfect for gifting.",
+    price: 160,
+    image: IMAGES.ribbonPackaging || "/api/placeholder/400/200",
+    isPopular: true,
+  },
+  {
+    id: "flowers",
+    name: "Decorative Flowers",
+    description: "Beautiful floral accents for a festive presentation.",
+    price: 160,
+    image: IMAGES.decorativeFlowersPackaging || "/api/placeholder/400/200",
+  },
+  {
+    id: "platter",
+    name: "1 Ring Platter",
+    description:
+      "Premium brass platter presentation for a traditional gifting experience.",
+    price: 160,
+    image: IMAGES.ringPlatterPackaging || "/api/placeholder/400/200",
+  },
+];
+
 const ProductDetails: React.FC = () => {
   const { slug } = useParams();
   const { addToCart } = useCart();
@@ -32,6 +74,9 @@ const ProductDetails: React.FC = () => {
   // State
   const [selectedVariant, setSelectedVariant] =
     useState<TProductVariant | null>(null);
+  const [selectedPackage, setSelectedPackage] = useState<TPackagingOption>(
+    packagingOptions[0],
+  );
   const [quantity, setQuantity] = useState<number>(1);
   const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
 
@@ -98,6 +143,7 @@ const ProductDetails: React.FC = () => {
 
     const payload = {
       productId: productData?._id,
+      variantId: selectedVariant?._id,
       name: productData?.name,
       image: selectedVariant?.images?.[0] || "",
       basePrice: selectedVariant?.basePrice as number,
@@ -107,6 +153,8 @@ const ProductDetails: React.FC = () => {
       color: selectedVariant?.color ?? "",
       quantity: quantity,
       maxQuantity: selectedVariant?.stock ?? 0,
+      packagingStyle: selectedPackage?.name,
+      packagingStylePrice: selectedPackage?.price,
     };
     addToCart(payload);
     toast.success("Product added to cart!");
@@ -301,7 +349,15 @@ const ProductDetails: React.FC = () => {
               <ProductAttributes productAttributes={productAttributes} />
 
               {/* Packaging Options */}
-              <PackagingStyle />
+              <PackagingStyle
+                packagingOptions={packagingOptions}
+                selectedPackage={selectedPackage}
+                setSelectedPackage={
+                  setSelectedPackage as React.Dispatch<
+                    React.SetStateAction<TPackagingOption | null>
+                  >
+                }
+              />
             </div>
           </div>
         </div>

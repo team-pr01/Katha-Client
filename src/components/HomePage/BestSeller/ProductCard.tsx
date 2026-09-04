@@ -1,22 +1,46 @@
 import { GoHeart } from "react-icons/go";
 import { ICONS } from "../../../assets";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { TProduct } from "../../../types/product.type";
 import { calculateProductDiscountedPercentage } from "../../../utils/calculateProductDiscountedPercentage";
+import { useCart } from "../../../providers/CartProvider/CartProvider";
 
 const ProductCard = ({ product }: { product: TProduct }) => {
-  const { basePrice, discountedPrice } = product?.variants[0];
+  const navigate  = useNavigate();
+  const { _id, basePrice, discountedPrice, images, size, color, stock } =
+    product?.variants[0];
+  const { addToCart } = useCart();
+
+  const handleAddProductToCart = () => {
+    const payload = {
+      productId: product?._id,
+      variantId: _id,
+      name: product?.name,
+      image: images?.[0] || "",
+      basePrice: basePrice as number,
+      discountedPrice: discountedPrice as number,
+      category: product?.category,
+      size: size ?? "",
+      color: color ?? "",
+      quantity: 1,
+      maxQuantity: stock ?? 0,
+      packagingStyle: "regular",
+      packagingStylePrice: 0,
+    };
+    addToCart(payload);
+    navigate("/cart");
+  };
 
   return (
     <div className="rounded-lg">
       <div className="relative rounded-lg">
-        {/* <Link to={`/product/${product?.slug}`}>
+        <Link to={`/product/${product?.slug}`}>
           <img
-            src={product?.images[0]}
+            src={images[0]}
             alt=""
             className="rounded-lg w-full h-55 object-cover"
           />
-        </Link> */}
+        </Link>
         <button className="absolute top-3 right-3 bg-white border border-neutral-10/50 size-7 rounded-full flex items-center justify-center p-1">
           <GoHeart className="text-primary-10" />
           {/* <GoHeartFill /> */}
@@ -47,7 +71,7 @@ const ProductCard = ({ product }: { product: TProduct }) => {
 
           <p className="text-red-500 text-xs mt-0.5">
             <span className="line-through">₹{basePrice}</span>{" "}
-            <span>
+            <span className="text-green-600 font-semibold">
               -
               {calculateProductDiscountedPercentage(basePrice, discountedPrice)}
               %
@@ -56,7 +80,7 @@ const ProductCard = ({ product }: { product: TProduct }) => {
         </div>
       </div>
 
-      <button className="text-neutral-5 underline font-semibold text-sm uppercase font-Inter mt-2">
+      <button onClick={handleAddProductToCart} className="text-neutral-5 underline font-semibold text-sm uppercase font-Inter mt-2">
         Add to Cart
       </button>
     </div>

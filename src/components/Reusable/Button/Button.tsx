@@ -7,6 +7,7 @@ const Button = ({
   onClick,
   className = "",
   isLoading = false,
+  isDisabled = false,
   icon=true,
 }: {
   type?: "button" | "submit" | "reset";
@@ -15,13 +16,14 @@ const Button = ({
   onClick?: () => void;
   className?: string;
   isLoading?: boolean;
+  isDisabled?: boolean;
   icon?: boolean;
 }) => {
   return (
     <button
       type={type}
       onClick={onClick}
-      disabled={isLoading}
+      disabled={isDisabled || isLoading}
       className={`text-xs md:text-sm rounded-[30px] py-1.5 lg:py-2 pr-2 pl-6 md:pl-8 font-Manrope font-medium flex items-center justify-center gap-3 w-fit border h-fit transition-all duration-300 active:scale-95 group shadow-sm ${
         isLoading ? "opacity-85 cursor-not-allowed" : "cursor-pointer"
       } ${

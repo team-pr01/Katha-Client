@@ -1,58 +1,24 @@
-import React, { useState } from "react";
+import React from "react";
 import { FiGift } from "react-icons/fi";
-import { IMAGES } from "../../../assets";
+import type { TPackagingOption } from "../../../pages/ProductDetails/ProductDetails";
 
-interface PackagingOption {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-  isPopular?: boolean;
-}
-
-const PackagingStyle: React.FC = () => {
-  const [selectedPackage, setSelectedPackage] = useState<string>("regular");
-
-  const packagingOptions: PackagingOption[] = [
-    {
-      id: "regular",
-      name: "Regular Packaging",
-      description: "Basic packaging for safe delivery",
-      price: 0,
-      image: IMAGES.regularPackaging || "/api/placeholder/400/200",
-    },
-    {
-      id: "ribbon",
-      name: "Ribbon",
-      description: "Elegant ribbon wrapping, perfect for gifting.",
-      price: 160,
-      image: IMAGES.ribbonPackaging || "/api/placeholder/400/200",
-      isPopular: true,
-    },
-    {
-      id: "flowers",
-      name: "Decorative Flowers",
-      description: "Beautiful floral accents for a festive presentation.",
-      price: 160,
-      image: IMAGES.decorativeFlowersPackaging || "/api/placeholder/400/200",
-    },
-    {
-      id: "platter",
-      name: "1 Ring Platter",
-      description:
-        "Premium brass platter presentation for a traditional gifting experience.",
-      price: 160,
-      image: IMAGES.ringPlatterPackaging || "/api/placeholder/400/200",
-    },
-  ];
-
+const PackagingStyle = ({
+  packagingOptions,
+  selectedPackage,
+  setSelectedPackage,
+}: {
+  packagingOptions: TPackagingOption[];
+  selectedPackage: TPackagingOption | null;
+  setSelectedPackage: React.Dispatch<
+    React.SetStateAction<TPackagingOption | null>
+  >;
+}) => {
   const selectedOption = packagingOptions.find(
-    (opt) => opt.id === selectedPackage,
+    (opt) => opt.id === selectedPackage?.id,
   );
 
-  const handleSelect = (id: string): void => {
-    setSelectedPackage(id);
+  const handleSelect = (option: TPackagingOption): void => {
+    setSelectedPackage(option);
   };
 
   const getPriceDisplay = (price: number): string => {
@@ -81,12 +47,12 @@ const PackagingStyle: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {packagingOptions.map((option) => {
-          const isSelected = selectedPackage === option.id;
+          const isSelected = selectedPackage?.id === option.id;
 
           return (
             <button
               key={option.id}
-              onClick={() => handleSelect(option.id)}
+              onClick={() => handleSelect(option)}
               className={`
                 relative group rounded-xl overflow-hidden border-2 transition-all duration-300 text-left h-fit
                 ${

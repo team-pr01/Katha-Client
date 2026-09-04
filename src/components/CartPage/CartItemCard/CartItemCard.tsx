@@ -38,9 +38,16 @@ const CartItemCard = ({ item }: { item: TCartItem }) => {
                   Size: {item.size}
                 </span>
               )}
+              <div className="size-1 rounded-full bg-neutral-45/80"></div>
               {item.color && (
                 <span className="text-xs text-neutral-45">
                   Color: {item.color}
+                </span>
+              )}
+              <div className="size-1 rounded-full bg-neutral-45/80"></div>
+              {item.packagingStyle && (
+                <span className="text-xs text-neutral-45 capitalize">
+                  Packaging: {item.packagingStyle} (₹{item.packagingStylePrice})
                 </span>
               )}
             </div>
@@ -90,7 +97,9 @@ const CartItemCard = ({ item }: { item: TCartItem }) => {
 
         {/* Total */}
         <div className="col-span-1 text-center font-bold text-neutral-10">
-          ₹{item?.discountedPrice * item?.quantity}
+          ₹
+          {(item?.discountedPrice * item?.quantity) + (item?.packagingStylePrice ||
+            0)}
         </div>
 
         {/* Action */}
