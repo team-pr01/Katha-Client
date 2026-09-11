@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-export const backendBaseUrl = "http://localhost:5000";
-// export const backendBaseUrl = "https://prtech-solutions-server.onrender.com";
+// export const backendBaseUrl = "http://localhost:5000";
+export const backendBaseUrl = "https://katha-server.vercel.app";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: `${backendBaseUrl}/api/v1`,
@@ -20,7 +20,9 @@ export const baseApi = createApi({
     "occasion",
     "category",
     "product",
-    "couponCode"
+    "couponCode",
+    "materials",
+    "user"
   ],
   endpoints: () => ({}),
 });

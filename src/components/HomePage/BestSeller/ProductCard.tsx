@@ -1,4 +1,3 @@
-import { GoHeart } from "react-icons/go";
 import { ICONS } from "../../../assets";
 import { Link, useNavigate } from "react-router-dom";
 import type { TProduct } from "../../../types/product.type";
@@ -41,10 +40,9 @@ const ProductCard = ({ product }: { product: TProduct }) => {
             className="rounded-lg w-full h-55 object-cover"
           />
         </Link>
-        <button className="absolute top-3 right-3 bg-white border border-neutral-10/50 size-7 rounded-full flex items-center justify-center p-1">
+        {/* <button className="absolute top-3 right-3 bg-white border border-neutral-10/50 size-7 rounded-full flex items-center justify-center p-1">
           <GoHeart className="text-primary-10" />
-          {/* <GoHeartFill /> */}
-        </button>
+        </button> */}
         <div className="absolute left-3 top-3 bg-neutral-5 text-white text-[10px] rounded-3xl flex items-center justify-center px-3 py-1 w-fit">
           {product?.category}
         </div>

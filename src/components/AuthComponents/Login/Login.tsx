@@ -3,9 +3,11 @@ import { useForm } from "react-hook-form";
 import TextInput from "../../Reusable/TextInput/TextInput";
 import Button from "../../Reusable/Button/Button";
 import { useState } from "react";
-import { emailValidator } from "../../../utils/emailValidator";
 import PasswordInput from "../../Reusable/PasswordInput/PasswordInput";
 import { ICONS } from "../../../assets";
+import { useLoginMutation } from "../../../redux/Features/Auth/authApi";
+import { useDispatch } from "react-redux";
+import { setUser } from "../../../redux/Features/Auth/authSlice";
 
 type TFormData = {
   phoneNumber: string;
@@ -17,24 +19,34 @@ const Login = ({
 }: {
   setAuthModalType: React.Dispatch<React.SetStateAction<"login" | "signup">>;
 }) => {
+  const dispatch = useDispatch();
+  const [login, { isLoading }] = useLoginMutation();
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
 
   const {
     register,
     handleSubmit,
-    // reset,
+    reset,
     formState: { errors },
   } = useForm<TFormData>();
 
   const handleLogin = async (data: TFormData) => {
     try {
       const payload = {
-        phoneNumber: data.phoneNumber || "",
-        password: data.password || "",
+        phoneNumber: data.phoneNumber,
+        password: data.password,
       };
-    } catch (err: any) {
-      setLoginError(err?.data?.message);
+      const res = await login(payload).unwrap();
+      if (res?.success) {
+        dispatch(
+          setUser({ user: res?.data?.user, token: res?.data?.accessToken }),
+        );
+      }
+      window.location.replace("/dashboard");
+      reset();
+    } catch (error: any) {
+      setLoginError(error?.data?.message || "Login failed. Please try again.");
     }
   };
   return (
@@ -78,8 +90,8 @@ const Login = ({
             variant="primary"
             className="w-full py-1.5 lg:py-3.5"
             icon={false}
-            // isLoading={isLoading}
-            // isDisabled={isLoading}
+            isLoading={isLoading}
+            isDisabled={isLoading}
           />
 
           <div className="flex items-center justify-center gap-3 my-4">

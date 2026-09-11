@@ -1,10 +1,12 @@
-import React, { useState } from "react";
-import { FiSliders, FiChevronDown, FiX } from "react-icons/fi";
+import React, { useEffect, useState } from "react";
+import { FiSliders, FiChevronDown, FiX, FiPackage } from "react-icons/fi";
 import Filters from "../../components/ProductsPage/Filters/Filters";
 import ProductCard from "../../components/HomePage/BestSeller/ProductCard";
 import Container from "../../components/Reusable/Container/Container";
 import { useGetAllProductsQuery } from "../../redux/Features/Product/productApi";
 import type { TProduct } from "../../types/product.type";
+import ProductCardSkeletonLoader from "../../components/SkeletonLoaders/ProductCardSkeletonLoader/ProductCardSkeletonLoader";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 // Types
 interface SortOption {
@@ -13,6 +15,10 @@ interface SortOption {
 }
 
 const Products: React.FC = () => {
+  const navigate = useNavigate();
+const location = useLocation();
+  const [searchParams] = useSearchParams();
+    const query = searchParams.get('query');
   // Filter states
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
   const [selectedSubOccasions, setSelectedSubOccasions] = useState<string[]>(
@@ -31,27 +37,32 @@ const Products: React.FC = () => {
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<string>("latest");
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>(query || '');
+
+  useEffect(() => {
+    setSearchQuery(query || '');
+  }, [query]);
 
   const sortOptions: SortOption[] = [
     { value: "latest", label: "Latest" },
-    { value: "price-low", label: "Price: Low to High" },
-    { value: "price-high", label: "Price: High to Low" },
+    { value: "price_low_to_high", label: "Price: Low to High" },
+    { value: "price_high_to_low", label: "Price: High to Low" },
     { value: "popular", label: "Most Popular" },
-    { value: "rating", label: "Top Rated" },
+    { value: "top_rated", label: "Top Rated" },
   ];
 
   const { data, isLoading, isFetching } = useGetAllProductsQuery({
     category: selectedCategories,
     subCategory: selectedSubCategories,
-    occasionNames : selectedOccasions,
-    subOccasionNames : selectedSubOccasions,
+    occasionNames: selectedOccasions,
+    subOccasionNames: selectedSubOccasions,
     material: selectedMaterials,
+    colors : selectedColors,
     keyword: searchQuery,
     minPrice: minPrice as any,
     maxPrice: maxPrice as any,
+    sortBy: sortBy as any,
   });
-  console.log(data);
   const products = data?.data?.data || [];
 
   const getActiveFilterCount = (): number => {
@@ -61,11 +72,18 @@ const Products: React.FC = () => {
       selectedMaterials.length +
       selectedColors.length +
       (minPrice ? 1 : 0) +
-      (maxPrice ? 1 : 0)
+      (maxPrice ? 1 : 0) +
+      selectedCategories.length +
+      selectedSubCategories.length +
+      selectedSubOccasions.length +
+      (searchQuery ? 1 : 0)
     );
   };
 
   const clearAllFilters = (): void => {
+    setSelectedCategories([]);
+    setSelectedSubCategories([]);
+    setSearchQuery('');
     setSelectedOccasions([]);
     setSelectedSubOccasions([]);
     setMinPrice("");
@@ -73,11 +91,8 @@ const Products: React.FC = () => {
     setSelectedAvailability([]);
     setSelectedMaterials([]);
     setSelectedColors([]);
+    navigate(location.pathname, { replace: true });
   };
-
-  if (isLoading || isFetching) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="bg-neutral-20 min-h-screen font-Manrope">
@@ -162,45 +177,31 @@ const Products: React.FC = () => {
 
             {/* Products Grid */}
             <div className="flex-1">
-              {/* Results count */}
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-sm text-neutral-45">
-                  Showing 1-12 of 1,245 results
-                </p>
-                <p className="text-sm text-neutral-45 hidden sm:block">
-                  Page 1 of 104
-                </p>
-              </div>
-
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
-                {products?.map((product: TProduct) => (
-                  <ProductCard key={product?._id} product={product} />
-                ))}
-              </div>
-
-              {/* Pagination */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-neutral-50">
-                <button className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-neutral-10 bg-white border border-neutral-50 rounded-lg hover:bg-neutral-20 transition-colors">
-                  Previous
-                </button>
-                <div className="flex items-center gap-2">
-                  <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary-10 text-white text-sm font-medium">
-                    1
-                  </button>
-                  <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-sm font-medium text-neutral-10 transition-colors">
-                    2
-                  </button>
-                  <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-sm font-medium text-neutral-10 transition-colors">
-                    3
-                  </button>
-                  <span className="text-neutral-45">...</span>
-                  <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-sm font-medium text-neutral-10 transition-colors">
-                    12
-                  </button>
-                </div>
-                <button className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-neutral-10 bg-white border border-neutral-50 rounded-lg hover:bg-neutral-20 transition-colors">
-                  Next
-                </button>
+                {isLoading || isFetching ? (
+                  // Show skeleton loaders
+                  Array.from({ length: 6 }).map((_, index) => (
+                    <ProductCardSkeletonLoader key={index} />
+                  ))
+                ) : products?.length === 0 ? (
+                  // Show no products found
+                  <div className="col-span-1 sm:col-span-2 xl:col-span-3 flex flex-col items-center justify-center py-12 px-4 text-center">
+                    <div className="w-20 h-20 rounded-full bg-neutral-20 flex items-center justify-center mb-4">
+                      <FiPackage className="text-neutral-45 text-3xl" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-neutral-10 mb-1">
+                      No Products Found
+                    </h3>
+                    <p className="text-neutral-45 text-sm max-w-sm">
+                      Try adjusting your filters or search criteria.
+                    </p>
+                  </div>
+                ) : (
+                  // Show products
+                  products?.map((product: TProduct) => (
+                    <ProductCard key={product?._id} product={product} />
+                  ))
+                )}
               </div>
             </div>
           </div>

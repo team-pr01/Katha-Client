@@ -13,6 +13,7 @@ const productApi = baseApi.injectEndpoints({
         occasionNames?: string[];
         subOccasionNames?: string[];
         material?: string[];
+        colors?: string[];
         minPrice?: number;
         maxPrice?: number;
         minRating?: number;
@@ -44,6 +45,9 @@ const productApi = baseApi.injectEndpoints({
         }
         if (filters.material && filters.material.length > 0) {
           params.append("material", filters.material.join(","));
+        }
+        if (filters.colors && filters.colors.length > 0) {
+          params.append("colors", filters.colors.join(","));
         }
 
         // Price range

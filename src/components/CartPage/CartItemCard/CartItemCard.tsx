@@ -3,7 +3,7 @@ import {
   useCart,
   type TCartItem,
 } from "../../../providers/CartProvider/CartProvider";
-import { FiHeart, FiMinus, FiPlus, FiTrash2 } from "react-icons/fi";
+import { FiMinus, FiPlus, FiTrash2 } from "react-icons/fi";
 
 const CartItemCard = ({ item }: { item: TCartItem }) => {
   const { removeFromCart, updateQuantity } = useCart();
@@ -47,7 +47,7 @@ const CartItemCard = ({ item }: { item: TCartItem }) => {
               <div className="size-1 rounded-full bg-neutral-45/80"></div>
               {item.packagingStyle && (
                 <span className="text-xs text-neutral-45 capitalize">
-                  Packaging: {item.packagingStyle} (₹{item.packagingStylePrice})
+                  Packaging: {item.packagingStyle} (+ ₹{item.packagingStylePrice})
                 </span>
               )}
             </div>
@@ -111,12 +111,12 @@ const CartItemCard = ({ item }: { item: TCartItem }) => {
           >
             <FiTrash2 size={18} />
           </button>
-          <button
+          {/* <button
             className="p-1.5 text-neutral-45 hover:text-primary-10 hover:bg-primary-10/10 rounded-lg transition-colors"
             aria-label="Add to wishlist"
           >
             <FiHeart size={18} />
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

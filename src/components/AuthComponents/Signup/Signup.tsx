@@ -5,6 +5,9 @@ import Button from "../../Reusable/Button/Button";
 import { useState } from "react";
 import PasswordInput from "../../Reusable/PasswordInput/PasswordInput";
 import { ICONS } from "../../../assets";
+import { useSignupMutation } from "../../../redux/Features/Auth/authApi";
+import { setUser } from "../../../redux/Features/Auth/authSlice";
+import { useDispatch } from "react-redux";
 
 type TFormData = {
   name: string;
@@ -17,24 +20,42 @@ const Signup = ({
 }: {
   setAuthModalType: React.Dispatch<React.SetStateAction<"login" | "signup">>;
 }) => {
+  const dispatch = useDispatch();
+  const [signup, { isLoading }] = useSignupMutation();
   const [signupError, setSignupError] = useState<string | null>(null);
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
 
   const {
     register,
     handleSubmit,
-    // reset,
+    reset,
     formState: { errors },
   } = useForm<TFormData>();
 
   const handleSignup = async (data: TFormData) => {
     try {
       const payload = {
-        phoneNumber: data.phoneNumber || "",
-        password: data.password || "",
+        ...data,
       };
+      const response = await signup(payload).unwrap();
+      if (response?.success) {
+        dispatch(
+          setUser({
+            user: response?.data?.user,
+            token: response?.data?.accessToken,
+          }),
+        );
+
+        window.location.replace("/dashboard");
+        reset();
+      }
     } catch (err: any) {
-      setSignupError(err?.data?.message);
+      const errorMessage =
+        err?.data?.message ||
+        err?.error ||
+        "Something went wrong during signup. Please try again.";
+
+      setSignupError(errorMessage);
     }
   };
   return (
@@ -86,8 +107,8 @@ const Signup = ({
             variant="primary"
             className="w-full py-1.5 lg:py-3.5"
             icon={false}
-            // isLoading={isLoading}
-            // isDisabled={isLoading}
+            isLoading={isLoading}
+            isDisabled={isLoading}
           />
 
           <div className="flex items-center justify-center gap-3 my-4">

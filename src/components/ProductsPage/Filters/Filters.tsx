@@ -9,11 +9,14 @@ import {
 } from "react-icons/fi";
 import { useGetAllOccasionsQuery } from "../../../redux/Features/Occation/occasionApi";
 import { useGetAllCategoriesQuery } from "../../../redux/Features/Category/categoryApi";
+import FiltersSkeletonLoader from "../../SkeletonLoaders/FiltersSkeletonLoader/FiltersSkeletonLoader";
+import { useGetAllMaterialsQuery } from "../../../redux/Features/Material/materialApi";
 
 // Types
 interface FilterOption {
   label: string;
   count: number;
+  id?: string; // Add optional id for materials
 }
 
 interface SubItem {
@@ -44,6 +47,7 @@ interface FilterCheckboxProps {
   count: number;
   checked: boolean;
   onChange: () => void;
+  id?: string; // Add optional id
 }
 
 interface PriceRangeProps {
@@ -70,7 +74,7 @@ interface FiltersProps {
   setMaxPrice: React.Dispatch<React.SetStateAction<string>>;
   selectedAvailability: string[];
   setSelectedAvailability: React.Dispatch<React.SetStateAction<string[]>>;
-  selectedMaterials: string[];
+  selectedMaterials: string[]; // This will store material IDs
   setSelectedMaterials: React.Dispatch<React.SetStateAction<string[]>>;
   selectedColors: string[];
   setSelectedColors: React.Dispatch<React.SetStateAction<string[]>>;
@@ -246,7 +250,7 @@ const PriceRange: React.FC<PriceRangeProps> = ({
           <label className="text-xs text-neutral-45 block mb-1">Min</label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-45 text-sm">
-              $
+              ₹
             </span>
             <input
               type="number"
@@ -264,7 +268,7 @@ const PriceRange: React.FC<PriceRangeProps> = ({
           <label className="text-xs text-neutral-45 block mb-1">Max</label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-45 text-sm">
-              $
+              ₹
             </span>
             <input
               type="number"
@@ -310,27 +314,28 @@ const Filters: React.FC<FiltersProps> = ({
   const [showAllMaterials, setShowAllMaterials] = useState(false);
   const [showAllColors, setShowAllColors] = useState(false);
 
-  const { data: occasionData } = useGetAllOccasionsQuery({});
-  const { data: categoryData } = useGetAllCategoriesQuery({});
+  const { data: occasionData, isLoading: isOccasionsLoading } =
+    useGetAllOccasionsQuery({});
+  const { data: categoryData, isLoading: isCategoriesLoading } =
+    useGetAllCategoriesQuery({});
+  const { data: materialsData, isLoading: isMaterialsLoading } =
+    useGetAllMaterialsQuery({});
 
   const occasions = occasionData?.data?.data || [];
   const categories = categoryData?.data?.data || [];
 
-  const materials: FilterOption[] = [
-    { label: "Wood", count: 136 },
-    { label: "Leather", count: 136 },
-    { label: "Brass", count: 250 },
-    { label: "Cotton", count: 95 },
-    { label: "Steel", count: 180 },
-    { label: "Jute", count: 180 },
-    { label: "Bamboo", count: 180 },
-    { label: "Silver", count: 180 },
-  ];
+  // Materials with id
+  const materials = materialsData?.data?.data?.map((material: any) => ({
+    id: material._id,
+    label: material.name,
+    count: material.productCount || 0,
+  })) || [];
 
   const colors: FilterOption[] = [
     { label: "Red", count: 136 },
     { label: "Blue", count: 136 },
     { label: "Green", count: 136 },
+    { label: "Brown", count: 11 },
     { label: "Yellow", count: 136 },
     { label: "Purple", count: 85 },
     { label: "Orange", count: 100 },
@@ -366,6 +371,11 @@ const Filters: React.FC<FiltersProps> = ({
     handleCheckboxChange(selectedSubCategories, setSelectedSubCategories, name);
   };
 
+  // Handle material change using id
+  const handleMaterialChange = (id: string): void => {
+    handleCheckboxChange(selectedMaterials, setSelectedMaterials, id);
+  };
+
   // Get total active filter count including sub-occasions and sub-categories
   const totalActiveFilters =
     activeFilterCount +
@@ -376,21 +386,32 @@ const Filters: React.FC<FiltersProps> = ({
     onClearFilters();
     setSelectedSubOccasions([]);
     setSelectedSubCategories([]);
+    setSelectedMaterials([]);
   };
+
+  // Show skeleton while loading
+  if (isOccasionsLoading || isCategoriesLoading || isMaterialsLoading) {
+    return <FiltersSkeletonLoader />;
+  }
 
   return (
     <div className="bg-white rounded-2xl shadow-sm p-6 font-Manrope">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-neutral-10">Filters</h2>
-        {totalActiveFilters > 0 && (
-          <span className="text-xs bg-primary-10 text-white px-2 py-0.5 rounded-full">
-            {totalActiveFilters} active
-          </span>
-        )}
+        {/* Clear Filters */}
+      {totalActiveFilters > 0 && (
+        <button
+          onClick={handleClearAll}
+          className="text-sm text-primary-10 hover:text-[#d4892a] font-medium flex items-center gap-1.5 transition-colors"
+        >
+          <FiX size={16} />
+          Clear Filters ({totalActiveFilters})
+        </button>
+      )}
       </div>
 
       {/* Search */}
-      <div className="relative mb-6">
+      <div className="relative mb-2">
         <FiSearch
           className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-45"
           size={18}
@@ -482,23 +503,17 @@ const Filters: React.FC<FiltersProps> = ({
         />
       </FilterSection>
 
-      {/* Material Filter */}
+      {/* Material Filter - Using ID */}
       <FilterSection title="Material">
         {materials
           .slice(0, showAllMaterials ? materials.length : 7)
-          .map((item: FilterOption) => (
+          .map((item: any) => (
             <FilterCheckbox
-              key={item.label}
+              key={item.id}
               label={item.label}
               count={item.count}
-              checked={selectedMaterials.includes(item.label)}
-              onChange={() =>
-                handleCheckboxChange(
-                  selectedMaterials,
-                  setSelectedMaterials,
-                  item.label,
-                )
-              }
+              checked={selectedMaterials.includes(item.id)}
+              onChange={() => handleMaterialChange(item.id)}
             />
           ))}
         {materials.length > 7 && (
@@ -542,16 +557,7 @@ const Filters: React.FC<FiltersProps> = ({
         )}
       </FilterSection>
 
-      {/* Clear Filters */}
-      {totalActiveFilters > 0 && (
-        <button
-          onClick={handleClearAll}
-          className="mt-6 text-sm text-primary-10 hover:text-[#d4892a] font-medium flex items-center gap-1.5 transition-colors"
-        >
-          <FiX size={16} />
-          Clear all filters ({totalActiveFilters})
-        </button>
-      )}
+      
     </div>
   );
 };
