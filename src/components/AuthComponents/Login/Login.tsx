@@ -111,6 +111,7 @@ const Login = ({
           <div className="font-Satoshi flex items-center gap-1 mt-7 text-sm">
             <p className="text-neutral-5">New to Katha?</p>
             <button
+              type="button"
               onClick={() => setAuthModalType("signup")}
               className="text-primary-10 font-medium underline"
             >

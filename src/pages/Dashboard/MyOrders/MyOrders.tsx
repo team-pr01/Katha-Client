@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   FiPackage,
   FiChevronRight,
@@ -168,7 +168,7 @@ const MyOrders = () => {
     const matchesSearch =
       order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.items.some((item) =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     return matchesTab && matchesSearch;
   });
@@ -237,11 +237,8 @@ const MyOrders = () => {
             />
           </div>
         </div>
-      </div>
 
-      {/* Tabs */}
-      <div className="bg-white rounded-2xl shadow-sm p-2 overflow-x-auto">
-        <div className="flex gap-1 min-w-max">
+        <div className="flex gap-1 min-w-max mt-6 border border-neutral-50 rounded-2xl p-2">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -339,10 +336,7 @@ const MyOrders = () => {
                           {order.items.length > 1 ? "s" : ""}
                         </span>
                         <span className="flex items-center gap-1.5">
-                          <FiCreditCard
-                            size={12}
-                            className="text-primary-10"
-                          />
+                          <FiCreditCard size={12} className="text-primary-10" />
                           {order.paymentMethod}
                         </span>
                       </div>

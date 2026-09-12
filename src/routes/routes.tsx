@@ -14,6 +14,9 @@ import BulkOrders from "../pages/BulkOrders/BulkOrders";
 import OrderSuccess from "../components/CheckoutPage/OrderSuccess/OrderSuccess";
 import DashboardHome from "../pages/Dashboard/DashboardHome/DashboardHome";
 import DashboardLayout from "../layouts/DashboardLayout/DashboardLayout";
+import MyOrders from "../pages/Dashboard/MyOrders/MyOrders";
+import ManageAddress from "../pages/Dashboard/ManageAddress/ManageAddress";
+import TrackOrder from "../pages/TrackOrder/TrackOrder";
 
 export const router = createBrowserRouter([
   {
@@ -28,6 +31,10 @@ export const router = createBrowserRouter([
       {
         path: "/about-us",
         element: <AboutUs />,
+      },
+      {
+        path: "/track-order",
+        element: <TrackOrder />,
       },
       {
         path: "/products",
@@ -79,6 +86,14 @@ export const router = createBrowserRouter([
       {
         path: "",
         element: <DashboardHome />,
+      },
+      {
+        path: "my-orders",
+        element: <MyOrders />,
+      },
+      {
+        path: "address",
+        element: <ManageAddress />,
       },
       {
         path: "*",

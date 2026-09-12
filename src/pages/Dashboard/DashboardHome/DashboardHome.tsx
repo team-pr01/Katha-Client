@@ -279,7 +279,7 @@ const DashboardHome = () => {
           </div>
 
           <div className="flex items-start gap-3 p-4 bg-neutral-20/50 rounded-xl">
-            <div className="w-10 h-10 rounded-full bg-primary-10/10 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-full bg-primary-10/10 flex items-center justify-center shrink-0">
               <FiMapPin className="text-primary-10" size={18} />
             </div>
             <div className="text-sm">

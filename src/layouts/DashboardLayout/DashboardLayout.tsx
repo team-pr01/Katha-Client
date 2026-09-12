@@ -13,7 +13,7 @@ const DashboardLayout = () => {
           <SideNavigation />
 
           <div
-            className={`flex-1 w-full min-w-0 overflow-y-auto overflow-x-hidden`}
+            className={`flex-1 w-full min-w-0 overflow-y-auto scrollbar-none overflow-x-hidden`}
           >
             <Outlet />
           </div>

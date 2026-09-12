@@ -16,7 +16,7 @@ const Navbar = () => {
   );
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
 
-  // ✅ Search state
+  // Search state
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   // Search placeholder animation
@@ -58,9 +58,13 @@ const Navbar = () => {
       label: "Order In Bulk",
       path: "/bulk-orders",
     },
+    {
+      label: "Track Order",
+      path: "/track-order",
+    },
   ];
 
-  // ✅ Handle search on Enter key
+  // Handle search on Enter key
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -73,7 +77,7 @@ const Navbar = () => {
     }
   };
 
-  // ✅ Handle search input change
+  // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
@@ -170,7 +174,7 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* ✅ Search with animated placeholder and Enter key support */}
+            {/* Search with animated placeholder and Enter key support */}
             <div className="flex py-2.5 items-center rounded-md bg-neutral-20 px-4 w-75 relative overflow-hidden">
               <img src={ICONS.search} alt="Search" className="shrink-0" />
               <input
