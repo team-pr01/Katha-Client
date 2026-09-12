@@ -9,6 +9,7 @@ import Signup from "../../AuthComponents/Signup/Signup";
 import { useCart } from "../../../providers/CartProvider/CartProvider";
 
 const Navbar = () => {
+  const user = true;
   const pathname = useLocation().pathname;
   const navigate = useNavigate();
   const [authModalType, setAuthModalType] = useState<"login" | "signup">(
@@ -156,9 +157,9 @@ const Navbar = () => {
   const { getCartItemCount } = useCart();
 
   return (
-    <div className="bg-white shadow-navbar font-Manrope py-4">
+    <div className="bg-white shadow-navbar font-Manrope py-4 sticky top-0 z-99">
       <Container>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between bg-white">
           <img src={IMAGES.logo} alt="Logo" className="w-40" />
 
           <div className="flex items-center gap-8">
@@ -218,14 +219,30 @@ const Navbar = () => {
                 )}
               </Link>
 
-              {/* Profile */}
-              <Button
-                onClick={() => {
-                  setAuthModalType("signup");
-                  setIsAuthModalOpen(true);
-                }}
-                label="Register Now"
-              />
+              {user ? (
+                <Link
+                  to="/dashboard"
+                  className="bg-neutral-20 rounded-3xl text-neutral-10 text-sm flex items-center gap-2 p-2"
+                >
+                  <div className="size-7 rounded-full flex items-center justify-center bg-neutral-45">
+                    <img
+                      src={IMAGES.babyShower}
+                      alt=""
+                      className="rounded-full"
+                    />
+                  </div>
+                  <span>Rahul Sutra....</span>
+                  <img src={ICONS.arrowRight} alt="" className="w-6" />
+                </Link>
+              ) : (
+                <Button
+                  onClick={() => {
+                    setAuthModalType("signup");
+                    setIsAuthModalOpen(true);
+                  }}
+                  label="Register Now"
+                />
+              )}
             </div>
           </div>
         </div>

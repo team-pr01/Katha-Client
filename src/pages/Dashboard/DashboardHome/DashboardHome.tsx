@@ -267,7 +267,7 @@ const DashboardHome = () => {
         <div className="bg-white rounded-2xl shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-neutral-10">
-              Default Address
+              Delivery Address
             </h3>
             <Link
               to="/dashboard/address"
@@ -300,7 +300,7 @@ const DashboardHome = () => {
             </h4>
             <div className="space-y-2">
               <Link
-                to="/dashboard/my-orders"
+                to="/track-order"
                 className="flex items-center justify-between p-2.5 rounded-lg hover:bg-neutral-20 transition-colors group"
               >
                 <span className="flex items-center gap-2 text-sm text-neutral-10">
@@ -318,7 +318,7 @@ const DashboardHome = () => {
               >
                 <span className="flex items-center gap-2 text-sm text-neutral-10">
                   <FiMapPin size={16} className="text-primary-10" />
-                  Manage Addresses
+                  Manage Address
                 </span>
                 <FiChevronRight
                   size={16}
