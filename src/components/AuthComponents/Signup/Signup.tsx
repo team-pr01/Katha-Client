@@ -58,6 +58,7 @@ const Signup = ({
       setSignupError(errorMessage);
     }
   };
+  
   return (
     <form onSubmit={handleSubmit(handleSignup)}>
       <div className="flex flex-col">

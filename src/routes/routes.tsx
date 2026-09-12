@@ -12,6 +12,8 @@ import Checkout from "../pages/Checkout/Checkout";
 import CustomizeProduct from "../pages/CustomizeProduct/CustomizeProduct";
 import BulkOrders from "../pages/BulkOrders/BulkOrders";
 import OrderSuccess from "../components/CheckoutPage/OrderSuccess/OrderSuccess";
+import DashboardHome from "../pages/Dashboard/DashboardHome/DashboardHome";
+import DashboardLayout from "../layouts/DashboardLayout/DashboardLayout";
 
 export const router = createBrowserRouter([
   {
@@ -62,6 +64,21 @@ export const router = createBrowserRouter([
       {
         path: "/bulk-orders",
         element: <BulkOrders />,
+      },
+      {
+        path: "*",
+        element: <NotFound />,
+      },
+    ],
+  },
+  {
+    path: "/dashboard",
+    element: <DashboardLayout />,
+    // errorElement: <ErrorComponent />,
+    children: [
+      {
+        path: "",
+        element: <DashboardHome />,
       },
       {
         path: "*",
