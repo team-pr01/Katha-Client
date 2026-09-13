@@ -9,42 +9,52 @@ import {
   FiHome,
   FiMapPin,
   FiPackage,
+  FiRotateCcw,
   FiTruck,
   FiXCircle,
 } from "react-icons/fi";
+import { formatDate } from "../../utils/formatDate";
 
 const OrderTrackingData = ({ orderData, setOrderData }: any) => {
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "delivered":
-        return "bg-green-50 text-green-700 border-green-200";
-      case "shipped":
-        return "bg-blue-50 text-blue-700 border-blue-200";
+  const getStatusIcon = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "pending":
+        return <FiClock className="text-neutral-45" size={14} />;
+      case "confirmed":
+        return <FiCheckCircle className="text-indigo-600" size={14} />;
       case "processing":
-        return "bg-yellow-50 text-yellow-700 border-yellow-200";
-      case "out for delivery":
-        return "bg-purple-50 text-purple-700 border-purple-200";
+        return <FiPackage className="text-yellow-600" size={14} />;
+      case "shipped":
+        return <FiTruck className="text-blue-600" size={14} />;
+      case "delivered":
+        return <FiCheckCircle className="text-green-600" size={14} />;
       case "cancelled":
-        return "bg-red-50 text-red-700 border-red-200";
+        return <FiXCircle className="text-red-600" size={14} />;
+      case "returned":
+        return <FiRotateCcw className="text-orange-600" size={14} />;
       default:
-        return "bg-neutral-20 text-neutral-45 border-neutral-50";
+        return <FiPackage className="text-neutral-45" size={14} />;
     }
   };
-
-  const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "delivered":
-        return <FiCheckCircle size={14} />;
-      case "shipped":
-        return <FiTruck size={14} />;
+  
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "pending":
+        return "bg-neutral-20 text-neutral-10 border-neutral-50";
+      case "confirmed":
+        return "bg-indigo-50 text-indigo-700 border-indigo-200";
       case "processing":
-        return <FiClock size={14} />;
-      case "out for delivery":
-        return <FiMapPin size={14} />;
+        return "bg-yellow-50 text-yellow-700 border-yellow-200";
+      case "shipped":
+        return "bg-blue-50 text-blue-700 border-blue-200";
+      case "delivered":
+        return "bg-green-50 text-green-700 border-green-200";
       case "cancelled":
-        return <FiXCircle size={14} />;
+        return "bg-red-50 text-red-700 border-red-200";
+      case "returned":
+        return "bg-orange-50 text-orange-700 border-orange-200";
       default:
-        return <FiPackage size={14} />;
+        return "bg-neutral-20 text-neutral-45 border-neutral-50";
     }
   };
 
@@ -68,15 +78,16 @@ const OrderTrackingData = ({ orderData, setOrderData }: any) => {
             <div className="flex flex-wrap items-center gap-3">
               <span
                 className={`text-xs px-3 py-1 rounded-full border flex items-center gap-1.5 font-semibold ${getStatusColor(
-                  orderData.status,
+                  orderData.orderStatus,
                 )}`}
               >
-                {getStatusIcon(orderData.status)}
-                {orderData.status}
+                {getStatusIcon(orderData.orderStatus)}
+                {orderData.orderStatus}
               </span>
               <span className="text-xs text-neutral-45 flex items-center gap-1">
                 <FiCalendar size={12} />
-                Expected: {orderData.expectedDelivery}
+                Expected: 
+                {/* {orderData.expectedDelivery} */}
               </span>
             </div>
           </div>
@@ -86,15 +97,15 @@ const OrderTrackingData = ({ orderData, setOrderData }: any) => {
               Total Amount
             </p>
             <p className="text-2xl font-bold text-neutral-10">
-              ₹{orderData.total}
+              ₹{orderData.totalAmount}
             </p>
-            <p className="text-xs text-neutral-45 mt-1">
+            {/* <p className="text-xs text-neutral-45 mt-1">
               {orderData.items} item{orderData.items > 1 ? "s" : ""}
-            </p>
+            </p> */}
           </div>
         </div>
 
-        <div className="mt-5 pt-5 border-t border-neutral-20">
+        {/* <div className="mt-5 pt-5 border-t border-neutral-20">
           <div className="flex items-center gap-2">
             <FiMapPin size={16} className="text-primary-10" />
             <div>
@@ -104,7 +115,7 @@ const OrderTrackingData = ({ orderData, setOrderData }: any) => {
               </p>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Tracking Timeline */}
@@ -118,7 +129,7 @@ const OrderTrackingData = ({ orderData, setOrderData }: any) => {
           <div className="absolute left-5 top-2 bottom-2 w-0.5 bg-neutral-20" />
 
           <div className="space-y-6">
-            {orderData.steps.map((step: any) => (
+            {orderData.timeline.map((step: any) => (
               <div key={step.id} className="relative flex gap-4">
                 <div
                   className={`
@@ -166,7 +177,7 @@ const OrderTrackingData = ({ orderData, setOrderData }: any) => {
                                         }
                                       `}
                     >
-                      {step.title}
+                      {step.step}
                       {step.status === "current" && (
                         <span className="ml-2 text-xs bg-primary-10/10 text-primary-10 px-2 py-0.5 rounded-full font-medium">
                           Current
@@ -175,7 +186,7 @@ const OrderTrackingData = ({ orderData, setOrderData }: any) => {
                     </h4>
                     <div className="flex items-center gap-1 text-xs text-neutral-45">
                       <FiClock size={11} />
-                      {step.date} • {step.time}
+                      {step.date ? formatDate(step.date) : "Pending"}
                     </div>
                   </div>
                   <p className="text-xs mt-1 text-neutral-45">
@@ -196,7 +207,7 @@ const OrderTrackingData = ({ orderData, setOrderData }: any) => {
             Shipping Address
           </h3>
           <p className="text-sm text-neutral-45 leading-relaxed">
-            {orderData.shippingAddress}
+            {orderData.shippingAddress.addressLine1}, {orderData.shippingAddress.city}, {orderData.shippingAddress.state}, {orderData.shippingAddress.zipCode}
           </p>
         </div>
 
@@ -207,15 +218,9 @@ const OrderTrackingData = ({ orderData, setOrderData }: any) => {
           </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-neutral-45">Tracking ID</span>
-              <span className="text-neutral-10 font-medium">
-                {orderData.trackingId}
-              </span>
-            </div>
-            <div className="flex justify-between">
               <span className="text-neutral-45">Courier</span>
               <span className="text-neutral-10 font-medium">
-                {orderData.courier}
+                {orderData.courier || "Not Available"}
               </span>
             </div>
             <div className="flex justify-between">
@@ -227,7 +232,7 @@ const OrderTrackingData = ({ orderData, setOrderData }: any) => {
             <div className="flex justify-between">
               <span className="text-neutral-45">Expected</span>
               <span className="text-neutral-10 font-medium">
-                {orderData.expectedDelivery}
+                {orderData.expectedDelivery || "Not Available"}
               </span>
             </div>
           </div>

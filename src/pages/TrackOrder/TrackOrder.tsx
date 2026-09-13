@@ -6,6 +6,8 @@ import Modal from "../../components/Reusable/Modal copy/Modal";
 import Login from "../../components/AuthComponents/Login/Login";
 import Signup from "../../components/AuthComponents/Signup/Signup";
 import { useSearchParams } from "react-router-dom";
+import toast from "react-hot-toast";
+import { useTrackOrderMutation } from "../../redux/Features/TrackOrder/trackOrderApi";
 
 // Types
 interface TrackingStep {
@@ -42,98 +44,77 @@ const TrackOrder = () => {
   const [searchParams] = useSearchParams();
 
   const orderIdParams = searchParams.get("orderId");
-  const email = searchParams.get("email");
-  const phoneNumber = searchParams.get("phoneNumber");
+  const emailParam = searchParams.get("email");
+  const phoneNumberParam = searchParams.get("phoneNumber");
+
+  const [trackOrder, { isLoading }] = useTrackOrderMutation();
 
   const [orderId, setOrderId] = useState<string>("");
   const [verifyMethod, setVerifyMethod] = useState<"email" | "phone">("email");
   const [verifyValue, setVerifyValue] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [orderData, setOrderData] = useState<OrderTrackingData | null>(null);
   const [error, setError] = useState<string>("");
-  const [hasSearched, setHasSearched] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (orderIdParams) {
-      setOrderId(orderIdParams);
-    }
-    if (email) {
-      setVerifyMethod("email");
-      setVerifyValue(email);
-    } else {
-      setVerifyMethod("phone");
-      setVerifyValue(phoneNumber);
-    }
-  }, [orderIdParams]);
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authModalType, setAuthModalType] = useState<"login" | "signup">(
     "login",
   );
 
-  // Mock tracking data
-  const mockOrderData: OrderTrackingData = {
-    orderId: "ORD-2024-001",
-    status: "Shipped",
-    orderDate: "12 Sep 2026",
-    expectedDelivery: "18 Sep 2026",
-    trackingId: "TRK123456789",
-    courier: "BlueDart Express",
-    paymentMethod: "Cash on Delivery",
-    total: 1359,
-    items: 2,
-    shippingAddress: "123 Main Street, Mumbai, Maharashtra 400001",
-    currentLocation: "Mumbai Sorting Center",
-    steps: [
-      {
-        id: 1,
-        title: "Order Placed",
-        description: "Your order has been placed successfully",
-        date: "12 Sep 2026",
-        time: "10:30 AM",
-        status: "completed",
-      },
-      {
-        id: 2,
-        title: "Order Confirmed",
-        description: "Seller has confirmed your order",
-        date: "12 Sep 2026",
-        time: "02:15 PM",
-        status: "completed",
-      },
-      {
-        id: 3,
-        title: "Packed & Ready",
-        description: "Your order has been packed and ready for shipment",
-        date: "14 Sep 2026",
-        time: "09:00 AM",
-        status: "completed",
-      },
-      {
-        id: 4,
-        title: "Shipped",
-        description: "Order has been shipped from the warehouse",
-        date: "15 Sep 2026",
-        time: "11:45 AM",
-        status: "current",
-      },
-      {
-        id: 5,
-        title: "Out for Delivery",
-        description: "Order is out for delivery",
-        date: "Expected 18 Sep",
-        time: "09:00 AM",
-        status: "pending",
-      },
-      {
-        id: 6,
-        title: "Delivered",
-        description: "Order will be delivered to your address",
-        date: "Expected 18 Sep",
-        time: "Before 6:00 PM",
-        status: "pending",
-      },
-    ],
+  // Prefill from URL params
+  useEffect(() => {
+    if (orderIdParams) {
+      setOrderId(orderIdParams);
+    }
+    if (emailParam) {
+      setVerifyMethod("email");
+      setVerifyValue(emailParam);
+    } else if (phoneNumberParam) {
+      setVerifyMethod("phone");
+      setVerifyValue(phoneNumberParam);
+    }
+  }, [orderIdParams, emailParam, phoneNumberParam]);
+
+  // Auto-trigger tracking if all params present
+  useEffect(() => {
+    if (orderIdParams && (emailParam || phoneNumberParam)) {
+      handleTrackOrderFromUrl(orderIdParams, emailParam, phoneNumberParam);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleTrackOrderFromUrl = async (
+    id: string,
+    email: string | null,
+    phoneNumber: string | null,
+  ) => {
+    setError("");
+    setOrderData(null);
+
+    const payload = {
+      orderId: id.trim().toUpperCase().replace("#", ""),
+      verifyWith: email ? "email" : "phoneNumber",
+      email: email || "",
+      phoneNumber: phoneNumber || "",
+    };
+
+    try {
+      const response = await trackOrder(payload).unwrap();
+      console.log(response);
+
+      if (response?.success) {
+        setOrderData(response?.data);
+      } else {
+        setError(
+          response?.message ||
+            "No order found with this information. Please check and try again.",
+        );
+      }
+    } catch (err: any) {
+      console.error("Track order error:", err);
+      const errorMessage =
+        "No order found with this information. Please check and try again.";
+      setError(errorMessage);
+    }
   };
 
   const handleTrackOrder = async (e: React.FormEvent) => {
@@ -155,25 +136,32 @@ const TrackOrder = () => {
       return;
     }
 
-    setIsLoading(true);
+    // Build payload
+    const payload = {
+      orderId: orderId.trim().toUpperCase().replace("#", ""),
+      verifyWith: verifyMethod === "email" ? "email" : "phoneNumber",
+      email: verifyMethod === "email" ? verifyValue.trim() : "",
+      phoneNumber: verifyMethod === "phone" ? verifyValue.trim() : "",
+    };
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const response = await trackOrder(payload).unwrap();
 
-      const normalizedInput = orderId.trim().toUpperCase().replace("#", "");
-      const normalizedMockId = mockOrderData.orderId.toUpperCase();
-
-      if (normalizedInput === normalizedMockId) {
-        setOrderData(mockOrderData);
+      if (response?.success) {
+        setOrderData(response?.data);
+        toast.success("Order found!");
       } else {
         setError(
-          "No order found with this information. Please check and try again.",
+          response?.message ||
+            "No order found with this information. Please check and try again.",
         );
       }
-    } catch (err) {
-      setError("Something went wrong. Please try again later.");
-    } finally {
-      setIsLoading(false);
+    } catch (err: any) {
+      console.error("Track order error:", err);
+      const errorMessage =
+        "No order found with this information. Please check and try again.";
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -212,15 +200,14 @@ const TrackOrder = () => {
                     onChange={(e) => {
                       setOrderId(e.target.value.toUpperCase());
                       setError("");
-                      setHasSearched(false);
                     }}
-                    placeholder="e.g. 1056 or #1056"
+                    placeholder="e.g. K-040926-00001"
                     className={`
-                  w-full px-4 py-3 border rounded-lg text-sm bg-white
-                  focus:outline-none focus:ring-2 focus:ring-primary-10 focus:border-transparent
-                  transition-all
-                  ${error && !orderId ? "border-red-300" : "border-neutral-50"}
-                `}
+                      w-full px-4 py-3 border rounded-lg text-sm bg-white
+                      focus:outline-none focus:ring-2 focus:ring-primary-10 focus:border-transparent
+                      transition-all
+                      ${error && !orderId ? "border-red-300" : "border-neutral-50"}
+                    `}
                   />
                 </div>
 
@@ -281,7 +268,6 @@ const TrackOrder = () => {
                       onChange={(e) => {
                         setVerifyValue(e.target.value);
                         setError("");
-                        setHasSearched(false);
                       }}
                       placeholder={
                         verifyMethod === "email"
@@ -289,15 +275,15 @@ const TrackOrder = () => {
                           : "+91 98765 43210"
                       }
                       className={`
-                    w-full pl-11 pr-4 py-3 border rounded-lg text-sm bg-white
-                    focus:outline-none focus:ring-2 focus:ring-primary-10 focus:border-transparent
-                    transition-all
-                    ${
-                      error && orderId && !verifyValue
-                        ? "border-red-300"
-                        : "border-neutral-50"
-                    }
-                  `}
+                        w-full pl-11 pr-4 py-3 border rounded-lg text-sm bg-white
+                        focus:outline-none focus:ring-2 focus:ring-primary-10 focus:border-transparent
+                        transition-all
+                        ${
+                          error && orderId && !verifyValue
+                            ? "border-red-300"
+                            : "border-neutral-50"
+                        }
+                      `}
                     />
                   </div>
                 </div>
@@ -307,12 +293,12 @@ const TrackOrder = () => {
                   type="submit"
                   disabled={isLoading}
                   className={`
-                w-full py-3.5 bg-primary-10 text-white rounded-lg 
-                text-sm font-semibold transition-all
-                hover:bg-neutral-10
-                disabled:opacity-60 disabled:cursor-not-allowed
-                flex items-center justify-center gap-2
-              `}
+                    w-full py-3.5 bg-primary-10 text-white rounded-lg 
+                    text-sm font-semibold transition-all
+                    hover:bg-neutral-10
+                    disabled:opacity-60 disabled:cursor-not-allowed
+                    flex items-center justify-center gap-2
+                  `}
                 >
                   {isLoading ? (
                     <>

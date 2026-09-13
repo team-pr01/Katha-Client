@@ -60,7 +60,9 @@ export const baseApi = createApi({
     "couponCode",
     "materials",
     "user",
-    "address"
+    "address",
+    "orders",
+    "trackOrder"
   ],
   endpoints: () => ({}),
 });

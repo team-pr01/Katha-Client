@@ -2,23 +2,24 @@ import { baseApi } from "../../Api/baseApi";
 
 const orderApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAllCouponCodes: builder.query({
-      query: ({ keyword, page }: { keyword?: string; page?: number }) => {
+    getAllOrders: builder.query({
+      query: ({ keyword, orderStatus, page }: { keyword?: string; orderStatus?: string; page?: number }) => {
         const params = new URLSearchParams();
 
         if (keyword) params.append("keyword", keyword);
+        if (orderStatus) params.append("orderStatus", orderStatus);
         if (page) params.append("page", page.toString());
 
         return {
-          url: `/coupon-code${params.toString() ? `?${params.toString()}` : ""}`,
+          url: `/order/my-orders${params.toString() ? `?${params.toString()}` : ""}`,
           method: "GET",
           credentials: "include",
         };
       },
-      providesTags: ["couponCode"],
+      providesTags: ["orders"],
     }),
-    
-    
+
+
     checkout: builder.mutation({
       query: (data) => ({
         url: "/order/checkout",
@@ -28,26 +29,7 @@ const orderApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["couponCode"],
     }),
-
-    deleteCouponCode: builder.mutation({
-      query: (id) => ({
-        url: `/coupon-code/delete/${id}`,
-        method: "DELETE",
-        credentials: "include",
-      }),
-      invalidatesTags: ["couponCode"],
-    }),
-
-    validateCouponCode: builder.mutation({
-      query: (data) => ({
-        url: `/coupon-code/validate`,
-        method: "POST",
-        body: data,
-        credentials: "include",
-      }),
-      invalidatesTags: ["couponCode"],
-    }),
   }),
 });
 
-export const { useGetAllCouponCodesQuery, useCheckoutMutation, useDeleteCouponCodeMutation, useValidateCouponCodeMutation } = orderApi;
+export const { useGetAllOrdersQuery, useCheckoutMutation } = orderApi;

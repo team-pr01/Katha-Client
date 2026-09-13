@@ -14,9 +14,11 @@ import {
   FiMapPin,
   FiCreditCard,
   FiBox,
-  FiEye,
+  FiRotateCcw,
 } from "react-icons/fi";
 import { Link } from "react-router-dom";
+import { useGetAllOrdersQuery } from "../../../redux/Features/Order/orderApi";
+import { formatDate } from "../../../utils/formatDate";
 
 // Types
 interface OrderItem {
@@ -46,6 +48,10 @@ const MyOrders = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("all");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+
+  const {data} = useGetAllOrdersQuery({});
+  console.log(data);
+  const myOrders = data?.data?.data || [];
 
   // Mock orders data - Replace with API data
   const orders: Order[] = [
@@ -166,48 +172,47 @@ const MyOrders = () => {
     },
   ];
 
-  // Filter orders based on tab and search
-  const filteredOrders = orders.filter((order) => {
-    const matchesTab =
-      activeTab === "all" ||
-      order.status.toLowerCase() === activeTab.toLowerCase();
-    const matchesSearch =
-      order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.items.some((item) =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-    return matchesTab && matchesSearch;
-  });
+const getStatusIcon = (status: string) => {
+  switch (status.toLowerCase()) {
+    case "pending":
+      return <FiClock className="text-neutral-45" size={14} />;
+    case "confirmed":
+      return <FiCheckCircle className="text-indigo-600" size={14} />;
+    case "processing":
+      return <FiPackage className="text-yellow-600" size={14} />;
+    case "shipped":
+      return <FiTruck className="text-blue-600" size={14} />;
+    case "delivered":
+      return <FiCheckCircle className="text-green-600" size={14} />;
+    case "cancelled":
+      return <FiXCircle className="text-red-600" size={14} />;
+    case "returned":
+      return <FiRotateCcw className="text-orange-600" size={14} />;
+    default:
+      return <FiPackage className="text-neutral-45" size={14} />;
+  }
+};
 
-  const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "delivered":
-        return <FiCheckCircle className="text-green-600" size={14} />;
-      case "shipped":
-        return <FiTruck className="text-blue-600" size={14} />;
-      case "processing":
-        return <FiClock className="text-yellow-600" size={14} />;
-      case "cancelled":
-        return <FiXCircle className="text-red-600" size={14} />;
-      default:
-        return <FiPackage className="text-neutral-45" size={14} />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "delivered":
-        return "bg-green-50 text-green-700 border-green-200";
-      case "shipped":
-        return "bg-blue-50 text-blue-700 border-blue-200";
-      case "processing":
-        return "bg-yellow-50 text-yellow-700 border-yellow-200";
-      case "cancelled":
-        return "bg-red-50 text-red-700 border-red-200";
-      default:
-        return "bg-neutral-20 text-neutral-45 border-neutral-50";
-    }
-  };
+const getStatusColor = (status: string) => {
+  switch (status.toLowerCase()) {
+    case "pending":
+      return "bg-neutral-20 text-neutral-10 border-neutral-50";
+    case "confirmed":
+      return "bg-indigo-50 text-indigo-700 border-indigo-200";
+    case "processing":
+      return "bg-yellow-50 text-yellow-700 border-yellow-200";
+    case "shipped":
+      return "bg-blue-50 text-blue-700 border-blue-200";
+    case "delivered":
+      return "bg-green-50 text-green-700 border-green-200";
+    case "cancelled":
+      return "bg-red-50 text-red-700 border-red-200";
+    case "returned":
+      return "bg-orange-50 text-orange-700 border-orange-200";
+    default:
+      return "bg-neutral-20 text-neutral-45 border-neutral-50";
+  }
+};
 
   const toggleOrderExpand = (orderId: string) => {
     setExpandedOrder(expandedOrder === orderId ? null : orderId);
@@ -278,7 +283,7 @@ const MyOrders = () => {
       </div>
 
       {/* Orders List */}
-      {filteredOrders.length === 0 ? (
+      {myOrders?.length === 0 ? (
         <div className="bg-white rounded-2xl shadow-sm p-8 md:p-12 text-center">
           <div className="max-w-md mx-auto">
             <div className="w-24 h-24 rounded-full bg-neutral-20 flex items-center justify-center mx-auto mb-6">
@@ -303,12 +308,12 @@ const MyOrders = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredOrders.map((order) => {
+          {myOrders?.map((order:any) => {
             const isExpanded = expandedOrder === order.id;
 
             return (
               <div
-                key={order.id}
+                key={order.orderId}
                 className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
               >
                 {/* Order Header */}
@@ -318,28 +323,28 @@ const MyOrders = () => {
                     <div className="flex-1">
                       <div className="flex flex-wrap items-center gap-3">
                         <h3 className="text-base font-semibold text-neutral-10">
-                          #{order.id}
+                          #{order.orderId}
                         </h3>
                         <span
                           className={`
                             text-xs px-2.5 py-1 rounded-full border
-                            flex items-center gap-1.5 font-medium
-                            ${getStatusColor(order.status)}
+                            flex items-center gap-1.5 font-medium capitalize
+                            ${getStatusColor(order.orderStatus)}
                           `}
                         >
-                          {getStatusIcon(order.status)}
-                          {order.status}
+                          {getStatusIcon(order.orderStatus)}
+                          {order.orderStatus}
                         </span>
                       </div>
                       <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-neutral-45">
                         <span className="flex items-center gap-1.5">
                           <FiCalendar size={12} className="text-primary-10" />
-                          Ordered on {order.date}
+                          Ordered on {formatDate(order.createdAt)}
                         </span>
                         <span className="flex items-center gap-1.5">
                           <FiBox size={12} className="text-primary-10" />
-                          {order.items.length} item
-                          {order.items.length > 1 ? "s" : ""}
+                          {order.orderedItems?.length} item
+                          {order.orderedItems?.length > 1 ? "s" : ""}
                         </span>
                         <span className="flex items-center gap-1.5">
                           <FiCreditCard size={12} className="text-primary-10" />
@@ -353,7 +358,7 @@ const MyOrders = () => {
                       <div className="text-right">
                         <p className="text-xs text-neutral-45">Total Amount</p>
                         <p className="text-lg font-bold text-neutral-10">
-                          ₹{order.total}
+                          ₹{order.totalAmount}
                         </p>
                       </div>
                       <button
@@ -379,19 +384,19 @@ const MyOrders = () => {
                   {!isExpanded && (
                     <div className="flex items-center gap-3 mt-4 pt-4 border-t border-neutral-20">
                       <div className="flex -space-x-3">
-                        {order.items.slice(0, 3).map((item, index) => (
+                        {order.orderedItems.slice(0, 3).map((item:any, index:number) => (
                           <img
                             key={index}
-                            src={item.image}
+                            src={item.variant.images[0]}
                             alt={item.name}
                             className="w-12 h-12 rounded-lg object-cover border-2 border-white bg-neutral-20"
                           />
                         ))}
                       </div>
                       <p className="text-sm text-neutral-45 flex-1 truncate">
-                        {order.items[0].name}
-                        {order.items.length > 1 &&
-                          ` +${order.items.length - 1} more`}
+                        {order.orderedItems[0].variant.name }
+                        {order.orderedItems?.length > 1 &&
+                          ` +${order.orderedItems?.length - 1} more`}
                       </p>
                     </div>
                   )}
@@ -407,32 +412,32 @@ const MyOrders = () => {
                         Order Items
                       </h4>
                       <div className="space-y-3">
-                        {order.items.map((item) => (
+                        {order.orderedItems?.map((item:any) => (
                           <div
                             key={item.id}
                             className="flex items-center gap-4 bg-white rounded-xl p-3"
                           >
                             <img
-                              src={item.image}
-                              alt={item.name}
+                              src={item.variant.images[0]}
+                              alt={item.variant.name}
                               className="w-16 h-16 rounded-lg object-cover bg-neutral-20"
                             />
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-neutral-10 line-clamp-1">
-                                {item.name}
+                                {item.variant.name}
                               </p>
                               <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-neutral-45">
-                                {item.size && <span>Size: {item.size}</span>}
-                                {item.color && <span>Color: {item.color}</span>}
+                                {item.variant.size && <span>Size: {item.variant.size}</span>}
+                                {item.variant.color && <span>Color: {item.variant.color}</span>}
                                 <span>Qty: {item.quantity}</span>
                               </div>
                             </div>
                             <div className="text-right">
                               <p className="text-sm font-bold text-neutral-10">
-                                ₹{item.price * item.quantity}
+                                ₹{item.variant.discountedPrice * item.quantity}
                               </p>
                               <p className="text-xs text-neutral-45">
-                                ₹{item.price} each
+                                {/* ₹{item.price} each */}
                               </p>
                             </div>
                           </div>
@@ -449,7 +454,7 @@ const MyOrders = () => {
                           Shipping Address
                         </h4>
                         <p className="text-sm text-neutral-45 leading-relaxed">
-                          {order.address}
+                          {order.shippingAddress.addressLine1}, {order.shippingAddress.addressLine2}, {order.shippingAddress.city}, {order.shippingAddress.state}, {order.shippingAddress.pincode}
                         </p>
                       </div>
 
@@ -460,13 +465,13 @@ const MyOrders = () => {
                           Delivery Information
                         </h4>
                         <div className="space-y-1.5 text-sm">
-                          {order.trackingId && (
+                          {order.orderId && (
                             <div className="flex justify-between">
                               <span className="text-neutral-45">
                                 Tracking ID:
                               </span>
                               <span className="text-neutral-10 font-medium">
-                                {order.trackingId}
+                                {order.orderId}
                               </span>
                             </div>
                           )}
@@ -485,18 +490,18 @@ const MyOrders = () => {
                           <div className="flex justify-between">
                             <span className="text-neutral-45">Status:</span>
                             <span
-                              className={`font-medium flex items-center gap-1 ${
-                                order.status === "Delivered"
+                              className={`font-medium flex items-center gap-1 capitalize ${
+                                order.orderStatus === "Delivered"
                                   ? "text-green-600"
-                                  : order.status === "Shipped"
+                                  : order.orderStatus === "Shipped"
                                     ? "text-blue-600"
-                                    : order.status === "Processing"
+                                    : order.orderStatus === "Processing"
                                       ? "text-yellow-600"
                                       : "text-red-600"
                               }`}
                             >
-                              {getStatusIcon(order.status)}
-                              {order.status}
+                              {getStatusIcon(order.orderStatus)}
+                              {order.orderStatus}
                             </span>
                           </div>
                         </div>
