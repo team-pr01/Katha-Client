@@ -1,5 +1,5 @@
 import { FiAlertTriangle, FiTrash2 } from "react-icons/fi";
-import Modal from "../Modal copy/Modal";
+import Modal from "../Modal/Modal";
 
 interface DeleteConfirmationModalProps {
   isModalOpen: boolean;

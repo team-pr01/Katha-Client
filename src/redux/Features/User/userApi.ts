@@ -13,14 +13,14 @@ const userApi = baseApi.injectEndpoints({
       providesTags: ["user"],
     }),
 
-    addCouponCode: builder.mutation({
+    updateProfile: builder.mutation({
       query: (data) => ({
-        url: "/coupon-code/add",
-        method: "POST",
+        url: "/user/update-profile",
+        method: "PATCH",
         body: data,
         credentials: "include",
       }),
-      invalidatesTags: ["couponCode"],
+      invalidatesTags: ["user"],
     }),
 
     deleteCouponCode: builder.mutation({
@@ -44,4 +44,4 @@ const userApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetStatsQuery, useAddCouponCodeMutation, useDeleteCouponCodeMutation, useValidateCouponCodeMutation } = userApi;
+export const { useGetStatsQuery, useUpdateProfileMutation, useDeleteCouponCodeMutation, useValidateCouponCodeMutation } = userApi;

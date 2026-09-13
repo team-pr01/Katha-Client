@@ -3,6 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import { FiGrid, FiPackage, FiMapPin, FiLogOut, FiTruck } from "react-icons/fi";
 import { ICONS, IMAGES } from "../../../assets";
 import { FaAngleDown } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { useCurrentUser } from "../../../redux/Features/Auth/authSlice";
 
 interface UserDropdownProps {
   userName?: string;
@@ -10,9 +12,11 @@ interface UserDropdownProps {
 }
 
 const UserDropdown = ({
+  
   userName = "Rahul S...",
   userImage = IMAGES.babyShower,
 }: UserDropdownProps) => {
+  const user = useSelector(useCurrentUser);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
@@ -91,7 +95,7 @@ const UserDropdown = ({
             className="w-full h-full object-cover rounded-full"
           />
         </div>
-        <span className="font-medium">{userName}</span>
+        <span className="font-medium">{user?.name?.slice(0, 9).concat("...")}</span>
         <img
           src={ICONS.arrowRight}
           alt=""
@@ -129,10 +133,10 @@ const UserDropdown = ({
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="text-sm font-semibold text-neutral-10 truncate">
-                Rahul Sharma
+                {user?.name}
               </h3>
               <p className="text-xs text-neutral-45 truncate">
-                rahul@example.com
+                {user?.email || user?.phoneNumber} 
               </p>
             </div>
           </div>

@@ -4,7 +4,7 @@ import Container from "../../Reusable/Container/Container";
 import Button from "../../Reusable/Button/Button";
 import Login from "../../AuthComponents/Login/Login";
 import { useState, useEffect, useRef } from "react";
-import Modal from "../../Reusable/Modal copy/Modal";
+import Modal from "../../Reusable/Modal/Modal";
 import Signup from "../../AuthComponents/Signup/Signup";
 import { useCart } from "../../../providers/CartProvider/CartProvider";
 import UserDropdown from "./UserDropdown";
@@ -56,10 +56,10 @@ const Navbar = () => {
       label: "Personalized Orders",
       path: "/personalized-orders",
     },
-    {
-      label: "Order In Bulk",
-      path: "/bulk-orders",
-    },
+    // {
+    //   label: "Order In Bulk",
+    //   path: "/bulk-orders",
+    // },
     {
       label: "Track Order",
       path: "/track-order",

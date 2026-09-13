@@ -10,14 +10,17 @@ import {
   FiClock,
   FiCheckCircle,
   FiTruck,
-  FiCamera,
 } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { useGetStatsQuery } from "../../../redux/Features/User/userApi";
 import { formatDate } from "../../../utils/formatDate";
+import EditProfile from "../../../components/DashboardComponents/DashboardHomePage/EditProfile/EditProfile";
+import { useState } from "react";
+import DashboardHomeSkeletonLoader from "../../../components/Loaders/DashboardHomeSkeletonLoader/DashboardHomeSkeletonLoader";
 
 const DashboardHome = () => {
-  const { data } = useGetStatsQuery({});
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const { data, isLoading, isFetching } = useGetStatsQuery({});
   const stats = data?.data || {};
   const user = stats?.user || {};
   const deliveryAddress = stats?.deliveryAddress || {};
@@ -50,27 +53,26 @@ const DashboardHome = () => {
     }
   };
 
+  if (isLoading || isFetching) {
+    return <DashboardHomeSkeletonLoader />;
+  }
+
   return (
     <div className="space-y-6 font-Manrope">
       {/* Profile Card */}
       <div className="bg-white rounded-2xl shadow-sm p-6">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
           {/* Avatar */}
-          <div className="relative">
-            <div className="w-24 h-24 rounded-full bg-primary-10/10 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
-              {user.avatar ? (
-                <img
-                  src={user.profilePicture}
-                  alt={user.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <FiUser className="text-primary-10" size={40} />
-              )}
-            </div>
-            <button className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary-10 text-white flex items-center justify-center hover:bg-[#d4892a] transition-colors shadow-md">
-              <FiCamera size={14} />
-            </button>
+          <div className="size-24 rounded-full bg-primary-10/10 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
+            {user?.profilePicture ? (
+              <img
+                src={user?.profilePicture}
+                alt={user?.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <FiUser className="text-primary-10" size={40} />
+            )}
           </div>
 
           {/* User Info */}
@@ -78,40 +80,40 @@ const DashboardHome = () => {
             <div className="flex items-start justify-between">
               <div>
                 <h2 className="text-xl font-bold text-neutral-10">
-                  {user.name}
+                  {user?.name}
                 </h2>
                 <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-neutral-45">
                   <span className="flex items-center gap-1.5">
                     <FiMail size={14} className="text-primary-10" />
-                    {user.email}
+                    {user?.email || "N/A"}
                   </span>
                   <span className="flex items-center gap-1.5">
                     <FiPhone size={14} className="text-primary-10" />
-                    {user.phoneNumber}
+                    {user?.phoneNumber}
                   </span>
                   <span className="flex items-center gap-1.5">
                     <FiCalendar size={14} className="text-primary-10" />
-                    Member since {formatDate(user.memberSince)}
+                    Member since {formatDate(user?.memberSince)}
                   </span>
                 </div>
               </div>
-              <Link
-                to="/dashboard/edit-profile"
+              <button
+                onClick={() => setIsEditModalOpen(true)}
                 className="hidden md:flex items-center gap-2 px-4 py-2 border-2 border-primary-10 text-primary-10 rounded-xl text-sm font-medium hover:bg-primary-10 hover:text-white transition-all"
               >
                 <FiEdit2 size={14} />
                 Edit Profile
-              </Link>
+              </button>
             </div>
 
             {/* Mobile Edit Button */}
-            <Link
-              to="/dashboard/edit-profile"
+            <button
+              onClick={() => setIsEditModalOpen(true)}
               className="md:hidden flex items-center justify-center gap-2 mt-4 px-4 py-2 border-2 border-primary-10 text-primary-10 rounded-xl text-sm font-medium hover:bg-primary-10 hover:text-white transition-all w-full"
             >
               <FiEdit2 size={14} />
               Edit Profile
-            </Link>
+            </button>
           </div>
         </div>
       </div>
@@ -303,23 +305,16 @@ const DashboardHome = () => {
                   className="text-neutral-45 group-hover:text-primary-10 group-hover:translate-x-0.5 transition-all"
                 />
               </Link>
-              <Link
-                to="/dashboard/edit-profile"
-                className="flex items-center justify-between p-2.5 rounded-lg hover:bg-neutral-20 transition-colors group"
-              >
-                <span className="flex items-center gap-2 text-sm text-neutral-10">
-                  <FiUser size={16} className="text-primary-10" />
-                  Edit Profile
-                </span>
-                <FiChevronRight
-                  size={16}
-                  className="text-neutral-45 group-hover:text-primary-10 group-hover:translate-x-0.5 transition-all"
-                />
-              </Link>
             </div>
           </div>
         </div>
       </div>
+
+      <EditProfile
+        isModalOpen={isEditModalOpen}
+        setIsModalOpen={setIsEditModalOpen}
+        userData={user}
+      />
     </div>
   );
 };

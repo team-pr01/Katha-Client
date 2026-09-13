@@ -7,7 +7,9 @@ const orderApi = baseApi.injectEndpoints({
         const params = new URLSearchParams();
 
         if (keyword) params.append("keyword", keyword);
-        if (orderStatus) params.append("orderStatus", orderStatus);
+        if (orderStatus) {
+          orderStatus === "all" ? params.append("orderStatus", "") : params.append("orderStatus", orderStatus);
+        }
         if (page) params.append("page", page.toString());
 
         return {

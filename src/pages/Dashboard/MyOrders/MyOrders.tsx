@@ -19,6 +19,7 @@ import {
 import { Link } from "react-router-dom";
 import { useGetAllOrdersQuery } from "../../../redux/Features/Order/orderApi";
 import { formatDate } from "../../../utils/formatDate";
+import MyOrdersSkeletonLoader from "../../../components/Loaders/MyOrdersSkeletonLoader/MyOrdersSkeletonLoader";
 
 // Types
 interface OrderItem {
@@ -49,8 +50,9 @@ const MyOrders = () => {
   const [activeTab, setActiveTab] = useState<string>("all");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
-  const {data} = useGetAllOrdersQuery({});
-  console.log(data);
+  const { data, isLoading, isFetching } = useGetAllOrdersQuery({
+    orderStatus: activeTab,
+  });
   const myOrders = data?.data?.data || [];
 
   // Mock orders data - Replace with API data
@@ -172,47 +174,47 @@ const MyOrders = () => {
     },
   ];
 
-const getStatusIcon = (status: string) => {
-  switch (status.toLowerCase()) {
-    case "pending":
-      return <FiClock className="text-neutral-45" size={14} />;
-    case "confirmed":
-      return <FiCheckCircle className="text-indigo-600" size={14} />;
-    case "processing":
-      return <FiPackage className="text-yellow-600" size={14} />;
-    case "shipped":
-      return <FiTruck className="text-blue-600" size={14} />;
-    case "delivered":
-      return <FiCheckCircle className="text-green-600" size={14} />;
-    case "cancelled":
-      return <FiXCircle className="text-red-600" size={14} />;
-    case "returned":
-      return <FiRotateCcw className="text-orange-600" size={14} />;
-    default:
-      return <FiPackage className="text-neutral-45" size={14} />;
-  }
-};
+  const getStatusIcon = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return <FiClock className="text-neutral-45" size={14} />;
+      case "confirmed":
+        return <FiCheckCircle className="text-indigo-600" size={14} />;
+      case "processing":
+        return <FiPackage className="text-yellow-600" size={14} />;
+      case "shipped":
+        return <FiTruck className="text-blue-600" size={14} />;
+      case "delivered":
+        return <FiCheckCircle className="text-green-600" size={14} />;
+      case "cancelled":
+        return <FiXCircle className="text-red-600" size={14} />;
+      case "returned":
+        return <FiRotateCcw className="text-orange-600" size={14} />;
+      default:
+        return <FiPackage className="text-neutral-45" size={14} />;
+    }
+  };
 
-const getStatusColor = (status: string) => {
-  switch (status.toLowerCase()) {
-    case "pending":
-      return "bg-neutral-20 text-neutral-10 border-neutral-50";
-    case "confirmed":
-      return "bg-indigo-50 text-indigo-700 border-indigo-200";
-    case "processing":
-      return "bg-yellow-50 text-yellow-700 border-yellow-200";
-    case "shipped":
-      return "bg-blue-50 text-blue-700 border-blue-200";
-    case "delivered":
-      return "bg-green-50 text-green-700 border-green-200";
-    case "cancelled":
-      return "bg-red-50 text-red-700 border-red-200";
-    case "returned":
-      return "bg-orange-50 text-orange-700 border-orange-200";
-    default:
-      return "bg-neutral-20 text-neutral-45 border-neutral-50";
-  }
-};
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return "bg-neutral-20 text-neutral-10 border-neutral-50";
+      case "confirmed":
+        return "bg-indigo-50 text-indigo-700 border-indigo-200";
+      case "processing":
+        return "bg-yellow-50 text-yellow-700 border-yellow-200";
+      case "shipped":
+        return "bg-blue-50 text-blue-700 border-blue-200";
+      case "delivered":
+        return "bg-green-50 text-green-700 border-green-200";
+      case "cancelled":
+        return "bg-red-50 text-red-700 border-red-200";
+      case "returned":
+        return "bg-orange-50 text-orange-700 border-orange-200";
+      default:
+        return "bg-neutral-20 text-neutral-45 border-neutral-50";
+    }
+  };
 
   const toggleOrderExpand = (orderId: string) => {
     setExpandedOrder(expandedOrder === orderId ? null : orderId);
@@ -265,7 +267,7 @@ const getStatusColor = (status: string) => {
               `}
             >
               {tab.label}
-              <span
+              {/* <span
                 className={`
                   text-xs px-2 py-0.5 rounded-full
                   ${
@@ -276,14 +278,16 @@ const getStatusColor = (status: string) => {
                 `}
               >
                 {tab.count}
-              </span>
+              </span> */}
             </button>
           ))}
         </div>
       </div>
 
       {/* Orders List */}
-      {myOrders?.length === 0 ? (
+      {isLoading || isFetching ? (
+        <MyOrdersSkeletonLoader />
+      ) : myOrders?.length === 0 ? (
         <div className="bg-white rounded-2xl shadow-sm p-8 md:p-12 text-center">
           <div className="max-w-md mx-auto">
             <div className="w-24 h-24 rounded-full bg-neutral-20 flex items-center justify-center mx-auto mb-6">
@@ -308,7 +312,7 @@ const getStatusColor = (status: string) => {
         </div>
       ) : (
         <div className="space-y-4">
-          {myOrders?.map((order:any) => {
+          {myOrders?.map((order: any) => {
             const isExpanded = expandedOrder === order.id;
 
             return (
@@ -384,17 +388,19 @@ const getStatusColor = (status: string) => {
                   {!isExpanded && (
                     <div className="flex items-center gap-3 mt-4 pt-4 border-t border-neutral-20">
                       <div className="flex -space-x-3">
-                        {order.orderedItems.slice(0, 3).map((item:any, index:number) => (
-                          <img
-                            key={index}
-                            src={item.variant.images[0]}
-                            alt={item.name}
-                            className="w-12 h-12 rounded-lg object-cover border-2 border-white bg-neutral-20"
-                          />
-                        ))}
+                        {order.orderedItems
+                          .slice(0, 3)
+                          .map((item: any, index: number) => (
+                            <img
+                              key={index}
+                              src={item.variant.images[0]}
+                              alt={item.name}
+                              className="w-12 h-12 rounded-lg object-cover border-2 border-white bg-neutral-20"
+                            />
+                          ))}
                       </div>
                       <p className="text-sm text-neutral-45 flex-1 truncate">
-                        {order.orderedItems[0].variant.name }
+                        {order.orderedItems[0].variant.name}
                         {order.orderedItems?.length > 1 &&
                           ` +${order.orderedItems?.length - 1} more`}
                       </p>
@@ -412,7 +418,7 @@ const getStatusColor = (status: string) => {
                         Order Items
                       </h4>
                       <div className="space-y-3">
-                        {order.orderedItems?.map((item:any) => (
+                        {order.orderedItems?.map((item: any) => (
                           <div
                             key={item.id}
                             className="flex items-center gap-4 bg-white rounded-xl p-3"
@@ -427,8 +433,12 @@ const getStatusColor = (status: string) => {
                                 {item.variant.name}
                               </p>
                               <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-neutral-45">
-                                {item.variant.size && <span>Size: {item.variant.size}</span>}
-                                {item.variant.color && <span>Color: {item.variant.color}</span>}
+                                {item.variant.size && (
+                                  <span>Size: {item.variant.size}</span>
+                                )}
+                                {item.variant.color && (
+                                  <span>Color: {item.variant.color}</span>
+                                )}
                                 <span>Qty: {item.quantity}</span>
                               </div>
                             </div>
@@ -454,7 +464,11 @@ const getStatusColor = (status: string) => {
                           Shipping Address
                         </h4>
                         <p className="text-sm text-neutral-45 leading-relaxed">
-                          {order.shippingAddress.addressLine1}, {order.shippingAddress.addressLine2}, {order.shippingAddress.city}, {order.shippingAddress.state}, {order.shippingAddress.pincode}
+                          {order.shippingAddress.addressLine1},{" "}
+                          {order.shippingAddress.addressLine2},{" "}
+                          {order.shippingAddress.city},{" "}
+                          {order.shippingAddress.state},{" "}
+                          {order.shippingAddress.pincode}
                         </p>
                       </div>
 

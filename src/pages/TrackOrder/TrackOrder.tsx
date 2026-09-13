@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FiAlertCircle, FiMail, FiPhone } from "react-icons/fi";
 import { BsWhatsapp } from "react-icons/bs";
 import OrderTrackingData from "../OrderTrackingData/OrderTrackingData";
-import Modal from "../../components/Reusable/Modal copy/Modal";
+import Modal from "../../components/Reusable/Modal/Modal";
 import Login from "../../components/AuthComponents/Login/Login";
 import Signup from "../../components/AuthComponents/Signup/Signup";
 import { useSearchParams } from "react-router-dom";

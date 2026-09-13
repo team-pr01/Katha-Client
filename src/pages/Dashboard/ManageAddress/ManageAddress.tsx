@@ -10,10 +10,11 @@ import {
   FiCheck,
   FiMail,
 } from "react-icons/fi";
-import Modal from "../../../components/Reusable/Modal copy/Modal";
+import Modal from "../../../components/Reusable/Modal/Modal";
 import AddOrEditAddress from "../../../components/DashboardComponents/ManageAddressPage/AddOrEditAddress/AddOrEditAddress";
 import { useDeleteAddressMutation, useGetMyAddressQuery } from "../../../redux/Features/Address/addressApi";
 import DeleteConfirmationModal from "../../../components/Reusable/DeleteConfirmationModal/DeleteConfirmationModal";
+import ManageAddressSkeletonLoader from "../../../components/Loaders/ManageAddressSkeletonLoader/ManageAddressSkeletonLoader";
 
 // Types
 export interface TAddress {
@@ -31,7 +32,7 @@ export interface TAddress {
 
 const ManageAddress = () => {
   const [deleteAddress, {isLoading}] = useDeleteAddressMutation();
-  const { data, refetch } = useGetMyAddressQuery({});
+  const { data, refetch, isLoading:isAddressLoading, isFetching } = useGetMyAddressQuery({});
   const address = data?.data || {};
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -58,6 +59,10 @@ const ManageAddress = () => {
       console.error("Error deleting address:", error);
     }
   };
+
+  if (isAddressLoading || isFetching) {
+      return <ManageAddressSkeletonLoader />;
+    }
 
   return (
     <div className="space-y-6 font-Manrope">
