@@ -161,7 +161,7 @@ const Navbar = () => {
     <div className="bg-white shadow-navbar font-Manrope py-4 sticky top-0 z-99">
       <Container>
         <div className="flex items-center justify-between bg-white">
-          <img src={IMAGES.logo} alt="Logo" className="w-40" />
+          <Link to="/"><img src={IMAGES.logo} alt="Logo" className="w-40" /></Link>
 
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-4">

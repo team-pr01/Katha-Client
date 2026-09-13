@@ -12,6 +12,8 @@ import Button from "../../Reusable/Button/Button";
 import Container from "../../Reusable/Container/Container";
 import { useGetAllOccasionsQuery } from "../../../redux/Features/Occation/occasionApi";
 import type { TOccasion } from "../../../types/occasion.type";
+import { Link } from "react-router-dom";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 const ShopByOccasion = () => {
   const { data } = useGetAllOccasionsQuery({});
@@ -21,15 +23,55 @@ const ShopByOccasion = () => {
   return (
     <Container>
       <div className="py-16 font-Manrope">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 md:mb-16">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="w-8 h-px bg-neutral-10" />
+              <span className="text-[11px] tracking-[0.3em] uppercase text-neutral-10 font-medium">
+                Shop by Occasion
+              </span>
+            </div>
+            <h2 className="text-6xl font-bold text-neutral-10 leading-[0.95] tracking-tight">
+              Gifts for
+              <span className="block italic font-light text-primary-10">
+                every moment
+              </span>
+            </h2>
+          </div>
+
+          <div className="flex flex-col items-start md:items-end gap-4">
+            <p className="text-sm text-neutral-45 max-w-xs md:text-right">
+              Find the perfect gift for life's most cherished celebrations.
+            </p>
+
+            {/* Scroll Buttons */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => swiperRef.current?.slidePrev()}
+                className={`w-12 h-12 rounded-full border flex items-center justify-center transition-all duration-300
+                         border-neutral-10 text-neutral-10 hover:bg-neutral-10 hover:text-white`}
+                aria-label="Scroll left"
+              >
+                <FiChevronLeft size={20} />
+              </button>
+              <button
+                onClick={() => swiperRef.current?.slideNext()}
+                className={`w-12 h-12 rounded-full border flex items-center justify-center transition-all duration-300
+                         border-primary-10 text-primary-10 hover:bg-primary-10 hover:text-white`}
+                aria-label="Scroll right"
+              >
+                <FiChevronRight size={20} />
+              </button>
+            </div>
+          </div>
+        </div>
         {/* Header */}
-        <div className="flex items-center justify-between">
+        {/* <div className="flex items-center justify-between">
           <h2 className="text-3xl font-bold text-neutral-5">
             Shop by Occasion
           </h2>
 
-          {/* Navigation */}
           <div className="flex items-center gap-3">
-            {/* Previous */}
             <button
               type="button"
               onClick={() => swiperRef.current?.slidePrev()}
@@ -42,7 +84,6 @@ const ShopByOccasion = () => {
               />
             </button>
 
-            {/* Next */}
             <button
               type="button"
               onClick={() => swiperRef.current?.slideNext()}
@@ -51,7 +92,7 @@ const ShopByOccasion = () => {
               <img src={ICONS.arrowRightWhite} alt="Next" className="size-5" />
             </button>
           </div>
-        </div>
+        </div> */}
 
         {/* Carousel */}
         <div className="mt-6">
@@ -113,7 +154,9 @@ const ShopByOccasion = () => {
                       </p>
                     </div>
 
-                    <Button label="View" />
+                    <Link to={`/products?occasion=${occasion?.name}`}>
+                      <Button label="View" />
+                    </Link>
                   </div>
                 </div>
               </SwiperSlide>

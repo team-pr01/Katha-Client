@@ -16,9 +16,11 @@ interface SortOption {
 
 const Products: React.FC = () => {
   const navigate = useNavigate();
-const location = useLocation();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
-    const query = searchParams.get('query');
+  const query = searchParams.get("query");
+  const occasion = searchParams.get("occasion");
+  const category = searchParams.get("category");
   // Filter states
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
   const [selectedSubOccasions, setSelectedSubOccasions] = useState<string[]>(
@@ -37,10 +39,12 @@ const location = useLocation();
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<string>("latest");
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>(query || '');
+  const [searchQuery, setSearchQuery] = useState<string>(query || "");
 
   useEffect(() => {
-    setSearchQuery(query || '');
+    setSearchQuery(query || "");
+    setSelectedOccasions(occasion ? [occasion] : []);
+    setSelectedCategories(category ? [category] : []);
   }, [query]);
 
   const sortOptions: SortOption[] = [
@@ -57,7 +61,7 @@ const location = useLocation();
     occasionNames: selectedOccasions,
     subOccasionNames: selectedSubOccasions,
     material: selectedMaterials,
-    colors : selectedColors,
+    colors: selectedColors,
     keyword: searchQuery,
     minPrice: minPrice as any,
     maxPrice: maxPrice as any,
@@ -83,7 +87,7 @@ const location = useLocation();
   const clearAllFilters = (): void => {
     setSelectedCategories([]);
     setSelectedSubCategories([]);
-    setSearchQuery('');
+    setSearchQuery("");
     setSelectedOccasions([]);
     setSelectedSubOccasions([]);
     setMinPrice("");
