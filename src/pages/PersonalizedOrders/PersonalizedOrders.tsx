@@ -18,7 +18,6 @@ const PersonalizedOrders: React.FC = () => {
     recipientRelation: "",
     giftFor: "",
     ageGroup: "",
-    interests: [],
     budget: "",
     deliveryDate: "",
     specialRequests: "",
@@ -38,15 +37,6 @@ const PersonalizedOrders: React.FC = () => {
 
   const handleInputChange = (field: keyof any, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleInterestToggle = (interestId: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      interests: prev.interests.includes(interestId)
-        ? prev.interests.filter((id) => id !== interestId)
-        : [...prev.interests, interestId],
-    }));
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,7 +81,7 @@ const PersonalizedOrders: React.FC = () => {
       case 1:
         return !!formData.occasion && !!formData.recipientName;
       case 2:
-        return !!formData.budget && formData.interests.length > 0;
+        return !!formData.recipientRelation && !!formData.giftFor;
       case 3:
         return !!formData.deliveryDate;
       case 4:
@@ -189,7 +179,6 @@ const PersonalizedOrders: React.FC = () => {
                 <StepPreferences
                   formData={formData}
                   onChange={handleInputChange}
-                  onInterestToggle={handleInterestToggle}
                 />
               )}
 
@@ -230,7 +219,7 @@ const PersonalizedOrders: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleNextStep}
-                      disabled={!isStepComplete(currentStep)}
+                      // disabled={!isStepComplete(currentStep)}
                       className={`
                         px-6 py-2.5 rounded-lg font-medium transition-all flex items-center gap-2
                         ${

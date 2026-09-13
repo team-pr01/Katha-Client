@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { BsWhatsapp } from "react-icons/bs";
 import {
   FiPackage,
   FiChevronRight,
@@ -29,6 +30,7 @@ interface OrderItem {
 }
 
 interface Order {
+  orderId: string;
   id: string;
   date: string;
   status: "Delivered" | "Shipped" | "Processing" | "Cancelled";
@@ -48,6 +50,7 @@ const MyOrders = () => {
   // Mock orders data - Replace with API data
   const orders: Order[] = [
     {
+      orderId: "ORD-2024-001",
       id: "ORD-2024-001",
       date: "12 Sep 2026",
       status: "Delivered",
@@ -78,6 +81,7 @@ const MyOrders = () => {
       ],
     },
     {
+      orderId: "ORD-2024-002",
       id: "ORD-2024-002",
       date: "05 Sep 2026",
       status: "Shipped",
@@ -99,6 +103,7 @@ const MyOrders = () => {
       ],
     },
     {
+      orderId: "ORD-2024-003",
       id: "ORD-2024-003",
       date: "28 Aug 2026",
       status: "Processing",
@@ -118,6 +123,7 @@ const MyOrders = () => {
       ],
     },
     {
+      orderId: "ORD-2024-004",
       id: "ORD-2024-004",
       date: "15 Aug 2026",
       status: "Cancelled",
@@ -498,20 +504,28 @@ const MyOrders = () => {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-wrap gap-3 pt-2">
-                      <button className="flex items-center gap-2 px-5 py-2.5 bg-primary-10 text-white rounded-xl text-sm font-medium hover:bg-[#d4892a] transition-all shadow-sm hover:shadow-md">
-                        <FiEye size={16} />
-                        Track Order
-                      </button>
-                      {order.status === "Delivered" && (
-                        <button className="flex items-center gap-2 px-5 py-2.5 border-2 border-neutral-50 text-neutral-10 rounded-xl text-sm font-medium hover:border-primary-10 hover:bg-primary-10/5 transition-all">
-                          <FiPackage size={16} />
-                          Buy Again
-                        </button>
-                      )}
-                      <button className="flex items-center gap-2 px-5 py-2.5 border-2 border-neutral-50 text-neutral-10 rounded-xl text-sm font-medium hover:border-red-300 hover:bg-red-50 hover:text-red-500 transition-all ml-auto">
+                    <div className="flex flex-wrap items-center gap-3 pt-2">
+                      <p>
+                        Want to see where your order is?{" "}
+                        <Link
+                          to={`/track-order?orderId=${order?.orderId}&email=${order?.shippingAddress?.email}&phoneNumber=${order?.shippingAddress?.phoneNumber}`}
+                          className="text-primary-10 underline font-semibold"
+                        >
+                          Track Order
+                        </Link>
+                      </p>
+
+                      <a
+                        href={`https://wa.me/919420784505?text=${encodeURIComponent(
+                          `Hi, I need help with my order #${order?.orderId}`,
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-5 py-2.5 border-2 border-neutral-50 text-neutral-10 rounded-xl text-sm font-medium hover:border-green-300 hover:bg-green-50 hover:text-green-600 transition-all ml-auto"
+                      >
+                        <BsWhatsapp size={16} />
                         Need Help?
-                      </button>
+                      </a>
                     </div>
                   </div>
                 )}

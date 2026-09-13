@@ -13,54 +13,16 @@ import {
   FiCamera,
 } from "react-icons/fi";
 import { Link } from "react-router-dom";
+import { useGetStatsQuery } from "../../../redux/Features/User/userApi";
+import { formatDate } from "../../../utils/formatDate";
 
 const DashboardHome = () => {
-  // Mock user data - Replace with actual data from API
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+91 98765 43210",
-    joinedDate: "January 2024",
-    avatar: "",
-    address: {
-      line1: "123 Main Street",
-      line2: "Apartment 4B",
-      city: "Mumbai",
-      state: "Maharashtra",
-      pincode: "400001",
-    },
-  };
-
-  // Mock recent orders
-  const recentOrders = [
-    {
-      id: "ORD-2024-001",
-      date: "12 Sep 2026",
-      status: "Delivered",
-      statusColor: "green",
-      total: 1199,
-      items: 2,
-      image: "/api/placeholder/60/60",
-    },
-    {
-      id: "ORD-2024-002",
-      date: "05 Sep 2026",
-      status: "Shipped",
-      statusColor: "blue",
-      total: 2499,
-      items: 1,
-      image: "/api/placeholder/60/60",
-    },
-    {
-      id: "ORD-2024-003",
-      date: "28 Aug 2026",
-      status: "Processing",
-      statusColor: "yellow",
-      total: 899,
-      items: 3,
-      image: "/api/placeholder/60/60",
-    },
-  ];
+  const { data } = useGetStatsQuery({});
+  const stats = data?.data || {};
+  const user = stats?.user || {};
+  const deliveryAddress = stats?.deliveryAddress || {};
+  const orderStats = stats?.stats || {};
+  const recentOrders = stats?.recentOrders || [];
 
   const getStatusIcon = (status: string) => {
     switch (status.toLowerCase()) {
@@ -98,7 +60,7 @@ const DashboardHome = () => {
             <div className="w-24 h-24 rounded-full bg-primary-10/10 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
               {user.avatar ? (
                 <img
-                  src={user.avatar}
+                  src={user.profilePicture}
                   alt={user.name}
                   className="w-full h-full object-cover"
                 />
@@ -125,11 +87,11 @@ const DashboardHome = () => {
                   </span>
                   <span className="flex items-center gap-1.5">
                     <FiPhone size={14} className="text-primary-10" />
-                    {user.phone}
+                    {user.phoneNumber}
                   </span>
                   <span className="flex items-center gap-1.5">
                     <FiCalendar size={14} className="text-primary-10" />
-                    Member since {user.joinedDate}
+                    Member since {formatDate(user.memberSince)}
                   </span>
                 </div>
               </div>
@@ -163,18 +125,23 @@ const DashboardHome = () => {
             </div>
             <div>
               <p className="text-xs text-neutral-45">Total Orders</p>
-              <p className="text-lg font-bold text-neutral-10">12</p>
+              <p className="text-lg font-bold text-neutral-10">
+                {orderStats?.totalOrders}
+              </p>
             </div>
           </div>
         </div>
+
         <div className="bg-white rounded-2xl shadow-sm p-5 hover:shadow-md transition-shadow">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-              <FiCheckCircle className="text-green-600" size={18} />
+            <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
+              <FiClock className="text-yellow-600" size={18} />
             </div>
             <div>
-              <p className="text-xs text-neutral-45">Delivered</p>
-              <p className="text-lg font-bold text-neutral-10">8</p>
+              <p className="text-xs text-neutral-45">Processing</p>
+              <p className="text-lg font-bold text-neutral-10">
+                {orderStats?.processing}
+              </p>
             </div>
           </div>
         </div>
@@ -184,19 +151,24 @@ const DashboardHome = () => {
               <FiTruck className="text-blue-600" size={18} />
             </div>
             <div>
-              <p className="text-xs text-neutral-45">In Transit</p>
-              <p className="text-lg font-bold text-neutral-10">2</p>
+              <p className="text-xs text-neutral-45">Shipped</p>
+              <p className="text-lg font-bold text-neutral-10">
+                {orderStats?.shipped}
+              </p>
             </div>
           </div>
         </div>
+
         <div className="bg-white rounded-2xl shadow-sm p-5 hover:shadow-md transition-shadow">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
-              <FiClock className="text-yellow-600" size={18} />
+            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+              <FiCheckCircle className="text-green-600" size={18} />
             </div>
             <div>
-              <p className="text-xs text-neutral-45">Processing</p>
-              <p className="text-lg font-bold text-neutral-10">2</p>
+              <p className="text-xs text-neutral-45">Delivered</p>
+              <p className="text-lg font-bold text-neutral-10">
+                {orderStats?.delivered}
+              </p>
             </div>
           </div>
         </div>
@@ -220,38 +192,38 @@ const DashboardHome = () => {
           </div>
 
           <div className="space-y-3">
-            {recentOrders.map((order) => (
+            {recentOrders?.map((order: any) => (
               <div
-                key={order.id}
+                key={order.orderId}
                 className="flex items-center gap-4 p-3 rounded-xl border border-neutral-20 hover:border-primary-10/30 hover:bg-neutral-20/30 transition-all group cursor-pointer"
               >
                 <img
-                  src={order.image}
-                  alt={order.id}
+                  src={order?.orderedItems[0].variant.images[0]}
+                  alt={order?.orderId}
                   className="w-14 h-14 rounded-lg object-cover bg-neutral-20"
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-semibold text-neutral-10">
-                      #{order.id}
+                      #{order?.orderId}
                     </p>
                     <span
-                      className={`text-xs px-2 py-0.5 rounded-full border flex items-center gap-1 ${getStatusColor(
-                        order.status,
+                      className={`text-xs px-2 py-0.5 rounded-full border flex items-center gap-1 capitalize ${getStatusColor(
+                        order?.orderStatus,
                       )}`}
                     >
-                      {getStatusIcon(order.status)}
-                      {order.status}
+                      {getStatusIcon(order?.orderStatus)}
+                      {order?.orderStatus}
                     </span>
                   </div>
                   <p className="text-xs text-neutral-45 mt-0.5">
-                    {order.items} item{order.items > 1 ? "s" : ""} •{" "}
-                    {order.date}
+                    {order?.itemCount} item{order?.itemCount > 1 ? "s" : ""} •{" "}
+                    {formatDate(order?.createdAt)}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-bold text-neutral-10">
-                    ₹{order.total}
+                    ₹{order?.totalAmount}
                   </p>
                   <FiChevronRight
                     size={16}
@@ -283,13 +255,19 @@ const DashboardHome = () => {
               <FiMapPin className="text-primary-10" size={18} />
             </div>
             <div className="text-sm">
-              <p className="font-medium text-neutral-10">{user.name}</p>
-              <p className="text-neutral-45 mt-1">{user.address.line1}</p>
-              <p className="text-neutral-45">{user.address.line2}</p>
-              <p className="text-neutral-45">
-                {user.address.city}, {user.address.state}
+              <p className="font-medium text-neutral-10">
+                {deliveryAddress?.name}
               </p>
-              <p className="text-neutral-45">Pincode: {user.address.pincode}</p>
+              <p className="text-neutral-45 mt-1">
+                {deliveryAddress?.addressLine1}
+              </p>
+              <p className="text-neutral-45">{deliveryAddress?.addressLine2}</p>
+              <p className="text-neutral-45">
+                {deliveryAddress?.city}, {deliveryAddress?.state}
+              </p>
+              <p className="text-neutral-45">
+                Pincode: {deliveryAddress?.pinCode}
+              </p>
             </div>
           </div>
 

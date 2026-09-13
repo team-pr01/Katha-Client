@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FiAlertCircle, FiMail, FiPhone } from "react-icons/fi";
 import { BsWhatsapp } from "react-icons/bs";
 import OrderTrackingData from "../OrderTrackingData/OrderTrackingData";
 import Modal from "../../components/Reusable/Modal copy/Modal";
 import Login from "../../components/AuthComponents/Login/Login";
 import Signup from "../../components/AuthComponents/Signup/Signup";
+import { useSearchParams } from "react-router-dom";
 
 // Types
 interface TrackingStep {
@@ -38,6 +39,12 @@ interface OrderTrackingData {
 }
 
 const TrackOrder = () => {
+  const [searchParams] = useSearchParams();
+
+  const orderIdParams = searchParams.get("orderId");
+  const email = searchParams.get("email");
+  const phoneNumber = searchParams.get("phoneNumber");
+
   const [orderId, setOrderId] = useState<string>("");
   const [verifyMethod, setVerifyMethod] = useState<"email" | "phone">("email");
   const [verifyValue, setVerifyValue] = useState<string>("");
@@ -45,6 +52,19 @@ const TrackOrder = () => {
   const [orderData, setOrderData] = useState<OrderTrackingData | null>(null);
   const [error, setError] = useState<string>("");
   const [hasSearched, setHasSearched] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (orderIdParams) {
+      setOrderId(orderIdParams);
+    }
+    if (email) {
+      setVerifyMethod("email");
+      setVerifyValue(email);
+    } else {
+      setVerifyMethod("phone");
+      setVerifyValue(phoneNumber);
+    }
+  }, [orderIdParams]);
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authModalType, setAuthModalType] = useState<"login" | "signup">(

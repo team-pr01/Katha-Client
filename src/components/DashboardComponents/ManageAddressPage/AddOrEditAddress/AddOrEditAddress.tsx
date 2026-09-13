@@ -2,50 +2,72 @@ import { useForm } from "react-hook-form";
 import type { TAddress } from "../../../../pages/Dashboard/ManageAddress/ManageAddress";
 import TextInput from "../../../Reusable/TextInput/TextInput";
 import Button from "../../../Reusable/Button/Button";
+import {
+  useAddAddressMutation,
+  useUpdateAddressMutation,
+} from "../../../../redux/Features/Address/addressApi";
+import { useEffect } from "react";
 
 interface AddOrEditAddressProps {
   initialData?: TAddress | null;
-  onSave: (data: TAddress) => void;
   onCancel: () => void;
+  modalType: "add" | "edit";
 }
 
 const AddOrEditAddress = ({
   initialData,
-  onSave,
   onCancel,
+  modalType,
 }: AddOrEditAddressProps) => {
-  const isEditMode = !!initialData;
+  const [addAddress] = useAddAddressMutation();
+  const [updateAddress] = useUpdateAddressMutation();
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<TAddress>({
-    defaultValues: {
-      fullName: initialData?.fullName || "",
-      phoneNumber: initialData?.phoneNumber || "",
-      addressLine1: initialData?.addressLine1 || "",
-      addressLine2: initialData?.addressLine2 || "",
-      city: initialData?.city || "",
-      state: initialData?.state || "",
-      pinCode: initialData?.pinCode || "",
-      addressType: initialData?.addressType || "Home",
-      isDefault: initialData?.isDefault || true,
-    },
-  });
+    setValue,
+    reset,
+  } = useForm<TAddress>();
+
+  useEffect(() => {
+    if (modalType === "edit" && initialData) {
+      setValue("name", initialData.name);
+      setValue("phoneNumber", initialData.phoneNumber);
+      setValue("email", initialData.email);
+      setValue("addressLine1", initialData.addressLine1);
+      setValue("addressLine2", initialData.addressLine2);
+      setValue("city", initialData.city);
+      setValue("state", initialData.state);
+      setValue("pinCode", initialData.pinCode);
+      setValue("addressType", initialData.addressType);
+      setValue("isDefault", initialData.isDefault);
+    } else {
+      reset();
+    }
+  }, []);
 
   const onSubmit = async (data: TAddress) => {
-    onSave(data);
+    try {
+      if (modalType === "edit") {
+        await updateAddress(data).unwrap();
+      } else {
+        await addAddress(data).unwrap();
+      }
+      onCancel();
+    } catch (error) {
+      console.error("Error adding or updating address:", error);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       {/* Header */}
       <h2 className="text-2xl font-Satoshi font-semibold text-center text-neutral-10">
-        {isEditMode ? "Edit Address" : "Add New Address"}
+        {modalType === "edit" ? "Edit Address" : "Add New Address"}
       </h2>
       <p className="text-sm text-center text-neutral-45 mt-1 mb-6">
-        {isEditMode
+        {modalType === "edit"
           ? "Update your delivery address details"
           : "Enter your delivery address details"}
       </p>
@@ -55,8 +77,8 @@ const AddOrEditAddress = ({
         <TextInput
           label="Full Name"
           placeholder="Enter your full name"
-          error={errors.fullName}
-          {...register("fullName", {
+          error={errors.name}
+          {...register("name", {
             required: "Full name is required",
           })}
         />
@@ -73,6 +95,14 @@ const AddOrEditAddress = ({
               message: "Please enter a valid 10-digit phone number",
             },
           })}
+        />
+
+        <TextInput
+          label="Email"
+          placeholder="Enter your email address"
+          error={errors.email}
+          {...register("email")}
+          isRequired={false}
         />
 
         <TextInput
@@ -135,7 +165,7 @@ const AddOrEditAddress = ({
               className="w-full px-4 py-2.5 border border-neutral-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-10 focus:border-transparent bg-white"
             >
               <option value="Home">Home</option>
-              <option value="Work">Work</option>
+              <option value="Office">Office</option>
               <option value="Other">Other</option>
             </select>
           </div>
@@ -154,7 +184,7 @@ const AddOrEditAddress = ({
         />
         <Button
           type="submit"
-          label={isEditMode ? "Update Address" : "Save Address"}
+          label={modalType === "edit" ? "Update Address" : "Save Address"}
           variant="primary"
           className="flex-1 py-3"
           isLoading={isSubmitting}

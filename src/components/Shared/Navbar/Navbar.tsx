@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react";
 import Modal from "../../Reusable/Modal copy/Modal";
 import Signup from "../../AuthComponents/Signup/Signup";
 import { useCart } from "../../../providers/CartProvider/CartProvider";
+import UserDropdown from "./UserDropdown";
 
 const Navbar = () => {
   const user = true;
@@ -220,20 +221,7 @@ const Navbar = () => {
               </Link>
 
               {user ? (
-                <Link
-                  to="/dashboard"
-                  className="bg-neutral-20 rounded-3xl text-neutral-10 text-sm flex items-center gap-2 p-2"
-                >
-                  <div className="size-7 rounded-full flex items-center justify-center bg-neutral-45">
-                    <img
-                      src={IMAGES.babyShower}
-                      alt=""
-                      className="rounded-full"
-                    />
-                  </div>
-                  <span>Rahul Sutra....</span>
-                  <img src={ICONS.arrowRight} alt="" className="w-6" />
-                </Link>
+                <UserDropdown/>
               ) : (
                 <Button
                   onClick={() => {

@@ -1,23 +1,18 @@
 import { baseApi } from "../../Api/baseApi";
 
-const couponCodeApi = baseApi.injectEndpoints({
+const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAllCouponCodes: builder.query({
-      query: ({ keyword, page }: { keyword?: string; page?: number }) => {
-        const params = new URLSearchParams();
-
-        if (keyword) params.append("keyword", keyword);
-        if (page) params.append("page", page.toString());
-
+    getStats: builder.query({
+      query: () => {
         return {
-          url: `/coupon-code${params.toString() ? `?${params.toString()}` : ""}`,
+          url: `/user/stats`,
           method: "GET",
           credentials: "include",
         };
       },
-      providesTags: ["couponCode"],
+      providesTags: ["user"],
     }),
-    
+
     addCouponCode: builder.mutation({
       query: (data) => ({
         url: "/coupon-code/add",
@@ -49,4 +44,4 @@ const couponCodeApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetAllCouponCodesQuery, useAddCouponCodeMutation, useDeleteCouponCodeMutation, useValidateCouponCodeMutation } = couponCodeApi;
+export const { useGetStatsQuery, useAddCouponCodeMutation, useDeleteCouponCodeMutation, useValidateCouponCodeMutation } = userApi;
