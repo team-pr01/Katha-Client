@@ -75,7 +75,7 @@ const ShopByCategory = () => {
             categories.map((category: any) => (
               <Link
                 key={category?._id}
-                to={`/products?category=${category?.slug}`}
+                to={`/products?category=${category?.name}`}
                 className="group shrink-0 snap-center flex flex-col items-center text-center w-40 md:w-45"
               >
                 {/* Image — circle with subtle ring */}
