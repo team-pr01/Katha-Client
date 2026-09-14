@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useGetActiveHeroesQuery } from "../../../redux/Features/Hero/heroApi";
 import Button from "../../Reusable/Button/Button";
+import HeroSkeletonLoader from "../../Loaders/HeroSkeletonLoader/HeroSkeletonLoader";
 
 const Hero = () => {
   const { data, isLoading } = useGetActiveHeroesQuery({});
@@ -24,17 +25,16 @@ const Hero = () => {
     setCurrentIndex(index);
   }, []);
 
-  // Loading state
   if (isLoading) {
-    return (
-      <div className="relative w-full h-screen overflow-hidden font-Inter bg-black" />
-    );
-  }
+  return <HeroSkeletonLoader />;
+}
 
   // No heroes available
   if (!heroes.length) return null;
 
   const hero = heroes[currentIndex];
+
+  
 
   return (
     <div
@@ -88,8 +88,7 @@ const Hero = () => {
                 <span
                   className="absolute -bottom-2 left-0 w-full h-0.5 rounded"
                   style={{
-                    backgroundColor:
-                      hero.colors?.subtitleColor || "#F59E0B",
+                    backgroundColor: hero.colors?.subtitleColor || "#F59E0B",
                   }}
                 ></span>
               </span>
