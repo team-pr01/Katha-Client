@@ -6,8 +6,6 @@ import type { Swiper as SwiperType } from "swiper";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-
-import { ICONS } from "../../../assets";
 import Button from "../../Reusable/Button/Button";
 import Container from "../../Reusable/Container/Container";
 import { useGetAllOccasionsQuery } from "../../../redux/Features/Occation/occasionApi";

@@ -8,9 +8,11 @@ import Modal from "../../Reusable/Modal/Modal";
 import Signup from "../../AuthComponents/Signup/Signup";
 import { useCart } from "../../../providers/CartProvider/CartProvider";
 import UserDropdown from "./UserDropdown";
+import { useSelector } from "react-redux";
+import { useCurrentUser } from "../../../redux/Features/Auth/authSlice";
 
 const Navbar = () => {
-  const user = true;
+  const user = useSelector(useCurrentUser);
   const pathname = useLocation().pathname;
   const navigate = useNavigate();
   const [authModalType, setAuthModalType] = useState<"login" | "signup">(

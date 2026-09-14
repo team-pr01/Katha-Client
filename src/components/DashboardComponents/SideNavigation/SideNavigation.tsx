@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FiGrid,
   FiPackage,
@@ -6,8 +6,13 @@ import {
   FiLogOut,
   FiChevronRight,
 } from "react-icons/fi";
+import { useDispatch } from "react-redux";
+import { logout, setUser } from "../../../redux/Features/Auth/authSlice";
+import Cookies from "js-cookie";
 
 const SideNavigation = () => {
+  const navigate = useNavigate();
+    const dispatch = useDispatch();
   const location = useLocation();
   const pathname = location.pathname;
 
@@ -29,10 +34,13 @@ const SideNavigation = () => {
     },
   ];
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    window.location.href = "/";
+  const handleLogout = async () => {
+    dispatch(setUser({ user: null, token: null }));
+    Cookies.remove("accessToken");
+    Cookies.remove("role");
+    dispatch(logout());
+    localStorage.clear();
+    navigate("/");
   };
 
   return (

@@ -1,6 +1,16 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { RootState } from "../../store";
 
+export type TLoggedInUser = {
+  _id: string;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  role: string;
+  profilePicture: string;
+};
+
+
 type TAuthUser = {
     user: null | object;
     token: null | string;

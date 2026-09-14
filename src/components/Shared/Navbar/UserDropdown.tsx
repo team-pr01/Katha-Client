@@ -1,10 +1,16 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FiGrid, FiPackage, FiMapPin, FiLogOut, FiTruck } from "react-icons/fi";
 import { ICONS, IMAGES } from "../../../assets";
 import { FaAngleDown } from "react-icons/fa";
-import { useSelector } from "react-redux";
-import { useCurrentUser } from "../../../redux/Features/Auth/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  logout,
+  setUser,
+  useCurrentUser,
+  type TLoggedInUser,
+} from "../../../redux/Features/Auth/authSlice";
+import Cookies from "js-cookie";
 
 interface UserDropdownProps {
   userName?: string;
@@ -12,11 +18,12 @@ interface UserDropdownProps {
 }
 
 const UserDropdown = ({
-  
   userName = "Rahul S...",
   userImage = IMAGES.babyShower,
 }: UserDropdownProps) => {
-  const user = useSelector(useCurrentUser);
+  const navigate = useNavigate();
+  const user = useSelector(useCurrentUser) as TLoggedInUser;
+  const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
@@ -67,11 +74,13 @@ const UserDropdown = ({
     setIsOpen(false);
   }, [pathname]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setIsOpen(false);
-    window.location.href = "/";
+  const handleLogout = async () => {
+    dispatch(setUser({ user: null, token: null }));
+    Cookies.remove("accessToken");
+    Cookies.remove("role");
+    dispatch(logout());
+    localStorage.clear();
+    navigate("/");
   };
 
   return (
@@ -95,7 +104,9 @@ const UserDropdown = ({
             className="w-full h-full object-cover rounded-full"
           />
         </div>
-        <span className="font-medium">{user?.name?.slice(0, 9).concat("...")}</span>
+        <span className="font-medium">
+          {user?.name?.slice(0, 9).concat("...")}
+        </span>
         <img
           src={ICONS.arrowRight}
           alt=""
@@ -136,7 +147,7 @@ const UserDropdown = ({
                 {user?.name}
               </h3>
               <p className="text-xs text-neutral-45 truncate">
-                {user?.email || user?.phoneNumber} 
+                {user?.email || user?.phoneNumber}
               </p>
             </div>
           </div>

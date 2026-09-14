@@ -39,7 +39,7 @@ export type CheckoutFormRef = {
   setCouponData: (code: string) => void;
 };
 
-const CheckoutForm = forwardRef<CheckoutFormRef>((props, ref) => {
+const CheckoutForm = forwardRef<CheckoutFormRef>((ref: any) => {
   const navigate = useNavigate();
   const { cartItems, clearCart } = useCart();
 

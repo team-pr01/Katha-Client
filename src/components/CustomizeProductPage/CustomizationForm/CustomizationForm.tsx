@@ -28,6 +28,7 @@ const CustomizationForm = () => {
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [selectedField, setSelectedField] = useState<string>("");
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  console.log(selectedField);
 
   const [formData, setFormData] = useState<CustomizationForm>({
     selectedFields: [],

@@ -36,7 +36,7 @@ const PersonalizedOrders: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleInputChange = (field: keyof any, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev: any) => ({ ...prev, [field]: value }));
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -190,7 +190,7 @@ const PersonalizedOrders: React.FC = () => {
                   onChange={handleInputChange}
                   onFileUpload={handleFileUpload}
                   onFileRemove={removeFile}
-                  fileInputRef={fileInputRef}
+                  fileInputRef={fileInputRef as React.RefObject<HTMLInputElement>}
                 />
               )}
 
