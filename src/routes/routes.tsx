@@ -17,6 +17,10 @@ import DashboardLayout from "../layouts/DashboardLayout/DashboardLayout";
 import MyOrders from "../pages/Dashboard/MyOrders/MyOrders";
 import ManageAddress from "../pages/Dashboard/ManageAddress/ManageAddress";
 import TrackOrder from "../pages/TrackOrder/TrackOrder";
+import AdminDashboardLayout from "../layouts/AdminDashboardLayout/AdminDashboardLayout";
+import AdminDashboardHome from "../pages/AdminDashboardPages/AdminDashboardHome/AdminDashboardHome";
+import OrdersManagement from "../pages/AdminDashboardPages/OrdersManagement/OrdersManagement";
+import ProductsManagement from "../pages/AdminDashboardPages/ProductsManagement/ProductsManagement";
 
 export const router = createBrowserRouter([
   {
@@ -90,6 +94,33 @@ export const router = createBrowserRouter([
       {
         path: "my-orders",
         element: <MyOrders />,
+      },
+      {
+        path: "address",
+        element: <ManageAddress />,
+      },
+      {
+        path: "*",
+        element: <NotFound />,
+      },
+    ],
+  },
+  {
+    path: "/admin/dashboard",
+    element: <AdminDashboardLayout />,
+    // errorElement: <ErrorComponent />,
+    children: [
+      {
+        path: "",
+        element: <AdminDashboardHome />,
+      },
+      {
+        path: "orders-management",
+        element: <OrdersManagement />,
+      },
+      {
+        path: "products-management",
+        element: <ProductsManagement />,
       },
       {
         path: "address",

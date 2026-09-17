@@ -1,5 +1,3 @@
-
-
 type TUnits = 'cm' | 'mm' | 'inch' | 'm' | 'ft';
 
 export type TDimensions = {
@@ -31,10 +29,10 @@ export type TProductVariant = {
     quantity: number;
     unit: string;
   }[];
+  makingCost: number;
 };
 
 export type TReview = {
-  _id: string;
   user: any;
   rating: number;
   comment: string;
@@ -76,8 +74,9 @@ export type TProduct = {
   isActive: boolean;
   isFeatured?: boolean;
   tags?: string[];
-  createdAt?: Date;
-  updatedAt?: Date;
+  isPublished?: boolean;
+  createdAt: string;
+  updatedAt?: string;
 };
 
 export type TProductFilters = {
@@ -86,6 +85,7 @@ export type TProductFilters = {
   occasionNames?: string[];
   subOccasionNames?: string[];
   material?: string[];
+  colors?: string[];
   packSize?: string[]; // Filter by pack size
   minPrice?: number;
   maxPrice?: number;
@@ -99,8 +99,4 @@ export type TProductFilters = {
   maxWidth?: number;
   minHeight?: number;
   maxHeight?: number;
-};
-
-export type TProductSortOptions = {
-  field: 'price_low_to_high' | 'price_high_to_low' | 'popular' | 'top_rated' | 'newest';
 };
