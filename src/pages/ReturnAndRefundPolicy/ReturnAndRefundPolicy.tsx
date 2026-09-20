@@ -40,12 +40,7 @@ const ReturnAndRefundPolicy = () => {
               Here's everything you need to know.
             </p>
             <p className="text-white/40 text-xs mt-4">
-              Last updated:{" "}
-              {new Date().toLocaleDateString("en-IN", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
+              Last updated: 15 September 2026
             </p>
           </Container>
         </div>

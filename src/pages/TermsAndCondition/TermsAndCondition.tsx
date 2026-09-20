@@ -39,11 +39,7 @@ const TermsAndCondition = () => {
               placing an order with Katha.
             </p>
             <p className="text-white/40 text-xs mt-4">
-              Last updated: {new Date().toLocaleDateString("en-IN", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
+              Last updated: 15 September 2026
             </p>
           </Container>
         </div>
