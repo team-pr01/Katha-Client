@@ -22,6 +22,5 @@ export type TDataFiltersProps = {
     selects?: TSelectFilter[];
     hasActiveFilters?: boolean;
     onClear?: () => void;
-    onExport?: () => void;
     extraActions?: ReactNode;
 }

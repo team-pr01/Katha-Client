@@ -26,8 +26,10 @@ export const adminNavGroups: TAdminNavGroup[] = [
     icon: <FiGrid size={20} />,
     items: [
       { label: "Dashboard", path: "/admin/dashboard" },
-      { label: "Analytics", path: "/admin/analytics" },
-      { label: "Activity", path: "/admin/activity" },
+      { label: "Products", path: "/admin/dashboard/products-management" },
+      { label: "Orders", path: "/admin/dashboard/orders-management" },
+      { label: "Analytics", path: "/admin/dashboard/analytics" },
+      { label: "Activity", path: "/admin/dashboard/activity" },
     ],
   },
   {

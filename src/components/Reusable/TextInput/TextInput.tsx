@@ -39,7 +39,7 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
           >
             <span className="leading-4.5 text-[13px] md:text-sm font-medium tracking-[-0.16]">
               {label}{" "}
-              <span className="text-primary-10">{isRequired ? "*" : ""}</span>
+              <span className="text-red-500">{isRequired ? "*" : ""}</span>
             </span>
           </label>
         )}

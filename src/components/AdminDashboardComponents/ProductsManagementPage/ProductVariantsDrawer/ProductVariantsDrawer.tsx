@@ -9,14 +9,17 @@ import {
 } from "react-icons/fi";
 import type { TProduct, TProductVariant } from "../../../../types/product.type";
 import { hasDiscount } from "../../../../utils/productHelpers";
+import {
+  useDeleteVariantMutation,
+} from "../../../../redux/Features/Product/productVariantApi";
+import { useState } from "react";
+import AddOrEditVariantModal from "../AddOrEditVariantModal/AddOrEditVariantModal";
 
 interface ProductVariantsDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   product: TProduct | null;
   onAddVariant: () => void;
-  onEditVariant: (variant: TProductVariant) => void;
-  onDeleteVariant: (variantId: string) => void;
 }
 
 const ProductVariantsDrawer = ({
@@ -24,9 +27,27 @@ const ProductVariantsDrawer = ({
   onClose,
   product,
   onAddVariant,
-  onEditVariant,
-  onDeleteVariant,
 }: ProductVariantsDrawerProps) => {
+  const [isAddOrEditVariantModalOpen, setIsAddOrEditVariantModalOpen] =
+    useState<boolean>(false);
+  const [selectedVariant, setSelectedVariant] = useState<TProductVariant | null>(
+    null,
+  );
+  // const [updateVariant] = useUpdateVariantMutation();
+
+  const [deleteVariant] = useDeleteVariantMutation();
+
+  const handleDeleteVariant = async (variantId: string) => {
+    try {
+      await deleteVariant({
+        productId: product?._id,
+        variantId: variantId,
+      }).unwrap();
+    } catch (error) {
+      console.error("Error deleting variant:", error);
+    }
+  };
+
   return (
     <>
       {/* Backdrop */}
@@ -42,7 +63,7 @@ const ProductVariantsDrawer = ({
       {/* Drawer */}
       <aside
         className={`
-          fixed top-0 right-0 z-50 h-full w-full sm:w-[560px] bg-white
+          fixed top-0 right-0 z-50 h-full w-full sm:w-140 bg-white
           shadow-2xl flex flex-col
           transition-transform duration-500 ease-out
           ${isOpen ? "translate-x-0" : "translate-x-full"}
@@ -59,8 +80,8 @@ const ProductVariantsDrawer = ({
             </h2>
             <p className="text-xs text-neutral-45 mt-0.5">
               {product?.variants.length} variant
-              {product?.variants.length === 1 ? "" : "s"} ·{" "}
-              {product?.category} › {product?.subCategory}
+              {product?.variants.length === 1 ? "" : "s"} · {product?.category}{" "}
+              › {product?.subCategory}
             </p>
           </div>
           <button
@@ -172,14 +193,14 @@ const ProductVariantsDrawer = ({
                 </div>
                 <div className="flex items-center gap-1">
                   <button
-                    onClick={() => onEditVariant(variant)}
+                    onClick={() => setSelectedVariant(variant)}
                     className="p-1.5 rounded-lg text-neutral-45 hover:text-primary-10 hover:bg-primary-10/10 transition-all"
                     aria-label="Edit variant"
                   >
                     <FiEdit2 size={13} />
                   </button>
                   <button
-                    onClick={() => onDeleteVariant(variant._id)}
+                    onClick={() => handleDeleteVariant(variant?._id)}
                     className="p-1.5 rounded-lg text-neutral-45 hover:text-red-500 hover:bg-red-50 transition-all"
                     aria-label="Delete variant"
                   >
@@ -216,6 +237,13 @@ const ProductVariantsDrawer = ({
           </button>
         </div>
       </aside>
+
+      <AddOrEditVariantModal
+        isOpen={isAddOrEditVariantModalOpen}
+        onClose={() => setIsAddOrEditVariantModalOpen(false)}
+        productId={product?._id || null}
+        variant={(selectedVariant) || null}
+      />
     </>
   );
 };

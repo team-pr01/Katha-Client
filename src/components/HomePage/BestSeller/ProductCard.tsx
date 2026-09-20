@@ -3,12 +3,35 @@ import { Link, useNavigate } from "react-router-dom";
 import type { TProduct } from "../../../types/product.type";
 import { calculateProductDiscountedPercentage } from "../../../utils/calculateProductDiscountedPercentage";
 import { useCart } from "../../../providers/CartProvider/CartProvider";
+import { FiPackage } from "react-icons/fi";
 
 const ProductCard = ({ product }: { product: TProduct }) => {
   const navigate  = useNavigate();
-  const { _id, basePrice, discountedPrice, images, size, color, stock } =
-    product?.variants[0];
   const { addToCart } = useCart();
+
+  const firstVariant = product?.variants?.[0];
+
+  // If no variant, render a "coming soon" / fallback card
+  if (!firstVariant) {
+    return (
+      <div className="rounded-lg bg-white border border-neutral-20 p-4 flex flex-col">
+        <div className="aspect-square rounded-lg bg-neutral-20 flex items-center justify-center">
+          <FiPackage className="text-neutral-45" size={40} />
+        </div>
+        <div className="mt-3">
+          <p className="font-semibold text-neutral-5 line-clamp-2">
+            {product?.name}
+          </p>
+          <p className="text-xs text-neutral-45 mt-1">
+            Coming soon
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const { _id, basePrice, discountedPrice, images, size, color, stock } =
+    firstVariant;
 
   const handleAddProductToCart = () => {
     const payload = {

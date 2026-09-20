@@ -4,7 +4,7 @@ const productApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
 
 
-   getAllProducts: builder.query<
+    getAllProducts: builder.query<
       any,
       {
         keyword?: string;
@@ -19,9 +19,12 @@ const productApi = baseApi.injectEndpoints({
         minRating?: number;
         inStock?: boolean;
         isFeatured?: boolean;
+        isActive?: boolean;
+        isPublished?: boolean;
         sortBy?: string;
         skip?: number;
         limit?: number;
+        status?:any;
       }
     >({
       query: (filters) => {
@@ -70,10 +73,26 @@ const productApi = baseApi.injectEndpoints({
         if (filters.isFeatured !== undefined && filters.isFeatured !== null) {
           params.append("isFeatured", String(filters.isFeatured));
         }
+        if (filters.isActive !== undefined && filters.isActive !== null) {
+          params.append("isActive", String(filters.isActive));
+        }
+        if (filters.isPublished !== undefined && filters.isPublished !== null) {
+          params.append("isPublished", String(filters.isPublished));
+        }
 
         // Sorting
         if (filters.sortBy) {
           params.append("sortBy", filters.sortBy);
+        }
+
+        if(filters.status === "active"){
+          params.append("isActive", "true");
+        } else if(filters.status === "inactive"){
+          params.append("isActive", "false");
+        } else if(filters.status === "published"){
+          params.append("isPublished", "true");
+        } else if(filters.status === "unpublished"){
+          params.append("isPublished", "false");
         }
 
         // Pagination
@@ -101,10 +120,21 @@ const productApi = baseApi.injectEndpoints({
       }),
       providesTags: ["product"],
     }),
+
+    addProduct: builder.mutation({
+      query: (data) => ({
+        url: `/product/add`,
+        method: "POST",
+        body: data,
+        credentials: "include",
+      }),
+      invalidatesTags: ["product"],
+    }),
   }),
 });
 
 export const {
   useGetAllProductsQuery,
   useGetSingleProductBySlugQuery,
+  useAddProductMutation
 } = productApi;

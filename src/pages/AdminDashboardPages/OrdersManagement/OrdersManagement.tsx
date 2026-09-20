@@ -388,7 +388,6 @@ const OrdersManagement = () => {
         ]}
         hasActiveFilters={hasActiveFilters}
         onClear={handleClearFilters}
-        onExport={() => console.log("Export")}
       />
 
       <BulkActionBar

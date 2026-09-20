@@ -72,7 +72,7 @@ const ShopByCategory = () => {
 
           {/*  Categories */}
           {!loading &&
-            categories.map((category: any) => (
+            categories?.map((category: any) => (
               <Link
                 key={category?._id}
                 to={`/products?category=${category?.name}`}

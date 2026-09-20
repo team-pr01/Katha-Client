@@ -42,8 +42,8 @@ const Login = ({
         dispatch(
           setUser({ user: res?.data?.user, token: res?.data?.accessToken }),
         );
+        // window.location.replace("/dashboard");
       }
-      window.location.replace("/dashboard");
       reset();
     } catch (error: any) {
       setLoginError(error?.data?.message || "Login failed. Please try again.");

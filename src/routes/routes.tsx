@@ -21,6 +21,7 @@ import AdminDashboardLayout from "../layouts/AdminDashboardLayout/AdminDashboard
 import AdminDashboardHome from "../pages/AdminDashboardPages/AdminDashboardHome/AdminDashboardHome";
 import OrdersManagement from "../pages/AdminDashboardPages/OrdersManagement/OrdersManagement";
 import ProductsManagement from "../pages/AdminDashboardPages/ProductsManagement/ProductsManagement";
+import AddProduct from "../pages/AdminDashboardPages/AddProduct/AddProduct";
 
 export const router = createBrowserRouter([
   {
@@ -121,6 +122,10 @@ export const router = createBrowserRouter([
       {
         path: "products-management",
         element: <ProductsManagement />,
+      },
+      {
+        path: "add-product",
+        element: <AddProduct />,
       },
       {
         path: "address",

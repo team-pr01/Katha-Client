@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FiPlus,
@@ -8,15 +8,16 @@ import {
   FiEye,
   FiMoreVertical,
   FiCheckCircle,
-  FiEdit3,
   FiAlertCircle,
-  FiBox,
   FiDownload,
   FiUpload,
   FiStar,
   FiFile,
+  FiEyeOff,
+  FiZap,
+  FiXCircle,
 } from "react-icons/fi";
-import type { TProduct, TProductVariant } from "../../../types/product.type";
+import type { TProduct } from "../../../types/product.type";
 import type { TKPIItem } from "../../../types/kpi.types";
 import {
   getPrimaryImage,
@@ -25,7 +26,6 @@ import {
   getStockStatus,
 } from "../../../utils/productHelpers";
 import type { TDataTableColumn } from "../../../types/dataTable.types";
-import ProductStatusBadge from "../../../components/AdminDashboardComponents/ProductsManagementPage/ProductStatusBadge/ProductStatusBadge";
 import AdminPageHeader from "../../../components/Reusable/AdminReusable/AdminPageHeader/AdminPageHeader";
 import KPIStrip from "../../../components/Reusable/AdminReusable/KPIStrip/KPIStrip";
 import DataFilters from "../../../components/Reusable/DataFilters/DataFilters";
@@ -35,42 +35,61 @@ import DataTable from "../../../components/Reusable/DataTable/DataTable";
 import DataTablePagination from "../../../components/Reusable/DataTable/DataTablePagination";
 import ProductVariantsDrawer from "../../../components/AdminDashboardComponents/ProductsManagementPage/ProductVariantsDrawer/ProductVariantsDrawer";
 import ProductDeleteModal from "../../../components/AdminDashboardComponents/ProductsManagementPage/ProductDeleteModal/ProductDeleteModal";
-import AddVariantModal from "../../../components/AdminDashboardComponents/ProductsManagementPage/AddVariantModal/AddVariantModal";
+import AddOrEditVariantModal from "../../../components/AdminDashboardComponents/ProductsManagementPage/AddOrEditVariantModal/AddOrEditVariantModal";
+import { useGetAllProductsQuery } from "../../../redux/Features/Product/productApi";
+import { useGetAllCategoriesQuery } from "../../../redux/Features/Category/categoryApi";
 
 const ITEMS_PER_PAGE = 10;
 
-const categoryOptions = [
-  { value: "all", label: "All categories" },
-  { value: "Handicraft", label: "Handicraft" },
-  { value: "Home Decor", label: "Home Decor" },
-  { value: "Jewelry", label: "Jewelry" },
-];
-
 const statusOptions = [
-  { value: "all", label: "All statuses" },
+  { value: "all", label: "All Statuses" },
   { value: "published", label: "Published" },
-  { value: "draft", label: "Draft" },
+  { value: "unpublished", label: "Not Published" },
+  { value: "active", label: "Active" },
   { value: "inactive", label: "Inactive" },
 ];
 
 const sortOptions = [
-  { value: "newest", label: "Newest first" },
-  { value: "price-high", label: "Price: High → Low" },
-  { value: "price-low", label: "Price: Low → High" },
   { value: "stock-low", label: "Stock: Low → High" },
-  { value: "best-selling", label: "Best selling" },
+  { value: "best-selling", label: "Best Selling" },
 ];
 
 const ProductsManagement = () => {
   const navigate = useNavigate();
 
+  const { data: categoryData } = useGetAllCategoriesQuery({});
+
+  const categories = [
+    { value: "", label: "All Categories" },
+    ...(categoryData?.data?.data || []).map((category: any) => ({
+      value: category?.name,
+      label: category?.name,
+    })),
+  ];
+
   // ─── Filters & UI state ─────────────────────────────
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
+  const [keyword, setKeyword] = useState("");
+  const [category, setCategory] = useState("");
   const [status, setStatus] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const { data } = useGetAllProductsQuery({
+    category: category ? [category] : [],
+    // subCategory: selectedSubCategories,
+    // occasionNames: selectedOccasions,
+    // subOccasionNames: selectedSubOccasions,
+    // material: selectedMaterials,
+    // colors: selectedColors,
+    keyword: keyword,
+    status,
+    // minPrice: minPrice as any,
+    // maxPrice: maxPrice as any,
+    // sortBy: sortBy as any,
+  });
+  console.log(data);
+  const products = data?.data?.data || [];
 
   // ─── Drawer / Modal state ───────────────────────────
   const [variantsDrawerOpen, setVariantsDrawerOpen] = useState(false);
@@ -85,151 +104,12 @@ const ProductsManagement = () => {
   const kpi = {
     totalProducts: 182,
     publishedProducts: 148,
-    draftProducts: 22,
     outOfStock: 12,
-    totalRevenue: 1248000,
-    revenueChange: 9.4,
+    notPublishedProducts: 34,
+    activeProducts: 120,
+    inactiveProducts: 12,
+    featuredProducts: 12,
   };
-
-  const products: TProduct[] = [
-    {
-      _id: "p1",
-      name: "Handcrafted Wooden Wall Art",
-      slug: "handcrafted-wooden-wall-art",
-      category: "Home Decor",
-      subCategory: "Wall Art",
-      occasionNames: ["Wedding", "Housewarming"],
-      subOccasionNames: ["Gift", "Decoration"],
-      careInstructions: ["Wipe with dry cloth"],
-      isCustomizationAvailable: true,
-      processingTime: "3-5 business days",
-      variants: [
-        {
-          _id: "v1",
-          name: "Floral Wall Art Small",
-          description: "Small floral wall art",
-          packageContents: ["1 Wall Art", "2 Hooks"],
-          images: ["/api/placeholder/80/80"],
-          design: "Floral Pattern",
-          size: "Small",
-          color: "Brown",
-          packSize: "Single",
-          dimensions: { length: 12, width: 8, height: 1.5, unit: "inch" },
-          weight: "450g",
-          basePrice: 1499,
-          discountedPrice: 1199,
-          bulkPrice: 999,
-          stock: 25,
-          materials: [],
-          makingCost: 400,
-        },
-      ],
-      minPrice: 1499,
-      maxPrice: 1499,
-      minDiscountedPrice: 1199,
-      reviews: [],
-      averageRating: 4.6,
-      totalReviews: 34,
-      soldCount: 82,
-      totalClicks: 1204,
-      isActive: true,
-      isFeatured: true,
-      isPublished: true,
-      tags: ["wooden", "wall art", "handicraft"],
-      createdAt: "2026-09-01T10:00:00Z",
-      updatedAt: "2026-09-13T09:00:00Z",
-    },
-    {
-      _id: "p2",
-      name: "The Jewel Embedded Brass Elephant",
-      slug: "jewel-embedded-brass-elephant",
-      category: "Handicraft",
-      subCategory: "Brass",
-      occasionNames: ["Wedding", "Anniversary"],
-      subOccasionNames: [],
-      careInstructions: ["Polish regularly"],
-      isCustomizationAvailable: true,
-      processingTime: "5-7 business days",
-      variants: [
-        {
-          _id: "v2",
-          name: "Brass Elephant Medium",
-          description: "Medium brass elephant",
-          packageContents: ["1 Elephant"],
-          images: ["/api/placeholder/80/80"],
-          design: "Classic",
-          size: "Medium",
-          color: "Gold",
-          packSize: "Single",
-          dimensions: { length: 12, width: 8, height: 6, unit: "inch" },
-          weight: "1.2kg",
-          basePrice: 2499,
-          discountedPrice: 1999,
-          stock: 8,
-          materials: [],
-          makingCost: 700,
-        },
-        {
-          _id: "v3",
-          name: "Brass Elephant Large",
-          description: "Large brass elephant",
-          packageContents: ["1 Elephant"],
-          images: ["/api/placeholder/80/80"],
-          design: "Classic",
-          size: "Large",
-          color: "Antique Gold",
-          packSize: "Single",
-          dimensions: { length: 18, width: 12, height: 9, unit: "inch" },
-          weight: "2.1kg",
-          basePrice: 3999,
-          discountedPrice: 3299,
-          stock: 0,
-          materials: [],
-          makingCost: 1200,
-        },
-      ],
-      minPrice: 2499,
-      maxPrice: 3999,
-      minDiscountedPrice: 1999,
-      reviews: [],
-      averageRating: 4.5,
-      totalReviews: 112,
-      soldCount: 240,
-      totalClicks: 3421,
-      isActive: true,
-      isFeatured: false,
-      isPublished: true,
-      tags: ["brass", "elephant", "home decor"],
-      createdAt: "2026-08-20T10:00:00Z",
-      updatedAt: "2026-09-10T09:00:00Z",
-    },
-    {
-      _id: "p3",
-      name: "Wooden Wall Art Floral",
-      slug: "wooden-wall-art-floral",
-      category: "Home Decor",
-      subCategory: "Wall Art",
-      occasionNames: ["Housewarming"],
-      subOccasionNames: [],
-      careInstructions: ["Keep away from moisture"],
-      isCustomizationAvailable: false,
-      processingTime: "2-3 business days",
-      variants: [],
-      minPrice: 0,
-      maxPrice: 0,
-      reviews: [],
-      averageRating: 0,
-      totalReviews: 0,
-      soldCount: 0,
-      totalClicks: 24,
-      isActive: true,
-      isFeatured: false,
-      isPublished: false,
-      tags: ["wooden", "wall art"],
-      createdAt: "2026-09-12T10:00:00Z",
-      updatedAt: "2026-09-12T10:00:00Z",
-    },
-  ];
 
   // ─── KPI items ──────────────────────────────────────
   const kpiItems: TKPIItem[] = [
@@ -248,11 +128,32 @@ const ProductsManagement = () => {
       accent: "bg-green-50 text-green-600",
     },
     {
-      id: "draft",
-      label: "Drafts",
-      value: kpi.draftProducts.toLocaleString("en-IN"),
-      icon: <FiEdit3 size={18} />,
+      id: "not-published",
+      label: "Not Published",
+      value: kpi.notPublishedProducts.toLocaleString("en-IN"),
+      icon: <FiEyeOff size={18} />,
       accent: "bg-amber-50 text-amber-600",
+    },
+    {
+      id: "active",
+      label: "Active Products",
+      value: kpi.activeProducts.toLocaleString("en-IN"),
+      icon: <FiZap size={18} />,
+      accent: "bg-emerald-50 text-emerald-600",
+    },
+    {
+      id: "inactive",
+      label: "Inactive Products",
+      value: kpi.inactiveProducts.toLocaleString("en-IN"),
+      icon: <FiXCircle size={18} />,
+      accent: "bg-red-50 text-red-600",
+    },
+    {
+      id: "featured",
+      label: "Featured Products",
+      value: kpi.featuredProducts.toLocaleString("en-IN"),
+      icon: <FiStar size={18} />,
+      accent: "bg-primary-10/10 text-primary-10",
     },
     {
       id: "oos",
@@ -261,68 +162,15 @@ const ProductsManagement = () => {
       icon: <FiAlertCircle size={18} />,
       accent: "bg-red-50 text-red-600",
     },
-    {
-      id: "revenue",
-      label: "Revenue",
-      value: `₹${(kpi.totalRevenue / 100000).toFixed(2)}L`,
-      icon: <FiBox size={18} />,
-      accent: "bg-primary-10/10 text-primary-10",
-      trend: { value: kpi.revenueChange, label: "vs last month" },
-    },
   ];
 
-  // ─── Filtering & sorting ────────────────────────────
-  const filteredProducts = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    let result = products.filter((p) => {
-      if (category !== "all" && p.category !== category) return false;
-      if (status === "published" && !p.isPublished) return false;
-      if (status === "draft" && p.isPublished) return false;
-      if (status === "inactive" && p.isActive) return false;
-      if (q) {
-        const matches =
-          p.name.toLowerCase().includes(q) ||
-          p?.slug?.toLowerCase().includes(q) ||
-          p?.tags?.some((t) => t.toLowerCase().includes(q));
-        if (!matches) return false;
-      }
-      return true;
-    });
-
-    if (sortBy === "price-high") {
-      result = [...result].sort((a, b) => b.minPrice - a.minPrice);
-    } else if (sortBy === "price-low") {
-      result = [...result].sort((a, b) => a.minPrice - b.minPrice);
-    } else if (sortBy === "stock-low") {
-      result = [...result].sort(
-        (a, b) => getProductTotalStock(a) - getProductTotalStock(b),
-      );
-    } else if (sortBy === "best-selling") {
-      result = [...result].sort((a, b) => b.soldCount - a.soldCount);
-    } else {
-      result = [...result].sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-    }
-
-    return result;
-  }, [products, search, category, status, sortBy]);
-
   // ─── Pagination ─────────────────────────────────────
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredProducts.length / ITEMS_PER_PAGE),
-  );
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE,
-  );
+  const totalPages = 1;
 
   // ─── Handlers ───────────────────────────────────────
   const handleClearFilters = () => {
-    setSearch("");
-    setCategory("all");
+    setKeyword("");
+    setCategory("");
     setStatus("all");
     setSortBy("newest");
     setCurrentPage(1);
@@ -358,16 +206,6 @@ const ProductsManagement = () => {
     setAddVariantOpen(true);
   };
 
-  const handleEditVariant = (variant: TProductVariant) => {
-    console.log("Edit variant:", variant._id);
-    // TODO: open edit variant modal
-  };
-
-  const handleDeleteVariant = (variantId: string) => {
-    console.log("Delete variant:", variantId);
-    // TODO: open variant delete confirmation
-  };
-
   // ─── Table columns ──────────────────────────────────
   const columns: TDataTableColumn<TProduct>[] = [
     {
@@ -392,7 +230,8 @@ const ProductsManagement = () => {
             </div>
             <div className="min-w-0">
               <Link
-                to={`/admin/products/${p._id}`}
+                to={`/product/${p.slug}`}
+                target="_blank"
                 className="text-sm font-semibold text-neutral-10 hover:text-primary-10 transition-colors truncate block max-w-55"
               >
                 {p.name}
@@ -458,11 +297,6 @@ const ProductsManagement = () => {
           </span>
         );
       },
-    },
-    {
-      key: "status",
-      header: "Status",
-      render: (p) => <ProductStatusBadge product={p} />,
     },
     {
       key: "actions",
@@ -568,7 +402,7 @@ const ProductsManagement = () => {
   ];
 
   const hasActiveFilters =
-    search.trim() !== "" || category !== "all" || status !== "all";
+    keyword.trim() !== "" || category !== "" || status !== "all";
 
   return (
     <div className="space-y-5 font-Manrope">
@@ -583,7 +417,7 @@ const ProductsManagement = () => {
               Generate Report
             </button>
             <Link
-              to="/admin/products/new"
+              to="/admin/dashboard/add-product"
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-10 text-white text-sm font-medium hover:bg-[#d4892a] transition-all shadow-md shadow-primary-10/20"
             >
               <FiPlus size={16} />
@@ -597,9 +431,9 @@ const ProductsManagement = () => {
 
       <DataFilters
         search={{
-          value: search,
+          value: keyword,
           onChange: (v) => {
-            setSearch(v);
+            setKeyword(v);
             setCurrentPage(1);
           },
           placeholder: "Search by product name, slug, or tags…",
@@ -612,7 +446,7 @@ const ProductsManagement = () => {
               setCategory(v);
               setCurrentPage(1);
             },
-            options: categoryOptions,
+            options: categories,
           },
           {
             id: "status",
@@ -635,7 +469,6 @@ const ProductsManagement = () => {
         ]}
         hasActiveFilters={hasActiveFilters}
         onClear={handleClearFilters}
-        onExport={() => console.log("Export products")}
       />
 
       <BulkActionBar
@@ -644,7 +477,7 @@ const ProductsManagement = () => {
         actions={bulkActions}
       />
 
-      {paginatedProducts.length === 0 ? (
+      {products?.length === 0 ? (
         <DataTableEmpty
           icon={<FiPackage size={32} />}
           title="No products found"
@@ -660,7 +493,7 @@ const ProductsManagement = () => {
       ) : (
         <>
           <DataTable
-            rows={paginatedProducts}
+            rows={products}
             columns={columns}
             rowKey={(p) => p._id}
             selectable
@@ -673,7 +506,9 @@ const ProductsManagement = () => {
               )
             }
             onSelectAll={(checked) =>
-              setSelectedIds(checked ? paginatedProducts.map((p) => p._id) : [])
+              setSelectedIds(
+                checked ? products?.map((p: TProduct) => p._id) : [],
+              )
             }
             minWidth="1100px"
           />
@@ -681,7 +516,7 @@ const ProductsManagement = () => {
           <DataTablePagination
             currentPage={currentPage}
             totalPages={totalPages}
-            totalItems={filteredProducts.length}
+            totalItems={products?.length}
             itemsPerPage={ITEMS_PER_PAGE}
             onPageChange={setCurrentPage}
           />
@@ -694,8 +529,6 @@ const ProductsManagement = () => {
         onClose={() => setVariantsDrawerOpen(false)}
         product={activeProduct}
         onAddVariant={handleAddVariant}
-        onEditVariant={handleEditVariant}
-        onDeleteVariant={handleDeleteVariant}
       />
 
       <ProductDeleteModal
@@ -706,7 +539,7 @@ const ProductsManagement = () => {
         isLoading={isDeleting}
       />
 
-      <AddVariantModal
+      <AddOrEditVariantModal
         isOpen={addVariantOpen}
         onClose={() => setAddVariantOpen(false)}
         productId={activeProduct?._id}

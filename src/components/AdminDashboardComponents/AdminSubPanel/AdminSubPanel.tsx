@@ -32,7 +32,7 @@ const AdminSubPanel = ({
       {/* Sub-navigation */}
       <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
         {group.items.map((item) => {
-          const active = currentPath.startsWith(item.path);
+          const active = currentPath === item.path;
           return (
             <Link
               key={item.path}

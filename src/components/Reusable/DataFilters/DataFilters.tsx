@@ -1,4 +1,4 @@
-import { FiDownload, FiX } from "react-icons/fi";
+import { FiX } from "react-icons/fi";
 import SearchField from "./SearchField";
 import SelectField from "./SelectField";
 import type { TDataFiltersProps } from "../../../types/dataFilters.types";
@@ -8,7 +8,6 @@ const DataFilters = ({
   selects = [],
   hasActiveFilters,
   onClear,
-  onExport,
   extraActions,
 }: TDataFiltersProps) => {
   return (
@@ -47,20 +46,6 @@ const DataFilters = ({
           )}
 
           {extraActions}
-
-          {onExport && (
-            <button
-              onClick={onExport}
-              className="
-                flex items-center gap-2 px-3.5 py-2.5 rounded-xl
-                bg-neutral-20/60 text-sm font-medium text-neutral-10
-                hover:bg-neutral-20 transition-all
-              "
-            >
-              <FiDownload size={14} />
-              <span className="hidden sm:inline">Export</span>
-            </button>
-          )}
         </div>
       </div>
     </div>

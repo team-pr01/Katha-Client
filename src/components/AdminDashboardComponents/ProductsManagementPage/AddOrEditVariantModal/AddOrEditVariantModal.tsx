@@ -1,12 +1,15 @@
 import { FiX, FiPlus } from "react-icons/fi";
+import type { TProductVariant } from "../../../../types/product.type";
 
-interface AddVariantModalProps {
+interface AddOrEditVariantModalProps {
   isOpen: boolean;
   onClose: () => void;
-  productId?: string;
+  productId?: string | null;
+  variant?: TProductVariant | null;
 }
 
-const AddVariantModal = ({ isOpen, onClose, productId }: AddVariantModalProps) => {
+const AddOrEditVariantModal = ({ isOpen, onClose, productId, variant }: AddOrEditVariantModalProps) => {
+  console.log(variant);
   if (!isOpen) return null;
 
   return (
@@ -53,4 +56,4 @@ const AddVariantModal = ({ isOpen, onClose, productId }: AddVariantModalProps) =
   );
 };
 
-export default AddVariantModal;
+export default AddOrEditVariantModal;

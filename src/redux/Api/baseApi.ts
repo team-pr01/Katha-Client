@@ -57,6 +57,7 @@ export const baseApi = createApi({
     "occasion",
     "category",
     "product",
+    "productVariant",
     "couponCode",
     "materials",
     "user",
