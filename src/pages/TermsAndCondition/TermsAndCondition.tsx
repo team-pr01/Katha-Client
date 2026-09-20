@@ -174,14 +174,14 @@ const TermsAndCondition = () => {
                 </p>
               </PolicySection>
 
-              <PolicySection number="8" title="Cancellations & Returns">
+              <PolicySection number="8" title="Return & Refund">
                 <p>
                   Please refer to our{" "}
                   <Link
-                    to="/refund-cancellation-policy"
+                    to="/return-and-refund-policy"
                     className="text-primary-10 underline hover:text-[#d4892a]"
                   >
-                    Refund & Cancellation Policy
+                    Return & Refund Policy
                   </Link>{" "}
                   for complete details on order cancellations, returns,
                   replacements, and refunds.
@@ -227,7 +227,7 @@ const TermsAndCondition = () => {
                   These Terms are governed by the laws of India. Any disputes
                   arising shall be subject to the exclusive jurisdiction of the
                   courts in{" "}
-                  <strong>[Your City], [Your State], India</strong>.
+                  <strong>Ch.  Sambhaji Nagar, Maharashtra , India</strong>.
                 </p>
               </PolicySection>
 
@@ -286,23 +286,23 @@ export const ContactInfo = () => (
       <p className="text-neutral-45">
         Email:{" "}
         <a
-          href="mailto:support@katha.com"
+          href="mailto:support.katha@gmail.com"
           className="text-primary-10 hover:underline"
         >
-          support@katha.com
+          support.katha@gmail.com
         </a>
       </p>
       <p className="text-neutral-45">
         Phone:{" "}
-        <a href="tel:+919876500000" className="text-primary-10 hover:underline">
-          +91 98765 00000
+        <a href="tel:+919420784505" className="text-primary-10 hover:underline">
+          +91 94207 84505
         </a>
       </p>
       <p className="text-neutral-45">
-        Address: [Your Business Address], India
+        Address: Simrat Residency, Nagina nagar Ch.  Sambhaji Nagar, Maharashtra, 431001, India
       </p>
       <p className="text-neutral-45">
-        Business Hours: Mon-Sat, 9:00 AM - 6:00 PM IST
+        Business Hours: Mon-Sat, 9:00 AM - 10:00 PM IST
       </p>
     </div>
   </div>

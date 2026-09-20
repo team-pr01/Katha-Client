@@ -85,17 +85,17 @@ const Footer = () => {
   const contactDetails = [
     {
       icon: ICONS.location,
-      text: "Maharashtra 400001, India",
+      text: "Simrat Residency , Nagina nagar Ch.  Sambhaji Nagar, Maharashtra, 431001, India",
     },
     {
       icon: ICONS.phone,
-      text: "+91 98765 00000 (WhatsApp)",
-      href: "tel:+919876500000",
+      text: "+91 94207 84505 (WhatsApp)",
+      href: "tel:+919420784505",
     },
     {
       icon: ICONS.email,
-      text: "info@kathacelebrations.com",
-      href: "mailto:info@kathacelebrations.com",
+      text: "support.katha@gmail.com",
+      href: "mailto:support.katha@gmail.com",
     },
   ];
 

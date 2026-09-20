@@ -190,10 +190,10 @@ const PrivacyPolicy = () => {
                 <p>
                   To exercise any of these rights, please contact us at{" "}
                   <a
-                    href="mailto:privacy@katha.com"
+                    href="mailto:support.katha@gmail.com"
                     className="text-primary-10 hover:underline"
                   >
-                    privacy@katha.com
+                    support.katha@gmail.com
                   </a>
                   .
                 </p>

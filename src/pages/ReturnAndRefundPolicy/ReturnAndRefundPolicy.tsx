@@ -109,10 +109,10 @@ const ReturnAndRefundPolicy = () => {
                   <li>
                     Email{" "}
                     <a
-                      href="mailto:support@katha.com"
+                      href="mailto:support.katha@gmail.com"
                       className="text-primary-10 hover:underline"
                     >
-                      support@katha.com
+                      support.katha@gmail.com
                     </a>{" "}
                     within <strong>7 days of delivery</strong> with your Order
                     ID and reason for return.
