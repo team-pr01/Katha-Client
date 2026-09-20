@@ -22,6 +22,10 @@ import AdminDashboardHome from "../pages/AdminDashboardPages/AdminDashboardHome/
 import OrdersManagement from "../pages/AdminDashboardPages/OrdersManagement/OrdersManagement";
 import ProductsManagement from "../pages/AdminDashboardPages/ProductsManagement/ProductsManagement";
 import AddProduct from "../pages/AdminDashboardPages/AddProduct/AddProduct";
+import TermsAndCondition from "../pages/TermsAndCondition/TermsAndCondition";
+import PrivacyPolicy from "../pages/PrivacyPolicy/PrivacyPolicy";
+import RefundPolicy from "../pages/ReturnAndRefundPolicy/ReturnAndRefundPolicy";
+import ReturnAndRefundPolicy from "../pages/ReturnAndRefundPolicy/ReturnAndRefundPolicy";
 
 export const router = createBrowserRouter([
   {
@@ -77,6 +81,19 @@ export const router = createBrowserRouter([
         path: "/bulk-orders",
         element: <BulkOrders />,
       },
+      {
+        path: "/terms-and-conditions",
+        element: <TermsAndCondition />,
+      },
+      {
+        path: "/privacy-policy",
+        element: <PrivacyPolicy />,
+      },
+      {
+        path: "/return-and-refund-policy",
+        element: <ReturnAndRefundPolicy />,
+      },
+
       {
         path: "*",
         element: <NotFound />,

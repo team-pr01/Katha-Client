@@ -3,6 +3,7 @@ import { ICONS, IMAGES } from "../../../assets";
 import Container from "../../Reusable/Container/Container";
 import { LiaFacebook } from "react-icons/lia";
 import { RiYoutubeLine } from "react-icons/ri";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   const socialMediaDetails = [
@@ -213,9 +214,18 @@ const Footer = () => {
           </div>
 
           <img src={IMAGES.footerDivider} alt="" className="w-full my-6" />
-          <p className="text-neutral-10 font-semibold text-sm leading-5 text-center">
+          <div className="flex items-center justify-between">
+            <p className="text-neutral-10 font-semibold text-sm leading-5">
             All rights reserved © Katha 2026
           </p>
+
+          <div className="flex items-center gap-6">
+            <Link to="/terms-and-conditions" className="text-neutral-10 font-semibold text-sm leading-5 hover:underline">Terms and Conditions</Link>
+            <Link to="/privacy-policy" className="text-neutral-10 font-semibold text-sm leading-5 hover:underline">Privacy Policy</Link>
+            <Link to="/return-and-refund-policy" className="text-neutral-10 font-semibold text-sm leading-5 hover:underline">Return and Refund Policy</Link>
+
+          </div>
+          </div>
         </div>
       </Container>
     </div>
