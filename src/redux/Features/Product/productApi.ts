@@ -24,7 +24,7 @@ const productApi = baseApi.injectEndpoints({
         sortBy?: string;
         skip?: number;
         limit?: number;
-        status?:any;
+        status?: any;
       }
     >({
       query: (filters) => {
@@ -85,13 +85,13 @@ const productApi = baseApi.injectEndpoints({
           params.append("sortBy", filters.sortBy);
         }
 
-        if(filters.status === "active"){
+        if (filters.status === "active") {
           params.append("isActive", "true");
-        } else if(filters.status === "inactive"){
+        } else if (filters.status === "inactive") {
           params.append("isActive", "false");
-        } else if(filters.status === "published"){
+        } else if (filters.status === "published") {
           params.append("isPublished", "true");
-        } else if(filters.status === "unpublished"){
+        } else if (filters.status === "unpublished") {
           params.append("isPublished", "false");
         }
 
@@ -131,6 +131,16 @@ const productApi = baseApi.injectEndpoints({
       invalidatesTags: ["product"],
     }),
 
+    updateProduct: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/product/update/${id}`,
+        method: "PATCH",
+        body: data,
+        credentials: "include",
+      }),
+      invalidatesTags: ["product"],
+    }),
+
     deleteProduct: builder.mutation({
       query: (id) => ({
         url: `/product/delete/${id}`,
@@ -146,5 +156,6 @@ export const {
   useGetAllProductsQuery,
   useGetSingleProductBySlugQuery,
   useAddProductMutation,
+  useUpdateProductMutation,
   useDeleteProductMutation,
 } = productApi;

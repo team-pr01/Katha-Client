@@ -1,16 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useForm } from "react-hook-form";
 import { useEffect, useState, type KeyboardEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { FiX } from "react-icons/fi";
 import toast from "react-hot-toast";
-import { useAddProductMutation } from "../../../redux/Features/Product/productApi";
+import {
+  useAddProductMutation,
+  useGetSingleProductBySlugQuery,
+  useUpdateProductMutation,
+} from "../../../redux/Features/Product/productApi";
 import TextInput from "../../../components/Reusable/TextInput/TextInput";
 import Button from "../../../components/Reusable/Button/Button";
 import SelectDropdownWithSearch from "../../../components/Reusable/SelectDropdownWithSearch/SelectDropdownWithSearch";
 import { useGetAllCategoriesQuery } from "../../../redux/Features/Category/categoryApi";
 import { useGetAllOccasionsQuery } from "../../../redux/Features/Occation/occasionApi";
 import type { TCategory } from "../../../types/categories.interface";
+import AddOrEditProductSkeleton from "../../../components/SkeletonLoaders/AddOrEditProductSkeleton/AddOrEditProductSkeleton";
 
 // ─── Types ────────────────────────────────────────────────
 type TFormData = {
@@ -23,9 +28,20 @@ type TFormData = {
 };
 
 // ─── Component ────────────────────────────────────────────
-const AddProduct = () => {
+const AddOrEditProduct = () => {
+  const { slug } = useParams();
+  const isEditMode = Boolean(slug);
   const navigate = useNavigate();
-  const [addProduct, { isLoading }] = useAddProductMutation();
+
+  const { data: singleProduct, isLoading: isProductLoading } =
+    useGetSingleProductBySlugQuery(slug, {
+      skip: !slug,
+    });
+  const singleProductData = singleProduct?.data || {};
+  console.log(singleProductData);
+  const [addProduct, { isLoading: isAddingProduct }] = useAddProductMutation();
+  const [updateProduct, { isLoading: isUpdatingProduct }] =
+    useUpdateProductMutation();
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   // ─── API data ────────────────────────────────────────
@@ -59,7 +75,9 @@ const AddProduct = () => {
 
   // ─── Multi-select state (occasions) ──────────────────
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
-  const [selectedSubOccasions, setSelectedSubOccasions] = useState<string[]>([]);
+  const [selectedSubOccasions, setSelectedSubOccasions] = useState<string[]>(
+    [],
+  );
 
   // ─── Chip array state (care instructions + tags) ─────
   const [careInstructions, setCareInstructions] = useState<string[]>([]);
@@ -74,6 +92,58 @@ const AddProduct = () => {
   // ─── Validation flags (only show after submit attempt) ───
   const [showValidation, setShowValidation] = useState(false);
 
+  // ─── Prefill form in edit mode ───────────────────────
+  useEffect(() => {
+    if (!isEditMode || !singleProductData?._id) return;
+
+    // Populate RHF fields
+    reset({
+      name: singleProductData?.name || "",
+      category: singleProductData?.category || "",
+      subCategory: singleProductData?.subCategory || "",
+      processingTime: singleProductData?.processingTime || "",
+      isCustomizationAvailable:
+        singleProductData?.isCustomizationAvailable || false,
+      isFeatured: singleProductData?.isFeatured || false,
+    });
+
+    // Populate chip + multi-select states
+    setSelectedOccasions(singleProductData?.occasionNames || []);
+    setSelectedSubOccasions(singleProductData?.subOccasionNames || []);
+    setCareInstructions(singleProductData?.careInstructions || []);
+    setTags(singleProductData?.tags || []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditMode, singleProductData?._id]);
+
+  // ─── Track when initial prefill is done ──────────────
+  const [isPrefilled, setIsPrefilled] = useState(!isEditMode);
+
+  // ─── Prefill form in edit mode ───────────────────────
+  useEffect(() => {
+    if (!isEditMode || !singleProductData?._id) return;
+
+    reset({
+      name: singleProductData?.name || "",
+      category: singleProductData?.category || "",
+      subCategory: singleProductData?.subCategory || "",
+      processingTime: singleProductData?.processingTime || "",
+      isCustomizationAvailable:
+        singleProductData?.isCustomizationAvailable || false,
+      isFeatured: singleProductData?.isFeatured || false,
+    });
+
+    setSelectedOccasions(singleProductData?.occasionNames || []);
+    setSelectedSubOccasions(singleProductData?.subOccasionNames || []);
+    setCareInstructions(singleProductData?.careInstructions || []);
+    setTags(singleProductData?.tags || []);
+
+    // Mark prefill complete (defer to next tick so state is settled)
+    const t = setTimeout(() => setIsPrefilled(true), 0);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditMode, singleProductData?._id]);
+
+  // ─── Subcategory options (category-aware) ────────────
   useEffect(() => {
     if (!selectedCategory) {
       setSubCategoryOptions([]);
@@ -91,11 +161,18 @@ const AddProduct = () => {
 
     setSubCategoryOptions(normalized);
 
-    if (selectedSubCategory && !normalized.includes(selectedSubCategory)) {
+    // 👇 Only prune AFTER prefill is done AND categories are loaded
+    const categoriesReady = categories.length > 0;
+    if (
+      isPrefilled &&
+      categoriesReady &&
+      selectedSubCategory &&
+      !normalized.includes(selectedSubCategory)
+    ) {
       setValue("subCategory", "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCategory, categories]);
+  }, [selectedCategory, categories, isPrefilled]);
 
   // ─── Derive sub-occasion options from selected occasions ───
   const subOccasionOptions: string[] = (() => {
@@ -111,12 +188,16 @@ const AddProduct = () => {
     return Array.from(set);
   })();
 
+  // ─── Prune stale sub-occasions — only after prefill + occasions loaded ───
   useEffect(() => {
+    const occasionsReady = occasions.length > 0;
+    if (!isPrefilled || !occasionsReady) return;
+
     setSelectedSubOccasions((prev) =>
       prev.filter((s) => subOccasionOptions.includes(s)),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(subOccasionOptions)]);
+  }, [JSON.stringify(subOccasionOptions), isPrefilled, occasions.length]);
 
   // ─── Chip helpers (Enter to add — no Add button) ─────
   const handleCareKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -159,8 +240,8 @@ const AddProduct = () => {
     setTags((prev) => prev.filter((i) => i !== item));
   };
 
-  // ─── Submit ──────────────────────────────────────────
-  const handleAddProduct = async (formData: TFormData) => {
+  // ─── Submit (add or update) ──────────────────────────
+  const handleSubmitProduct = async (formData: TFormData) => {
     setSubmitError(null);
     setShowValidation(true);
 
@@ -169,6 +250,28 @@ const AddProduct = () => {
     if (careInstructions.length === 0) return;
 
     try {
+      // Preserve existing variants when editing
+      const existingVariants = isEditMode
+        ? singleProductData?.variants?.map((v: any) => ({
+            name: v.name,
+            description: v.description,
+            packageContents: v.packageContents || [],
+            images: v.images || [],
+            design: v.design,
+            size: v.size,
+            color: v.color,
+            packSize: v.packSize,
+            dimensions: v.dimensions,
+            weight: v.weight,
+            basePrice: v.basePrice,
+            discountedPrice: v.discountedPrice,
+            bulkPrice: v.bulkPrice,
+            stock: v.stock,
+            materials: v.materials || [],
+            makingCost: v.makingCost,
+          })) || []
+        : [];
+
       const payload = {
         name: formData.name.trim(),
         category: formData.category.trim(),
@@ -180,32 +283,46 @@ const AddProduct = () => {
         processingTime: formData.processingTime.trim() || null,
         isCustomizationAvailable: formData.isCustomizationAvailable,
         isFeatured: formData.isFeatured,
-        variants: [],
+        variants: existingVariants,
       };
 
-      const response = await addProduct(payload).unwrap();
+      if (isEditMode) {
+        // ─── Update ────────────────────────────────────
+        await updateProduct({
+          id: singleProductData?._id,
+          data: payload,
+        }).unwrap();
 
-      if (response?.success) {
-        toast.success("Product created! Now add its variants.");
-        reset();
-        setSelectedOccasions([]);
-        setSelectedSubOccasions([]);
-        setCareInstructions([]);
-        setTags([]);
-        setShowValidation(false);
+        toast.success("Product updated successfully!");
+        navigate("/admin/dashboard/products-management");
+      } else {
+        // ─── Add ───────────────────────────────────────
+        const response = await addProduct(payload).unwrap();
 
-        const newProductId = response?.data?._id;
-        navigate(
-          newProductId
-            ? `/admin/dashboard/products-management/${newProductId}`
-            : "/admin/dashboard/products-management",
-        );
+        if (response?.success) {
+          toast.success("Product created! Now add its variants.");
+          reset();
+          setSelectedOccasions([]);
+          setSelectedSubOccasions([]);
+          setCareInstructions([]);
+          setTags([]);
+          setShowValidation(false);
+
+          const newProductId = response?.data?._id;
+          navigate(
+            newProductId
+              ? `/admin/dashboard/products-management/${newProductId}`
+              : "/admin/dashboard/products-management",
+          );
+        }
       }
     } catch (err: any) {
       const errorMessage =
         err?.data?.message ||
         err?.error ||
-        "Something went wrong while adding the product. Please try again.";
+        `Something went wrong while ${
+          isEditMode ? "updating" : "adding"
+        } the product. Please try again.`;
       setSubmitError(errorMessage);
       toast.error(errorMessage);
     }
@@ -222,6 +339,9 @@ const AddProduct = () => {
       ? "Please add at least one care instruction"
       : null;
 
+  if (isProductLoading) {
+    return <AddOrEditProductSkeleton />;
+  }
   return (
     <div className="space-y-5 font-Manrope">
       {/* Header */}
@@ -249,7 +369,7 @@ const AddProduct = () => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(handleAddProduct)} className="space-y-5">
+      <form onSubmit={handleSubmit(handleSubmitProduct)} className="space-y-5">
         <section className="bg-white rounded-2xl border border-neutral-20 p-5 md:p-6">
           <div className="flex items-center gap-3 mb-5">
             <div className="w-1 h-5 bg-primary-10 rounded-full" />
@@ -447,10 +567,9 @@ const AddProduct = () => {
           {/* ═══ TAGS (chip input, Enter only) ═══ */}
           <div className="mt-6">
             <label className="block text-sm font-medium text-neutral-10 mb-3">
-               <span className="leading-4.5 text-[13px] md:text-sm font-medium tracking-[-0.16]">
-              Tags{" "}
-              <span className="text-primary-10">*</span>
-            </span>
+              <span className="leading-4.5 text-[13px] md:text-sm font-medium tracking-[-0.16]">
+                Tags <span className="text-primary-10">*</span>
+              </span>
             </label>
 
             {tags.length > 0 && (
@@ -530,8 +649,8 @@ const AddProduct = () => {
             variant="primary"
             className="w-full sm:w-auto px-8 py-3"
             icon={true}
-            isLoading={isLoading}
-            isDisabled={isLoading}
+            isLoading={isAddingProduct || isUpdatingProduct}
+            isDisabled={isAddingProduct || isUpdatingProduct}
           />
         </div>
       </form>
@@ -539,4 +658,4 @@ const AddProduct = () => {
   );
 };
 
-export default AddProduct;
+export default AddOrEditProduct;

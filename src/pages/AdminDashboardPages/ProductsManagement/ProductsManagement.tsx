@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   FiPlus,
   FiPackage,
@@ -58,8 +58,6 @@ const sortOptions = [
 ];
 
 const ProductsManagement = () => {
-  const navigate = useNavigate();
-
   const { data: categoryData } = useGetAllCategoriesQuery({});
 
   const categories = [
@@ -187,10 +185,6 @@ const ProductsManagement = () => {
     setVariantsDrawerOpen(true);
   };
 
-  const handleEditProduct = (product: TProduct) => {
-    navigate(`/admin/products/${product._id}/edit`);
-  };
-
   const handleDeleteClick = (id: string) => {
     setSelectedProductId(id);
     setIsDeleteModalOpen(true);
@@ -312,14 +306,14 @@ const ProductsManagement = () => {
             <FiPlus size={14} />
           </button>
 
-          <button
-            onClick={() => handleEditProduct(p)}
+          <Link
+            to={`/admin/dashboard/products-management/edit/${p?.slug}`}
             className="p-1.5 rounded-lg text-neutral-45 hover:text-primary-10 hover:bg-primary-10/10 transition-all"
             title="Edit product"
             aria-label="Edit product"
           >
             <FiEdit2 size={14} />
-          </button>
+          </Link>
 
           <button
             onClick={() => handleDeleteClick(p?._id)}
@@ -347,10 +341,10 @@ const ProductsManagement = () => {
                   onClick={() => setOpenMenuId(null)}
                 />
                 <div className="absolute right-0 top-full mt-1 z-20 w-44 bg-white rounded-xl border border-neutral-20 shadow-xl p-1">
-                  <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-neutral-10 hover:bg-neutral-20 transition-colors">
+                  <Link to={`/product/${p?.slug}`} target="_blank" className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-neutral-10 hover:bg-neutral-20 transition-colors">
                     <FiEye size={12} />
                     Preview
-                  </button>
+                  </Link>
                   <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-neutral-10 hover:bg-neutral-20 transition-colors">
                     <FiUpload size={12} />
                     {p.isPublished ? "Unpublish" : "Publish"}
@@ -361,7 +355,7 @@ const ProductsManagement = () => {
                   </button>
                   <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-neutral-10 hover:bg-neutral-20 transition-colors">
                     <FiDownload size={12} />
-                    Duplicate
+                    Download Report
                   </button>
                 </div>
               </>
@@ -423,7 +417,7 @@ const ProductsManagement = () => {
               Generate Report
             </button>
             <Link
-              to="/admin/dashboard/add-product"
+              to="/admin/dashboard/products-management/new"
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-10 text-white text-sm font-medium hover:bg-[#d4892a] transition-all shadow-md shadow-primary-10/20"
             >
               <FiPlus size={16} />

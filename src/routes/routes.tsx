@@ -21,10 +21,10 @@ import AdminDashboardLayout from "../layouts/AdminDashboardLayout/AdminDashboard
 import AdminDashboardHome from "../pages/AdminDashboardPages/AdminDashboardHome/AdminDashboardHome";
 import OrdersManagement from "../pages/AdminDashboardPages/OrdersManagement/OrdersManagement";
 import ProductsManagement from "../pages/AdminDashboardPages/ProductsManagement/ProductsManagement";
-import AddProduct from "../pages/AdminDashboardPages/AddProduct/AddProduct";
 import TermsAndCondition from "../pages/TermsAndCondition/TermsAndCondition";
 import PrivacyPolicy from "../pages/PrivacyPolicy/PrivacyPolicy";
 import ReturnAndRefundPolicy from "../pages/ReturnAndRefundPolicy/ReturnAndRefundPolicy";
+import AddOrEditProduct from "../pages/AdminDashboardPages/AddOrEditProduct/AddOrEditProduct";
 
 export const router = createBrowserRouter([
   {
@@ -140,12 +140,16 @@ export const router = createBrowserRouter([
         element: <ProductsManagement />,
       },
       {
-        path: "products-management/:id",  // To open the add variant modal if new product's been added
+        path: "products-management/:slug",  // To open the add variant modal if new product's been added
         element: <ProductsManagement />,
       },
       {
-        path: "add-product",
-        element: <AddProduct />,
+        path: "products-management/new",
+        element: <AddOrEditProduct />,
+      },
+      {
+        path: "products-management/edit/:slug",
+        element: <AddOrEditProduct />,
       },
       {
         path: "*",
