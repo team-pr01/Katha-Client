@@ -33,7 +33,9 @@ const AdminIconRail = ({ activeGroupId, onLogout }: AdminIconRailProps) => {
               onMouseEnter={() => setHoveredNav(group.id)}
               onMouseLeave={() => setHoveredNav(null)}
             >
-              <button
+              {/* 👇 Changed from <button> to <Link> */}
+              <Link
+                to={group.defaultPath}
                 className={`
                   relative size-11 rounded-2xl flex items-center justify-center
                   transition-all duration-300
@@ -50,7 +52,7 @@ const AdminIconRail = ({ activeGroupId, onLogout }: AdminIconRailProps) => {
                 {isActive && (
                   <span className="absolute -left-3 top-1/2 -translate-y-1/2 size-1.5 rounded-full bg-primary-10" />
                 )}
-              </button>
+              </Link>
 
               {/* Tooltip */}
               {!isActive && (

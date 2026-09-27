@@ -1,21 +1,41 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { FiChevronRight, FiPlus } from "react-icons/fi";
 import type { TAdminNavGroup } from "../../../config/navConfig";
 
 interface AdminSubPanelProps {
   group: TAdminNavGroup;
-  currentPath: string;
+  currentPath?: string;
   onQuickCreate?: () => void;
 }
+
+/**
+ * Check if a route path is active.
+ *
+ * Rules:
+ *  - Exact match → active
+ *  - Path is a parent segment of the current route → active
+ *    (e.g. /admin/orders is active when current is /admin/orders/123)
+ *  - Prevent false positives where /admin/dashboard matches
+ *    /admin/dashboard-products by requiring a "/" boundary.
+ */
+const isRouteActive = (current: string, target: string) => {
+  if (current === target) return true;
+  return current.startsWith(target + "/");
+};
 
 const AdminSubPanel = ({
   group,
   currentPath,
   onQuickCreate,
 }: AdminSubPanelProps) => {
-  const currentItem = group.items.find((i) =>
-    currentPath.startsWith(i.path),
-  );
+  const location = useLocation();
+  const path = currentPath ?? location.pathname;
+
+  // Pick the most specific (longest) matching item so nested paths
+  // don't accidentally match a shorter parent route.
+  const currentItem = [...group.items]
+    .sort((a, b) => b.path.length - a.path.length)
+    .find((i) => isRouteActive(path, i.path));
 
   return (
     <aside className="sticky top-0 h-screen w-60 shrink-0 bg-white border-r border-neutral-20 flex flex-col z-30">
@@ -32,7 +52,7 @@ const AdminSubPanel = ({
       {/* Sub-navigation */}
       <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
         {group.items.map((item) => {
-          const active = currentPath === item.path;
+          const active = isRouteActive(path, item.path);
           return (
             <Link
               key={item.path}
@@ -65,6 +85,7 @@ const AdminSubPanel = ({
       {/* Quick action */}
       <div className="p-3 border-t border-neutral-20">
         <button
+          type="button"
           onClick={onQuickCreate}
           className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-neutral-10 hover:bg-neutral-20 transition-all"
         >

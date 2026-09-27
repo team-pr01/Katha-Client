@@ -25,6 +25,7 @@ import TermsAndCondition from "../pages/TermsAndCondition/TermsAndCondition";
 import PrivacyPolicy from "../pages/PrivacyPolicy/PrivacyPolicy";
 import ReturnAndRefundPolicy from "../pages/ReturnAndRefundPolicy/ReturnAndRefundPolicy";
 import AddOrEditProduct from "../pages/AdminDashboardPages/AddOrEditProduct/AddOrEditProduct";
+import CategoriesManagement from "../pages/AdminDashboardPages/CategoriesManagement/CategoriesManagement";
 
 export const router = createBrowserRouter([
   {
@@ -140,7 +141,7 @@ export const router = createBrowserRouter([
         element: <ProductsManagement />,
       },
       {
-        path: "products-management/:slug",  // To open the add variant modal if new product's been added
+        path: "products-management/:slug", // To open the add variant modal if new product's been added
         element: <ProductsManagement />,
       },
       {
@@ -150,6 +151,10 @@ export const router = createBrowserRouter([
       {
         path: "products-management/edit/:slug",
         element: <AddOrEditProduct />,
+      },
+      {
+        path: "categories-management",
+        element: <CategoriesManagement />,
       },
       {
         path: "*",

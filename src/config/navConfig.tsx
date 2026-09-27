@@ -16,6 +16,7 @@ export interface TAdminNavGroup {
   id: string;
   label: string;
   icon: ReactNode;
+  defaultPath: string;
   items: TAdminNavItem[];
 }
 
@@ -24,10 +25,9 @@ export const adminNavGroups: TAdminNavGroup[] = [
     id: "overview",
     label: "Overview",
     icon: <FiGrid size={20} />,
+    defaultPath: "/admin/dashboard",
     items: [
       { label: "Dashboard", path: "/admin/dashboard" },
-      { label: "Products", path: "/admin/dashboard/products-management" },
-      { label: "Orders", path: "/admin/dashboard/orders-management" },
       { label: "Analytics", path: "/admin/dashboard/analytics" },
       { label: "Activity", path: "/admin/dashboard/activity" },
     ],
@@ -36,10 +36,11 @@ export const adminNavGroups: TAdminNavGroup[] = [
     id: "commerce",
     label: "Commerce",
     icon: <FiShoppingBag size={20} />,
+    defaultPath: "/admin/dashboard/orders-management",
     items: [
-      { label: "Orders", path: "/admin/orders" },
-      { label: "Products", path: "/admin/products" },
-      { label: "Categories", path: "/admin/categories" },
+      { label: "Orders", path: "/admin/dashboard/orders-management" },
+      { label: "Products", path: "/admin/dashboard/products-management" },
+      { label: "Categories", path: "/admin/dashboard/categories-management" },
       { label: "Occasions", path: "/admin/occasions" },
     ],
   },
@@ -47,6 +48,7 @@ export const adminNavGroups: TAdminNavGroup[] = [
     id: "people",
     label: "People",
     icon: <FiUsers size={20} />,
+    defaultPath: "/admin/dashboard/users",
     items: [
       { label: "Users", path: "/admin/users" },
       { label: "Reviews", path: "/admin/reviews" },
@@ -56,6 +58,7 @@ export const adminNavGroups: TAdminNavGroup[] = [
     id: "content",
     label: "Content",
     icon: <FiLayers size={20} />,
+    defaultPath: "/admin/dashboard/heroes",
     items: [
       { label: "Hero Banners", path: "/admin/heroes" },
       { label: "Media", path: "/admin/media" },
@@ -65,6 +68,7 @@ export const adminNavGroups: TAdminNavGroup[] = [
     id: "system",
     label: "System",
     icon: <FiSettings size={20} />,
+    defaultPath: "/admin/dashboard/settings",
     items: [
       { label: "Settings", path: "/admin/settings" },
       { label: "Help", path: "/admin/help" },
@@ -73,13 +77,31 @@ export const adminNavGroups: TAdminNavGroup[] = [
 ];
 
 // Helper to find active group
-export const findActiveGroup = (pathname: string) =>
-  adminNavGroups.find((g) =>
-    g.items.some((i) => pathname.startsWith(i.path)),
-  );
+export const findActiveGroup = (pathname: string) => {
+  // Build a flat list of { group, pathLength } for all items
+  const matches: { group: TAdminNavGroup; length: number }[] = [];
 
-// Helper to find active item
-export const findActiveItem = (pathname: string) =>
-  adminNavGroups
-    .flatMap((g) => g.items)
-    .find((i) => pathname.startsWith(i.path));
+  adminNavGroups.forEach((group) => {
+    group.items.forEach((item) => {
+      // Segment-aware match: exact OR starts with item.path + "/"
+      const isMatch =
+        pathname === item.path || pathname.startsWith(item.path + "/");
+      if (isMatch) {
+        matches.push({ group, length: item.path.length });
+      }
+    });
+  });
+
+  // Most specific (longest path) wins
+  matches.sort((a, b) => b.length - a.length);
+  return matches[0]?.group;
+};
+
+export const findActiveItem = (pathname: string) => {
+  const allItems = adminNavGroups.flatMap((g) => g.items);
+  const matches = allItems.filter(
+    (i) => pathname === i.path || pathname.startsWith(i.path + "/"),
+  );
+  // Most specific match
+  return matches.sort((a, b) => b.path.length - a.path.length)[0];
+};
