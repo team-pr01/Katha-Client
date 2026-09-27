@@ -9,9 +9,7 @@ import {
 } from "react-icons/fi";
 import type { TProduct, TProductVariant } from "../../../../types/product.type";
 import { hasDiscount } from "../../../../utils/productHelpers";
-import {
-  useDeleteVariantMutation,
-} from "../../../../redux/Features/Product/productVariantApi";
+import { useDeleteVariantMutation } from "../../../../redux/Features/Product/productVariantApi";
 import { useState } from "react";
 import AddOrEditVariantModal from "../AddOrEditVariantModal/AddOrEditVariantModal";
 
@@ -30,9 +28,8 @@ const ProductVariantsDrawer = ({
 }: ProductVariantsDrawerProps) => {
   const [isAddOrEditVariantModalOpen, setIsAddOrEditVariantModalOpen] =
     useState<boolean>(false);
-  const [selectedVariant, setSelectedVariant] = useState<TProductVariant | null>(
-    null,
-  );
+  const [selectedVariant, setSelectedVariant] =
+    useState<TProductVariant | null>(null);
   // const [updateVariant] = useUpdateVariantMutation();
 
   const [deleteVariant] = useDeleteVariantMutation();
@@ -193,7 +190,10 @@ const ProductVariantsDrawer = ({
                 </div>
                 <div className="flex items-center gap-1">
                   <button
-                    onClick={() => setSelectedVariant(variant)}
+                    onClick={() => {
+                      setSelectedVariant(variant);
+                      setIsAddOrEditVariantModalOpen(true);
+                    }}
                     className="p-1.5 rounded-lg text-neutral-45 hover:text-primary-10 hover:bg-primary-10/10 transition-all"
                     aria-label="Edit variant"
                   >
@@ -242,7 +242,7 @@ const ProductVariantsDrawer = ({
         isOpen={isAddOrEditVariantModalOpen}
         onClose={() => setIsAddOrEditVariantModalOpen(false)}
         productId={product?._id || null}
-        variant={(selectedVariant) || null}
+        variant={selectedVariant || null}
       />
     </>
   );

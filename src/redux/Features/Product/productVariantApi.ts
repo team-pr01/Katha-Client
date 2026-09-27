@@ -12,6 +12,16 @@ const productApi = baseApi.injectEndpoints({
       providesTags: ["productVariant", "product"],
     }),
 
+    addVariant: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/variant/add/${id}`,
+        method: "POST",
+        credentials: "include",
+        body: data,
+      }),
+      invalidatesTags: ["productVariant", "product"],
+    }),
+
     updateVariant: builder.mutation({
       query: ({ productId, variantId, data }) => ({
         url: `/variant/update/${productId}/${variantId}`,
@@ -35,6 +45,7 @@ const productApi = baseApi.injectEndpoints({
 
 export const {
   useGetAllVariantsByProductIdQuery,
+  useAddVariantMutation,
   useUpdateVariantMutation,
   useDeleteVariantMutation
 } = productApi;
