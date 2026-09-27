@@ -197,8 +197,8 @@ const AddProduct = () => {
         const newProductId = response?.data?._id;
         navigate(
           newProductId
-            ? `/admin/products/${newProductId}`
-            : "/admin/products",
+            ? `/admin/dashboard/products-management/${newProductId}`
+            : "/admin/dashboard/products-management",
         );
       }
     } catch (err: any) {

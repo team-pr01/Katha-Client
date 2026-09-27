@@ -140,12 +140,12 @@ export const router = createBrowserRouter([
         element: <ProductsManagement />,
       },
       {
-        path: "add-product",
-        element: <AddProduct />,
+        path: "products-management/:id",  // To open the add variant modal if new product's been added
+        element: <ProductsManagement />,
       },
       {
-        path: "address",
-        element: <ManageAddress />,
+        path: "add-product",
+        element: <AddProduct />,
       },
       {
         path: "*",

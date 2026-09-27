@@ -34,10 +34,13 @@ import DataTableEmpty from "../../../components/Reusable/DataTable/DataTableEmpt
 import DataTable from "../../../components/Reusable/DataTable/DataTable";
 import DataTablePagination from "../../../components/Reusable/DataTable/DataTablePagination";
 import ProductVariantsDrawer from "../../../components/AdminDashboardComponents/ProductsManagementPage/ProductVariantsDrawer/ProductVariantsDrawer";
-import ProductDeleteModal from "../../../components/AdminDashboardComponents/ProductsManagementPage/ProductDeleteModal/ProductDeleteModal";
 import AddOrEditVariantModal from "../../../components/AdminDashboardComponents/ProductsManagementPage/AddOrEditVariantModal/AddOrEditVariantModal";
-import { useGetAllProductsQuery } from "../../../redux/Features/Product/productApi";
+import {
+  useDeleteProductMutation,
+  useGetAllProductsQuery,
+} from "../../../redux/Features/Product/productApi";
 import { useGetAllCategoriesQuery } from "../../../redux/Features/Category/categoryApi";
+import DeleteConfirmationModal from "../../../components/Reusable/DeleteConfirmationModal/DeleteConfirmationModal";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -75,7 +78,10 @@ const ProductsManagement = () => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data } = useGetAllProductsQuery({
+  const [deleteProduct, { isLoading: isDeletingProduct }] =
+    useDeleteProductMutation();
+
+  const { data, refetch } = useGetAllProductsQuery({
     category: category ? [category] : [],
     // subCategory: selectedSubCategories,
     // occasionNames: selectedOccasions,
@@ -88,16 +94,16 @@ const ProductsManagement = () => {
     // maxPrice: maxPrice as any,
     // sortBy: sortBy as any,
   });
-  console.log(data);
   const products = data?.data?.data || [];
 
   // ─── Drawer / Modal state ───────────────────────────
   const [variantsDrawerOpen, setVariantsDrawerOpen] = useState(false);
   const [activeProduct, setActiveProduct] = useState<TProduct | null>(null);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [productToDelete, setProductToDelete] = useState<TProduct | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(
+    null,
+  );
   const [addVariantOpen, setAddVariantOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   // ─── Mock Data ──────────────────────────────────────
@@ -185,21 +191,9 @@ const ProductsManagement = () => {
     navigate(`/admin/products/${product._id}/edit`);
   };
 
-  const handleDeleteClick = (product: TProduct) => {
-    setProductToDelete(product);
-    setDeleteModalOpen(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    setIsDeleting(true);
-    try {
-      // TODO: await deleteProduct(productToDelete._id).unwrap();
-      await new Promise((r) => setTimeout(r, 800));
-      setDeleteModalOpen(false);
-      setProductToDelete(null);
-    } finally {
-      setIsDeleting(false);
-    }
+  const handleDeleteClick = (id: string) => {
+    setSelectedProductId(id);
+    setIsDeleteModalOpen(true);
   };
 
   const handleAddVariant = () => {
@@ -328,7 +322,7 @@ const ProductsManagement = () => {
           </button>
 
           <button
-            onClick={() => handleDeleteClick(p)}
+            onClick={() => handleDeleteClick(p?._id)}
             className="p-1.5 rounded-lg text-neutral-45 hover:text-red-500 hover:bg-red-50 transition-all"
             title="Delete product"
             aria-label="Delete product"
@@ -403,6 +397,18 @@ const ProductsManagement = () => {
 
   const hasActiveFilters =
     keyword.trim() !== "" || category !== "" || status !== "all";
+
+  const handleDeleteProduct = async () => {
+    try {
+      const response = await deleteProduct(selectedProductId).unwrap();
+      if (response?.success) {
+        setIsDeleteModalOpen(false);
+        refetch();
+      }
+    } catch (error) {
+      console.error("Error deleting address:", error);
+    }
+  };
 
   return (
     <div className="space-y-5 font-Manrope">
@@ -531,13 +537,23 @@ const ProductsManagement = () => {
         onAddVariant={handleAddVariant}
       />
 
-      <ProductDeleteModal
+      <DeleteConfirmationModal
+        isModalOpen={isDeleteModalOpen}
+        setIsModalOpen={setIsDeleteModalOpen}
+        onConfirm={handleDeleteProduct}
+        title="Delete this product?"
+        description="Are you sure you want to delete this product? This action cannot be undone."
+        confirmText="Yes, Delete"
+        isLoading={isDeletingProduct}
+      />
+
+      {/* <ProductDeleteModal
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
         productName={productToDelete?.name}
         isLoading={isDeleting}
-      />
+      /> */}
 
       <AddOrEditVariantModal
         isOpen={addVariantOpen}
