@@ -41,7 +41,7 @@ export const adminNavGroups: TAdminNavGroup[] = [
       { label: "Orders", path: "/admin/dashboard/orders-management" },
       { label: "Products", path: "/admin/dashboard/products-management" },
       { label: "Categories", path: "/admin/dashboard/categories-management" },
-      { label: "Occasions", path: "/admin/occasions" },
+      { label: "Occasions", path: "/admin/dashboard/occasions-management" },
     ],
   },
   {

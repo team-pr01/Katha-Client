@@ -4,32 +4,27 @@ import {
   FiPlus,
   FiEdit2,
   FiTrash2,
-  FiTag,
-  FiFolder,
+  FiStar,
   FiLayers,
   FiSearch,
+  FiCheckCircle,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import AdminPageHeader from "../../../components/Reusable/AdminReusable/AdminPageHeader/AdminPageHeader";
 import DataTable from "../../../components/Reusable/DataTable/DataTable";
 import DataTableEmpty from "../../../components/Reusable/DataTable/DataTableEmpty";
 import DataTablePagination from "../../../components/Reusable/DataTable/DataTablePagination";
-import AddOrEditCategoryModal from "../../../components/AdminDashboardComponents/CategoriesManagementPage/AddOrEditCategoryModal/AddOrEditCategoryModal";
 import DeleteConfirmationModal from "../../../components/Reusable/DeleteConfirmationModal/DeleteConfirmationModal";
 import {
-  useGetAllCategoriesQuery,
-  useDeleteCategoryMutation,
-} from "../../../redux/Features/Category/categoryApi";
+  useDeleteOccasionMutation,
+  useGetAllOccasionsQuery,
+} from "../../../redux/Features/Occation/occasionApi";
 import type { TDataTableColumn } from "../../../types/dataTable.types";
-import type { TCategories } from "../../../types/categories.types";
-import SubItemsPopover, { type TSubItem } from "../../../components/Reusable/SubItemsPopover/SubItemsPopover";
+import type { TOccasion } from "../../../types/occasion.type";
+import AddOrEditOccasionModal from "../../../components/AdminDashboardComponents/CategoriesManagementPage/OccasionsManagementPage/AddOrEditOccasionModal/AddOrEditOccasionModal";
+import SubItemsPopover from "../../../components/Reusable/SubItemsPopover/SubItemsPopover";
 
-const ITEMS_PER_PAGE = 10;
-
-const CategoriesManagement = () => {
-  const [deleteCategory, { isLoading: isDeleting }] =
-    useDeleteCategoryMutation();
-
+const OccasionsManagement = () => {
   // ─── State ───────────────────────────────────────────
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -39,63 +34,63 @@ const CategoriesManagement = () => {
 
   // Add/Edit modal
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<TCategories | null>(
+  const [editingOccasion, setEditingOccasion] = useState<TOccasion | null>(
     null,
   );
 
   // Delete modal
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] = useState<TCategories | null>(
+  const [occasionToDelete, setOccasionToDelete] = useState<TOccasion | null>(
     null,
   );
 
   const {
-    data: categoryData,
-    isLoading: isCategoriesLoading,
+    data: occasionData,
+    isLoading: isOccasionsLoading,
     isFetching,
-  } = useGetAllCategoriesQuery({ keyword: search, skip, limit });
-  const meta = categoryData?.data?.meta || {};
+  } = useGetAllOccasionsQuery({ keyword: search, skip, limit });
+  const meta = occasionData?.data?.meta || {};
+  const occasions: TOccasion[] = occasionData?.data?.data || [];
 
-  const categories: TCategories[] = categoryData?.data?.data || [];
-
-  // ─── Helpers ─────────────────────────────────────────
-  const getSubCategories = (category: TCategories): string[] => {
-    return (category.subCategories || [])
-      .map((s: any) => (typeof s === "string" ? s : s?.name))
-      .filter(Boolean);
-  };
+  const [deleteOccasion, { isLoading: isDeleting }] =
+    useDeleteOccasionMutation();
 
   // ─── Handlers ────────────────────────────────────────
-  const handleAddCategory = () => {
-    setEditingCategory(null);
+  const handleAddOccasion = () => {
+    setEditingOccasion(null);
     setIsFormModalOpen(true);
   };
 
-  const handleEditCategory = (category: TCategories) => {
-    setEditingCategory(category);
+  const handleEditOccasion = (occasion: TOccasion) => {
+    setEditingOccasion(occasion);
     setIsFormModalOpen(true);
   };
 
-  const handleDeleteClick = (category: TCategories) => {
-    setCategoryToDelete(category);
+  const handleDeleteClick = (occasion: TOccasion) => {
+    setOccasionToDelete(occasion);
     setIsDeleteModalOpen(true);
   };
 
   const handleConfirmDelete = async () => {
-    if (!categoryToDelete) return;
+    if (!occasionToDelete) return;
     try {
-      await deleteCategory(categoryToDelete._id).unwrap();
-      toast.success("Category deleted successfully!");
+      await deleteOccasion(occasionToDelete._id).unwrap();
+      toast.success("Occasion deleted successfully!");
       setIsDeleteModalOpen(false);
-      setCategoryToDelete(null);
+      setOccasionToDelete(null);
     } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to delete category");
+      toast.error(err?.data?.message || "Failed to delete occasion");
     }
   };
 
   const handleCloseFormModal = () => {
     setIsFormModalOpen(false);
-    setEditingCategory(null);
+    setEditingOccasion(null);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1); // reset to page 1 on search
   };
 
   const handleSelectToggle = (id: string) => {
@@ -107,104 +102,91 @@ const CategoriesManagement = () => {
   const handleSelectAll = (checked: boolean) => {
     setSelectedIds(
       checked
-        ? categories
-            .map((category) => category._id)
-            .filter((id): id is string => id !== undefined)
+        ? occasions.map((o) => o._id).filter((id): id is string => Boolean(id))
         : [],
     );
   };
 
-  const loading = isCategoriesLoading || isFetching;
+  const handleLimitChange = (newLimit: number) => {
+    setLimit(newLimit);
+    setPage(1);
+  };
+
+  const loading = isOccasionsLoading || isFetching;
 
   // ─── Table columns ───────────────────────────────────
-
-  const columns: TDataTableColumn<TCategories>[] = [
+  const columns: TDataTableColumn<TOccasion>[] = [
     {
-      key: "category",
-      header: "Category",
-      render: (category) => (
+      key: "occasion",
+      header: "Occasion",
+      render: (occasion) => (
         <div className="flex items-center gap-3">
           <div className="size-10 rounded-xl overflow-hidden bg-neutral-20 shrink-0">
-            {category.imageUrl ? (
+            {occasion.imageUrl ? (
               <img
-                src={category.imageUrl}
-                alt={category.name}
+                src={occasion.imageUrl}
+                alt={occasion.name}
                 className="w-full h-full object-cover"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <FiTag size={16} className="text-neutral-45" />
+                <FiStar size={16} className="text-neutral-45" />
               </div>
             )}
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-neutral-10 truncate">
-              {category.name}
+              {occasion.name}
             </p>
-            <p className="text-[11px] text-neutral-45 truncate">
-              {category.areaName || "—"}
+            <p className="text-[11px] text-neutral-45 line-clamp-1 max-w-55">
+              {occasion.description || "—"}
             </p>
           </div>
         </div>
       ),
     },
     {
-      key: "description",
-      header: "Description",
-      hiddenAt: "lg",
-      render: (category) => (
-        <p className="text-xs text-neutral-45 line-clamp-2 max-w-55">
-          {category.description || "—"}
-        </p>
+      key: "subOccasions",
+      header: "Sub-occasions",
+      render: (occasion) => (
+        <SubItemsPopover
+          items={(occasion.subOccasions || []).map((s) => ({
+            label: s.name,
+            description: s.description,
+          }))}
+          maxVisible={2}
+          itemLabel="sub-occasions"
+        />
       ),
     },
-    {
-  key: "subCategories",
-  header: "Sub-categories",
-  render: (category) => {
-    const items: TSubItem[] = (category.subCategories || []).map(
-      (sub: any) => ({
-        label: typeof sub === "string" ? sub : sub?.name,
-      }),
-    );
-
-    return (
-      <SubItemsPopover
-        items={items}
-        maxVisible={2}
-        itemLabel="sub-categories"
-      />
-    );
-  },
-},
     {
       key: "count",
       header: "Count",
       align: "center",
       widthClass: "w-16",
-      render: (category) => (
+      render: (occasion) => (
         <span className="text-xs font-semibold text-neutral-10">
-          {getSubCategories(category).length}
+          {(occasion.subOccasions || []).length}
         </span>
       ),
     },
     {
       key: "status",
       header: "Status",
-      render: (category) => (
+      render: (occasion) => (
         <span
           className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full ${
-            category.isActive
+            occasion.isActive
               ? "bg-green-50 text-green-700"
               : "bg-neutral-20 text-neutral-45"
           }`}
         >
           <span
             className={`size-1.5 rounded-full ${
-              category.isActive ? "bg-green-500" : "bg-neutral-45"
+              occasion.isActive ? "bg-green-500" : "bg-neutral-45"
             }`}
           />
-          {category.isActive ? "Active" : "Inactive"}
+          {occasion.isActive ? "Active" : "Inactive"}
         </span>
       ),
     },
@@ -213,19 +195,19 @@ const CategoriesManagement = () => {
       header: "Actions",
       align: "right",
       widthClass: "w-24",
-      render: (category) => (
+      render: (occasion) => (
         <div className="flex items-center justify-end gap-1">
           <button
-            onClick={() => handleEditCategory(category)}
+            onClick={() => handleEditOccasion(occasion)}
             className="p-1.5 rounded-lg text-neutral-45 hover:text-primary-10 hover:bg-primary-10/10 transition-all"
-            aria-label="Edit category"
+            aria-label="Edit occasion"
           >
             <FiEdit2 size={14} />
           </button>
           <button
-            onClick={() => handleDeleteClick(category)}
+            onClick={() => handleDeleteClick(occasion)}
             className="p-1.5 rounded-lg text-neutral-45 hover:text-red-500 hover:bg-red-50 transition-all"
-            aria-label="Delete category"
+            aria-label="Delete occasion"
           >
             <FiTrash2 size={14} />
           </button>
@@ -239,15 +221,15 @@ const CategoriesManagement = () => {
       {/* Header */}
       <AdminPageHeader
         eyebrow="Catalog"
-        title="Categories Management"
-        description="Organize products into categories and sub-categories."
+        title="Occasions Management"
+        description="Manage gift occasions and their sub-occasions."
         actions={
           <button
-            onClick={handleAddCategory}
+            onClick={handleAddOccasion}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-10 text-white text-sm font-medium hover:bg-[#d4892a] transition-all shadow-md shadow-primary-10/20"
           >
             <FiPlus size={16} />
-            Add Category
+            Add Occasion
           </button>
         }
       />
@@ -255,41 +237,39 @@ const CategoriesManagement = () => {
       {/* Stats strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard
-          label="Total Categories"
-          value={categories.length}
-          icon={<FiTag size={18} />}
+          label="Total Occasions"
+          value={meta?.total ?? occasions.length}
+          icon={<FiStar size={18} />}
           accent="bg-blue-50 text-blue-600"
         />
         <StatCard
-          label="Total Sub-categories"
-          value={categories.reduce(
-            (sum, c) => sum + getSubCategories(c).length,
+          label="Total Sub-occasions"
+          value={occasions.reduce(
+            (sum, o) => sum + (o.subOccasions?.length || 0),
             0,
           )}
-          icon={<FiFolder size={18} />}
+          icon={<FiLayers size={18} />}
           accent="bg-primary-10/10 text-primary-10"
         />
         <StatCard
-          label="With Sub-categories"
-          value={
-            categories.filter((c) => getSubCategories(c).length > 0).length
-          }
-          icon={<FiLayers size={18} />}
+          label="Active"
+          value={occasions.filter((o) => o.isActive).length}
+          icon={<FiCheckCircle size={18} />}
           accent="bg-green-50 text-green-600"
         />
         <StatCard
-          label="Avg Sub-categories"
+          label="Avg Sub-occasions"
           value={
-            categories.length
+            occasions.length
               ? (
-                  categories.reduce(
-                    (sum, c) => sum + getSubCategories(c).length,
+                  occasions.reduce(
+                    (sum, o) => sum + (o.subOccasions?.length || 0),
                     0,
-                  ) / categories.length
+                  ) / occasions.length
                 ).toFixed(1)
               : "0"
           }
-          icon={<FiFolder size={18} />}
+          icon={<FiLayers size={18} />}
           accent="bg-amber-50 text-amber-600"
         />
       </div>
@@ -304,10 +284,8 @@ const CategoriesManagement = () => {
           <input
             type="text"
             value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-            }}
-            placeholder="Search categories or sub-categories…"
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder="Search occasions or sub-occasions…"
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-neutral-20/60 border border-transparent text-sm focus:outline-none focus:bg-white focus:border-primary-10/40 transition-all"
           />
         </div>
@@ -315,26 +293,26 @@ const CategoriesManagement = () => {
 
       {/* Table */}
       {loading ? (
-        <CategoriesTableSkeleton />
-      ) : categories?.length === 0 ? (
+        <OccasionsTableSkeleton />
+      ) : occasions.length === 0 ? (
         <DataTableEmpty
-          icon={<FiTag size={32} />}
-          title={search ? "No matching categories" : "No categories yet"}
+          icon={<FiStar size={32} />}
+          title={search ? "No matching occasions" : "No occasions yet"}
           description={
             search
-              ? "No categories match your search. Try a different term."
-              : "Get started by adding your first category."
+              ? "No occasions match your search. Try a different term."
+              : "Get started by adding your first occasion."
           }
           variant={search ? "no-match" : "no-data"}
-          actionLabel={search ? "Clear search" : "Add Category"}
-          onAction={search ? () => setSearch("") : handleAddCategory}
+          actionLabel={search ? "Clear search" : "Add Occasion"}
+          onAction={search ? () => setSearch("") : handleAddOccasion}
         />
       ) : (
         <>
           <DataTable
-            rows={categories}
+            rows={occasions}
             columns={columns}
-            rowKey={(c) => c?._id || ""}
+            rowKey={(o) => o._id}
             selectable
             selectedIds={selectedIds}
             onSelectToggle={handleSelectToggle}
@@ -343,30 +321,30 @@ const CategoriesManagement = () => {
           />
 
           <DataTablePagination
-            currentPage={meta?.currentPage}
-            totalPages={meta?.pages}
-            totalItems={meta?.total}
-            itemsPerPage={ITEMS_PER_PAGE}
+            currentPage={meta?.currentPage ?? page}
+            totalPages={meta?.pages ?? 1}
+            totalItems={meta?.total ?? occasions.length}
+            itemsPerPage={limit}
             onPageChange={setPage}
             limit={limit}
-            setLimit={setLimit}
+            setLimit={handleLimitChange}
           />
         </>
       )}
 
       {/* Modals */}
-      <AddOrEditCategoryModal
+      <AddOrEditOccasionModal
         isOpen={isFormModalOpen}
         onClose={handleCloseFormModal}
-        category={editingCategory}
+        occasion={editingOccasion}
       />
 
       <DeleteConfirmationModal
         isModalOpen={isDeleteModalOpen}
         setIsModalOpen={setIsDeleteModalOpen}
         onConfirm={handleConfirmDelete}
-        title="Delete this category?"
-        description="Are you sure you want to delete this category? This action cannot be undone."
+        title="Delete this occasion?"
+        description="Are you sure you want to delete this occasion? This action cannot be undone."
         confirmText="Yes, Delete"
         isLoading={isDeleting}
       />
@@ -400,7 +378,7 @@ const StatCard = ({
 );
 
 // ─── Inline skeleton ──────────────────────────────────────
-const CategoriesTableSkeleton = () => (
+const OccasionsTableSkeleton = () => (
   <div className="bg-white rounded-2xl border border-neutral-20 overflow-hidden animate-pulse">
     <div className="bg-neutral-20/50 px-4 py-3 flex items-center gap-4">
       <div className="h-4 w-4 bg-neutral-20 rounded" />
@@ -416,13 +394,15 @@ const CategoriesTableSkeleton = () => (
       >
         <div className="size-4 bg-neutral-20 rounded" />
         <div className="flex items-center gap-3 w-48">
-          <div className="size-9 rounded-xl bg-neutral-20" />
-          <div className="h-4 w-28 bg-neutral-20 rounded" />
+          <div className="size-10 rounded-xl bg-neutral-20" />
+          <div className="space-y-2">
+            <div className="h-4 w-28 bg-neutral-20 rounded" />
+            <div className="h-3 w-40 bg-neutral-20 rounded" />
+          </div>
         </div>
         <div className="flex-1 flex gap-2">
           <div className="h-6 w-16 bg-neutral-20 rounded-lg" />
           <div className="h-6 w-20 bg-neutral-20 rounded-lg" />
-          <div className="h-6 w-14 bg-neutral-20 rounded-lg" />
         </div>
         <div className="h-6 w-8 bg-neutral-20 rounded" />
         <div className="h-6 w-16 bg-neutral-20 rounded-lg" />
@@ -440,4 +420,4 @@ const CategoriesTableSkeleton = () => (
   </div>
 );
 
-export default CategoriesManagement;
+export default OccasionsManagement;

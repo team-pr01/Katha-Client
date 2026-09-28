@@ -124,7 +124,7 @@ const AdminDashboardHome = () => {
       label: "Occasions",
       description: "Gift occasions",
       count: "9 set up",
-      path: "/admin/occasions",
+      path: "/admin/dashboard/occasions-management",
       icon: <FiStar size={18} />,
       accent: "bg-pink-50 text-pink-600",
     },

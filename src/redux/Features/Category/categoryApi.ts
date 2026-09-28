@@ -6,14 +6,18 @@ const categoryApi = baseApi.injectEndpoints({
       query: ({
         limit,
         page,
-        skip
+        skip,
+        keyword
       }: {
         limit?: number;
         page?: number;
         skip?: number;
+        keyword?: string
       } = {}) => {
         const params = new URLSearchParams();
 
+        // Keyword search
+        if (keyword) params.append("keyword", keyword);
         // Handle limit
         if (typeof limit === "number") params.append("limit", limit.toString());
 

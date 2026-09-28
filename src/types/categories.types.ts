@@ -6,7 +6,7 @@ export type TCategories = {
   imageUrl: string;
   description?: string;
   isActive: boolean;
-  subCategories?: string[];
+  subCategories: string[];
   createdAt?: Date;
   updatedAt?: Date;
 };

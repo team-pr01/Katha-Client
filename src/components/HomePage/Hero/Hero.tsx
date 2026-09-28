@@ -56,16 +56,6 @@ const Hero = () => {
               alt={h.title}
               className="w-full h-full object-cover block"
             />
-            <div
-              className="absolute top-0 left-0 w-full h-full"
-              style={{
-                background: `linear-gradient(to bottom right, rgba(0,0,0,${
-                  (h.overlayOpacity ?? 0.6) * 1.1
-                }), rgba(0,0,0,${h.overlayOpacity ?? 0.3}), rgba(0,0,0,${
-                  (h.overlayOpacity ?? 0.7) * 1.15
-                }))`,
-              }}
-            ></div>
           </div>
         ))}
       </div>

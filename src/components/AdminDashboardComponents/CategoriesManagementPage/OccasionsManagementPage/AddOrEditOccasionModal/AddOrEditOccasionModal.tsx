@@ -1,46 +1,52 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { FiX, FiImage } from "react-icons/fi";
+import { FiX, FiImage, FiPlus, FiTrash2 } from "react-icons/fi";
 import toast from "react-hot-toast";
+import type { TOccasion } from "../../../../../types/occasion.type";
 import {
-  useAddCategoryMutation,
-  useUpdateCategoryMutation,
-} from "../../../../redux/Features/Category/categoryApi";
-import TextInput from "../../../Reusable/TextInput/TextInput";
-import Button from "../../../Reusable/Button/Button";
-import type { TCategories } from "../../../../types/categories.types";
+  useAddOccasionMutation,
+  useUpdateOccasionMutation,
+} from "../../../../../redux/Features/Occation/occasionApi";
+import TextInput from "../../../../Reusable/TextInput/TextInput";
+import Button from "../../../../Reusable/Button/Button";
 
-type TCategoryForm = {
+// ─── Types ────────────────────────────────────────────────
+type TOccasionForm = {
   name: string;
-  areaName: string;
   description: string;
   isActive: boolean;
+  subOccasionName: string;
+  subOccasionDescription: string;
 };
 
-interface AddOrEditCategoryModalProps {
+type TSubOccasionForm = {
+  name: string;
+  description?: string;
+};
+
+interface AddOrEditOccasionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  category?: TCategories | null;
+  occasion?: TOccasion | null;
 }
 
-const AddOrEditCategoryModal = ({
+const AddOrEditOccasionModal = ({
   isOpen,
   onClose,
-  category,
-}: AddOrEditCategoryModalProps) => {
-  const isEditMode = Boolean(category?._id);
+  occasion,
+}: AddOrEditOccasionModalProps) => {
+  const isEditMode = Boolean(occasion?._id);
 
-  const [addCategory, { isLoading: isAdding }] = useAddCategoryMutation();
-  const [updateCategory, { isLoading: isUpdating }] =
-    useUpdateCategoryMutation();
+  const [addOccasion, { isLoading: isAdding }] = useAddOccasionMutation();
+  const [updateOccasion, { isLoading: isUpdating }] =
+    useUpdateOccasionMutation();
   const isLoading = isAdding || isUpdating;
 
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Subcategory chips
-  const [subCategories, setSubCategories] = useState<string[]>([]);
-  const [subInput, setSubInput] = useState("");
+  // Sub-occasions list
+  const [subOccasions, setSubOccasions] = useState<TSubOccasionForm[]>([]);
 
   // Image
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -51,67 +57,83 @@ const AddOrEditCategoryModal = ({
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
-  } = useForm<TCategoryForm>({
+  } = useForm<TOccasionForm>({
     defaultValues: {
       name: "",
-      areaName: "",
       description: "",
       isActive: true,
+      subOccasionName: "",
+      subOccasionDescription: "",
     },
   });
 
-  // Prefill
+  // Watch sub-occasion inputs
+  const subNameInput = watch("subOccasionName");
+  const subDescInput = watch("subOccasionDescription");
+
+  // ─── Prefill ─────────────────────────────────────────
   useEffect(() => {
     if (!isOpen) return;
 
-    if (isEditMode && category) {
+    if (isEditMode && occasion) {
       reset({
-        name: category.name || "",
-        areaName: category.areaName || "",
-        description: category.description || "",
-        isActive: category.isActive ?? true,
+        name: occasion.name || "",
+        description: occasion.description || "",
+        isActive: occasion.isActive ?? true,
+        subOccasionName: "",
+        subOccasionDescription: "",
       });
-      setSubCategories(category.subCategories?.map((s: any) => s?.name) || []);
-      setImagePreview(category.imageUrl || "");
+      setSubOccasions(
+        (occasion.subOccasions || []).map((s) => ({
+          name: s.name,
+          description: s.description || "",
+        })),
+      );
+      setImagePreview(occasion.imageUrl || "");
     } else {
       reset({
         name: "",
-        areaName: "",
         description: "",
         isActive: true,
+        subOccasionName: "",
+        subOccasionDescription: "",
       });
-      setSubCategories([]);
+      setSubOccasions([]);
       setImagePreview("");
     }
 
     setImageFile(null);
-    setSubInput("");
     setSubmitError(null);
-  }, [isOpen, isEditMode, category, reset]);
+  }, [isOpen, isEditMode, occasion, reset]);
 
-  // Chip handlers
-  const handleSubKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      const value = subInput.trim();
-      if (!value) return;
-      if (subCategories.includes(value)) {
-        toast.error("Already added");
-        return;
-      }
-      setSubCategories((prev) => [...prev, value]);
-      setSubInput("");
-    } else if (e.key === "Backspace" && !subInput && subCategories.length) {
-      setSubCategories((prev) => prev.slice(0, -1));
+  // ─── Sub-occasion handlers ───────────────────────────
+  const handleAddSubOccasion = () => {
+    const name = subNameInput?.trim();
+    if (!name) return;
+
+    if (subOccasions.some((s) => s.name.toLowerCase() === name.toLowerCase())) {
+      toast.error("Sub-occasion already added");
+      return;
     }
+
+    setSubOccasions((prev) => [
+      ...prev,
+      { name, description: subDescInput?.trim() || "" },
+    ]);
+
+    // Clear the input fields via RHF
+    setValue("subOccasionName", "");
+    setValue("subOccasionDescription", "");
   };
 
-  const removeSubCategory = (item: string) => {
-    setSubCategories((prev) => prev.filter((s) => s !== item));
+  const removeSubOccasion = (index: number) => {
+    setSubOccasions((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Image handler
+  // ─── Image handler ───────────────────────────────────
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -135,35 +157,32 @@ const AddOrEditCategoryModal = ({
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // Submit
-  const handleSubmitCategory = async (formData: TCategoryForm) => {
+  // ─── Submit ──────────────────────────────────────────
+  const handleSubmitOccasion = async (formData: TOccasionForm) => {
     setSubmitError(null);
 
     if (!isEditMode && !imageFile) {
-      setSubmitError("Please upload a category image");
+      setSubmitError("Please upload an occasion image");
       return;
     }
 
     try {
       const payload = new FormData();
       payload.append("name", formData.name.trim());
-      payload.append("areaName", formData.areaName.trim());
       payload.append("description", formData.description.trim());
       payload.append("isActive", String(formData.isActive));
-      subCategories.forEach((sub) => {
-        payload.append("subCategories", sub);
-      });
+      payload.append("subOccasions", JSON.stringify(subOccasions));
 
       if (imageFile) {
         payload.append("file", imageFile);
       }
 
-      if (isEditMode && category?._id) {
-        await updateCategory({ id: category._id, data: payload }).unwrap();
-        toast.success("Category updated successfully!");
+      if (isEditMode && occasion?._id) {
+        await updateOccasion({ id: occasion._id, data: payload }).unwrap();
+        toast.success("Occasion updated successfully!");
       } else {
-        await addCategory(payload).unwrap();
-        toast.success("Category added successfully!");
+        await addOccasion(payload).unwrap();
+        toast.success("Occasion added successfully!");
       }
 
       onClose();
@@ -173,7 +192,7 @@ const AddOrEditCategoryModal = ({
         err?.error ||
         `Something went wrong while ${
           isEditMode ? "updating" : "adding"
-        } the category.`;
+        } the occasion.`;
       setSubmitError(errorMessage);
       toast.error(errorMessage);
     }
@@ -196,7 +215,7 @@ const AddOrEditCategoryModal = ({
               {isEditMode ? "Edit" : "New"}
             </p>
             <h2 className="text-lg font-bold text-neutral-10 tracking-tight mt-1">
-              {isEditMode ? "Edit Category" : "Add Category"}
+              {isEditMode ? "Edit Occasion" : "Add Occasion"}
             </h2>
           </div>
           <button
@@ -211,14 +230,14 @@ const AddOrEditCategoryModal = ({
 
         {/* Body */}
         <form
-          onSubmit={handleSubmit(handleSubmitCategory)}
+          onSubmit={handleSubmit(handleSubmitOccasion)}
           className="max-h-[70vh] overflow-y-auto"
         >
           <div className="p-5 space-y-5">
             {/* Image upload */}
             <div>
               <label className="block text-sm font-medium text-neutral-10 mb-2">
-                Category Image{" "}
+                Occasion Image{" "}
                 {!isEditMode && <span className="text-red-500">*</span>}
               </label>
 
@@ -228,7 +247,7 @@ const AddOrEditCategoryModal = ({
                     <>
                       <img
                         src={imagePreview}
-                        alt="Category"
+                        alt="Occasion"
                         className="w-full h-full object-cover"
                       />
                       <button
@@ -270,21 +289,12 @@ const AddOrEditCategoryModal = ({
             </div>
 
             <TextInput
-              label="Category Name"
-              placeholder="e.g. Handicraft"
+              label="Occasion Name"
+              placeholder="e.g. Wedding"
               error={errors.name}
               {...register("name", {
-                required: "Category name is required",
+                required: "Occasion name is required",
                 minLength: { value: 2, message: "Min 2 characters" },
-              })}
-            />
-
-            <TextInput
-              label="Area Name"
-              placeholder="e.g. Home Decor"
-              error={errors.areaName}
-              {...register("areaName", {
-                required: "Area name is required",
               })}
             />
 
@@ -295,7 +305,7 @@ const AddOrEditCategoryModal = ({
               </label>
               <textarea
                 rows={3}
-                placeholder="Describe this category…"
+                placeholder="Describe this occasion…"
                 {...register("description", {
                   required: "Description is required",
                 })}
@@ -308,42 +318,70 @@ const AddOrEditCategoryModal = ({
               )}
             </div>
 
-            {/* Subcategories chips */}
+            {/* Sub-occasions */}
             <div>
               <label className="block text-sm font-medium text-neutral-10 mb-3">
-                Sub Categories{" "}
-                <span className="text-red-500 font-normal">*</span>
+                Sub Occasions{" "}
+                <span className="text-neutral-45 font-normal">(optional)</span>
               </label>
 
-              {subCategories.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {subCategories.map((item) => (
-                    <span
-                      key={item}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-20 text-neutral-10 text-xs font-medium"
+              {/* Existing sub-occasions list */}
+              {subOccasions.length > 0 && (
+                <div className="space-y-2 mb-3">
+                  {subOccasions.map((sub, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start gap-2 p-2.5 rounded-xl bg-neutral-20/60 border border-neutral-20"
                     >
-                      {item}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-neutral-10">
+                          {sub.name}
+                        </p>
+                        {sub.description && (
+                          <p className="text-[11px] text-neutral-45 mt-0.5 line-clamp-2">
+                            {sub.description}
+                          </p>
+                        )}
+                      </div>
                       <button
                         type="button"
-                        onClick={() => removeSubCategory(item)}
-                        className="text-neutral-45 hover:text-neutral-10 transition-colors"
-                        aria-label={`Remove ${item}`}
+                        onClick={() => removeSubOccasion(index)}
+                        className="p-1.5 rounded-lg text-neutral-45 hover:text-red-500 hover:bg-red-50 transition-all shrink-0"
+                        aria-label={`Remove ${sub.name}`}
                       >
-                        <FiX size={12} />
+                        <FiTrash2 size={13} />
                       </button>
-                    </span>
+                    </div>
                   ))}
                 </div>
               )}
 
-              <input
-                type="text"
-                value={subInput}
-                onChange={(e) => setSubInput(e.target.value)}
-                onKeyDown={handleSubKeyDown}
-                placeholder="Type and press Enter — e.g. Wooden"
-                className="w-full px-4 py-2.5 border border-neutral-50 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-10 focus:border-transparent"
-              />
+              {/* Add new sub-occasion */}
+              <div className="space-y-2 p-3 rounded-xl border border-dashed border-neutral-20">
+                <TextInput
+                  label="Sub Occasion Name"
+                  placeholder="e.g. Haldi"
+                  error={errors.subOccasionName}
+                  {...register("subOccasionName")}
+                />
+
+                <TextInput
+                  label="Description (optional)"
+                  placeholder="e.g. Traditional pre-wedding ceremony"
+                  error={errors.subOccasionDescription}
+                  {...register("subOccasionDescription")}
+                />
+
+                <button
+                  type="button"
+                  onClick={handleAddSubOccasion}
+                  disabled={!subNameInput?.trim()}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary-10 text-white text-xs font-semibold hover:bg-[#d4892a] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FiPlus size={12} />
+                  Add Sub Occasion
+                </button>
+              </div>
             </div>
 
             {/* Active toggle */}
@@ -354,7 +392,7 @@ const AddOrEditCategoryModal = ({
                 className="size-4 rounded border-neutral-45 text-primary-10 focus:ring-primary-10 focus:ring-offset-0 cursor-pointer"
               />
               <span className="text-sm text-neutral-10">
-                Category is active
+                Occasion is active
               </span>
             </label>
 
@@ -378,7 +416,7 @@ const AddOrEditCategoryModal = ({
             </button>
             <Button
               type="submit"
-              label={isEditMode ? "Update Category" : "Add Category"}
+              label={isEditMode ? "Update Occasion" : "Add Occasion"}
               variant="primary"
               className="px-6 py-2.5"
               icon={false}
@@ -392,4 +430,4 @@ const AddOrEditCategoryModal = ({
   );
 };
 
-export default AddOrEditCategoryModal;
+export default AddOrEditOccasionModal;

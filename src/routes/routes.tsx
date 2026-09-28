@@ -26,6 +26,7 @@ import PrivacyPolicy from "../pages/PrivacyPolicy/PrivacyPolicy";
 import ReturnAndRefundPolicy from "../pages/ReturnAndRefundPolicy/ReturnAndRefundPolicy";
 import AddOrEditProduct from "../pages/AdminDashboardPages/AddOrEditProduct/AddOrEditProduct";
 import CategoriesManagement from "../pages/AdminDashboardPages/CategoriesManagement/CategoriesManagement";
+import OccasionsManagement from "../pages/AdminDashboardPages/OccasionsManagement/OccasionsManagement";
 
 export const router = createBrowserRouter([
   {
@@ -155,6 +156,10 @@ export const router = createBrowserRouter([
       {
         path: "categories-management",
         element: <CategoriesManagement />,
+      },
+      {
+        path: "occasions-management",
+        element: <OccasionsManagement />,
       },
       {
         path: "*",

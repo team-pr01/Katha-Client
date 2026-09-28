@@ -6,6 +6,9 @@ interface DataTablePaginationProps {
   totalItems: number;
   itemsPerPage: number;
   onPageChange: (page: number) => void;
+  limit: number;
+  setLimit: (limit: number) => void;
+  limitOptions?: number[];
 }
 
 const DataTablePagination = ({
@@ -14,8 +17,11 @@ const DataTablePagination = ({
   totalItems,
   itemsPerPage,
   onPageChange,
+  limit,
+  setLimit,
+  limitOptions = [10, 20, 50, 100],
 }: DataTablePaginationProps) => {
-  const start = (currentPage - 1) * itemsPerPage + 1;
+  const start = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
   const end = Math.min(currentPage * itemsPerPage, totalItems);
 
   // Show max 5 page buttons with ellipsis
@@ -50,15 +56,46 @@ const DataTablePagination = ({
     return pages;
   };
 
+  const handleLimitChange = (newLimit: number) => {
+    setLimit(newLimit);
+    onPageChange(1); // Reset to page 1 whenever limit changes
+  };
+
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-      <p className="text-xs text-neutral-45">
-        Showing <span className="font-semibold text-neutral-10">{start}</span>{" "}
-        to <span className="font-semibold text-neutral-10">{end}</span> of{" "}
-        <span className="font-semibold text-neutral-10">{totalItems}</span>{" "}
-        entries
-      </p>
+      {/* Left: Limit selector + entries info */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-neutral-45">Show</span>
+          <select
+            value={limit}
+            onChange={(e) => handleLimitChange(Number(e.target.value))}
+            className="
+              px-3 py-1.5 rounded-lg text-xs font-semibold
+              bg-white border border-neutral-20 text-neutral-10
+              hover:border-primary-10/40
+              focus:outline-none focus:ring-2 focus:ring-primary-10 focus:border-transparent
+              transition-all cursor-pointer
+            "
+            aria-label="Items per page"
+          >
+            {limitOptions.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
+          <span className="text-xs text-neutral-45">entries</span>
+        </div>
 
+        <p className="text-xs text-neutral-45">
+          Showing <span className="font-semibold text-neutral-10">{start}</span>{" "}
+          to <span className="font-semibold text-neutral-10">{end}</span> of{" "}
+          <span className="font-semibold text-neutral-10">{totalItems}</span>
+        </p>
+      </div>
+
+      {/* Right: Page navigation */}
       <div className="flex items-center gap-1">
         <button
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
