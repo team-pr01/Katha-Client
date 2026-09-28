@@ -457,6 +457,8 @@ const OrdersManagement = () => {
             totalItems={filteredOrders.length}
             itemsPerPage={ITEMS_PER_PAGE}
             onPageChange={setCurrentPage}
+            limit={100}
+            setLimit={() => null}
           />
         </>
       )}

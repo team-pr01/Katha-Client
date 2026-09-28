@@ -43,17 +43,72 @@ const materialApi = baseApi.injectEndpoints({
       providesTags: ["materials"],
     }),
 
-    // getSingleProductBySlug: builder.query({
-    //   query: (id) => ({
-    //     url: `/product/slug/${id}`,
-    //     method: "GET",
-    //     credentials: "include",
-    //   }),
-    //   providesTags: ["product"],
-    // }),
+    addMaterial: builder.mutation({
+      query: (data) => ({
+        url: `/materials/add`,
+        method: "POST",
+        body: data,
+        credentials: "include",
+      }),
+      invalidatesTags: ["materials"],
+    }),
+
+    updateMaterial: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/materials/update/${id}`,
+        method: "PATCH",
+        body: data,
+        credentials: "include",
+      }),
+      invalidatesTags: ["materials"],
+    }),
+
+    deleteMaterial: builder.mutation({
+      query: (id) => ({
+        url: `/materials/delete/${id}`,
+        method: "DELETE",
+        credentials: "include",
+      }),
+      invalidatesTags: ["materials"],
+    }),
+
+    addVariant: builder.mutation({
+      query: ({id, data}) => ({
+        url: `/materials/${id}/variant/add`,
+        method: "POST",
+        body: data,
+        credentials: "include",
+      }),
+      invalidatesTags: ["materials"],
+    }),
+
+    updateVariant: builder.mutation({
+      query: ({id, variantIndex, data}) => ({
+        url: `/materials/${id}//variant/update/${variantIndex}`,
+        method: "PATCH",
+        body: data,
+        credentials: "include",
+      }),
+      invalidatesTags: ["materials"],
+    }),
+
+     deleteVariant: builder.mutation({
+      query: ({id, variantIndex}) => ({
+        url: `/materials/${id}/variant/delete/${variantIndex}`,
+        method: "DELETE",
+        credentials: "include",
+      }),
+      invalidatesTags: ["materials"],
+    }),
   }),
 });
 
 export const {
   useGetAllMaterialsQuery,
+  useAddMaterialMutation,
+  useUpdateMaterialMutation,
+  useDeleteMaterialMutation,
+  useAddVariantMutation,
+  useUpdateVariantMutation,
+  useDeleteVariantMutation
 } = materialApi;

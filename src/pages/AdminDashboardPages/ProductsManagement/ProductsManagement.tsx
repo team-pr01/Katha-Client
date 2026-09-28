@@ -42,8 +42,6 @@ import {
 import { useGetAllCategoriesQuery } from "../../../redux/Features/Category/categoryApi";
 import DeleteConfirmationModal from "../../../components/Reusable/DeleteConfirmationModal/DeleteConfirmationModal";
 
-const ITEMS_PER_PAGE = 10;
-
 const statusOptions = [
   { value: "all", label: "All Statuses" },
   { value: "published", label: "Published" },
@@ -74,7 +72,9 @@ const ProductsManagement = () => {
   const [status, setStatus] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [page, setPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(10);
+  const skip = (page - 1) * limit;
 
   const [deleteProduct, { isLoading: isDeletingProduct }] =
     useDeleteProductMutation();
@@ -87,12 +87,15 @@ const ProductsManagement = () => {
     // material: selectedMaterials,
     // colors: selectedColors,
     keyword: keyword,
+    skip,
+    limit,
     status,
     // minPrice: minPrice as any,
     // maxPrice: maxPrice as any,
     // sortBy: sortBy as any,
   });
   const products = data?.data?.data || [];
+  const meta = data?.data?.meta || {};
 
   // ─── Drawer / Modal state ───────────────────────────
   const [variantsDrawerOpen, setVariantsDrawerOpen] = useState(false);
@@ -168,16 +171,12 @@ const ProductsManagement = () => {
     },
   ];
 
-  // ─── Pagination ─────────────────────────────────────
-  const totalPages = 1;
-
   // ─── Handlers ───────────────────────────────────────
   const handleClearFilters = () => {
     setKeyword("");
     setCategory("");
     setStatus("all");
     setSortBy("newest");
-    setCurrentPage(1);
   };
 
   const handleOpenVariants = (product: TProduct) => {
@@ -341,7 +340,11 @@ const ProductsManagement = () => {
                   onClick={() => setOpenMenuId(null)}
                 />
                 <div className="absolute right-0 top-full mt-1 z-20 w-44 bg-white rounded-xl border border-neutral-20 shadow-xl p-1">
-                  <Link to={`/product/${p?.slug}`} target="_blank" className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-neutral-10 hover:bg-neutral-20 transition-colors">
+                  <Link
+                    to={`/product/${p?.slug}`}
+                    target="_blank"
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-neutral-10 hover:bg-neutral-20 transition-colors"
+                  >
                     <FiEye size={12} />
                     Preview
                   </Link>
@@ -404,6 +407,11 @@ const ProductsManagement = () => {
     }
   };
 
+  const handleLimitChange = (newLimit: number) => {
+    setLimit(newLimit);
+    setPage(1);
+  };
+
   return (
     <div className="space-y-5 font-Manrope">
       <AdminPageHeader
@@ -434,7 +442,6 @@ const ProductsManagement = () => {
           value: keyword,
           onChange: (v) => {
             setKeyword(v);
-            setCurrentPage(1);
           },
           placeholder: "Search by product name, slug, or tags…",
         }}
@@ -444,7 +451,6 @@ const ProductsManagement = () => {
             value: category,
             onChange: (v) => {
               setCategory(v);
-              setCurrentPage(1);
             },
             options: categories,
           },
@@ -453,7 +459,6 @@ const ProductsManagement = () => {
             value: status,
             onChange: (v) => {
               setStatus(v);
-              setCurrentPage(1);
             },
             options: statusOptions,
           },
@@ -462,7 +467,6 @@ const ProductsManagement = () => {
             value: sortBy,
             onChange: (v) => {
               setSortBy(v);
-              setCurrentPage(1);
             },
             options: sortOptions,
           },
@@ -514,11 +518,13 @@ const ProductsManagement = () => {
           />
 
           <DataTablePagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalItems={products?.length}
-            itemsPerPage={ITEMS_PER_PAGE}
-            onPageChange={setCurrentPage}
+            currentPage={meta?.currentPage ?? page}
+            totalPages={meta?.pages ?? 1}
+            totalItems={meta?.total ?? products?.length}
+            itemsPerPage={limit}
+            onPageChange={setPage}
+            limit={limit}
+            setLimit={handleLimitChange}
           />
         </>
       )}

@@ -8,6 +8,7 @@ import { ICONS } from "../../../assets";
 import { useLoginMutation } from "../../../redux/Features/Auth/authApi";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../../redux/Features/Auth/authSlice";
+import { useNavigate } from "react-router-dom";
 
 type TFormData = {
   phoneNumber: string;
@@ -19,6 +20,7 @@ const Login = ({
 }: {
   setAuthModalType: React.Dispatch<React.SetStateAction<"login" | "signup">>;
 }) => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const [login, { isLoading }] = useLoginMutation();
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -42,6 +44,9 @@ const Login = ({
         dispatch(
           setUser({ user: res?.data?.user, token: res?.data?.accessToken }),
         );
+        if(res?.data?.user?.role === "admin") {
+          navigate("/admin/dashboard");
+        }
         // window.location.replace("/dashboard");
       }
       reset();

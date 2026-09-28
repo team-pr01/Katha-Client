@@ -27,6 +27,7 @@ import ReturnAndRefundPolicy from "../pages/ReturnAndRefundPolicy/ReturnAndRefun
 import AddOrEditProduct from "../pages/AdminDashboardPages/AddOrEditProduct/AddOrEditProduct";
 import CategoriesManagement from "../pages/AdminDashboardPages/CategoriesManagement/CategoriesManagement";
 import OccasionsManagement from "../pages/AdminDashboardPages/OccasionsManagement/OccasionsManagement";
+import MaterialsManagement from "../pages/AdminDashboardPages/MaterialsManagement/MaterialsManagement";
 
 export const router = createBrowserRouter([
   {
@@ -160,6 +161,10 @@ export const router = createBrowserRouter([
       {
         path: "occasions-management",
         element: <OccasionsManagement />,
+      },
+      {
+        path: "materials-management",
+        element: <MaterialsManagement />,
       },
       {
         path: "*",
