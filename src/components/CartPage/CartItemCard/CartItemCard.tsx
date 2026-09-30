@@ -8,9 +8,14 @@ import { FiMinus, FiPlus, FiTrash2 } from "react-icons/fi";
 const CartItemCard = ({ item }: { item: TCartItem }) => {
   const { removeFromCart, updateQuantity } = useCart();
 
-  const handleQuantityUpdate = (id: string, newQuantity: number) => {
+  const handleQuantityUpdate = (
+    productId: string,
+    newQuantity: number,
+    variantId: string,
+  ) => {
+    console.log(newQuantity);
     if (newQuantity < 1) return;
-    updateQuantity(id, newQuantity);
+    updateQuantity(productId, newQuantity, variantId);
   };
   return (
     <div className="px-4 md:px-6 py-4 border-b border-neutral-50 last:border-0 hover:bg-neutral-20/50 transition-colors">
@@ -47,7 +52,8 @@ const CartItemCard = ({ item }: { item: TCartItem }) => {
               <div className="size-1 rounded-full bg-neutral-45/80"></div>
               {item.packagingStyle && (
                 <span className="text-xs text-neutral-45 capitalize">
-                  Packaging: {item.packagingStyle} (+ ₹{item.packagingStylePrice})
+                  Packaging: {item.packagingStyle} (+ ₹
+                  {item.packagingStylePrice})
                 </span>
               )}
             </div>
@@ -71,7 +77,11 @@ const CartItemCard = ({ item }: { item: TCartItem }) => {
           <div className="flex items-center border border-neutral-50 rounded-lg overflow-hidden">
             <button
               onClick={() =>
-                handleQuantityUpdate(item.productId, item.quantity - 1)
+                handleQuantityUpdate(
+                  item.productId,
+                  item.quantity - 1,
+                  item.variantId as string,
+                )
               }
               disabled={item.quantity <= 1}
               className="px-2.5 py-1 hover:bg-neutral-20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
@@ -84,7 +94,11 @@ const CartItemCard = ({ item }: { item: TCartItem }) => {
             </span>
             <button
               onClick={() =>
-                handleQuantityUpdate(item.productId, item.quantity + 1)
+                handleQuantityUpdate(
+                  item.productId,
+                  item.quantity + 1,
+                  item.variantId as string,
+                )
               }
               disabled={item.quantity >= item.maxQuantity}
               className="px-2.5 py-1 hover:bg-neutral-20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
@@ -98,8 +112,8 @@ const CartItemCard = ({ item }: { item: TCartItem }) => {
         {/* Total */}
         <div className="col-span-1 text-center font-bold text-neutral-10">
           ₹
-          {(item?.discountedPrice * item?.quantity) + (item?.packagingStylePrice ||
-            0)}
+          {item?.discountedPrice * item?.quantity +
+            (item?.packagingStylePrice || 0)}
         </div>
 
         {/* Action */}

@@ -4,6 +4,7 @@ import AdminIconRail from "../../components/AdminDashboardComponents/AdminIconRa
 import AdminSubPanel from "../../components/AdminDashboardComponents/AdminSubPanel/AdminSubPanel";
 import AdminTopBar from "../../components/AdminDashboardComponents/AdminTopBar/AdminTopBar";
 import AdminStatusBar from "../../components/AdminDashboardComponents/AdminStatusBar/AdminStatusBar";
+import ScrollToTop from "../../components/ScrollToTop/ScrollToTop";
 
 const AdminDashboardLayout = () => {
   const location = useLocation();
@@ -30,6 +31,7 @@ const AdminDashboardLayout = () => {
 
   return (
     <div className="min-h-screen bg-neutral-20 font-Manrope flex">
+      <ScrollToTop/>
       {/* Icon rail */}
       <AdminIconRail
         activeGroupId={activeGroup?.id}

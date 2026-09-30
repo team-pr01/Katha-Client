@@ -1,4 +1,4 @@
-import { FaInstagram } from "react-icons/fa";
+import { FaInstagram, FaWhatsapp } from "react-icons/fa";
 import { ICONS, IMAGES } from "../../../assets";
 import Container from "../../Reusable/Container/Container";
 import { LiaFacebook } from "react-icons/lia";
@@ -9,18 +9,23 @@ const Footer = () => {
   const socialMediaDetails = [
     {
       icon: <LiaFacebook className="text-3xl" />,
-      href: "https://www.facebook.com/hanjifinance/",
+      href: "https://www.facebook.com/kathacelebrations/",
       label: "Facebook",
     },
     {
       icon: <FaInstagram className="text-2xl" />,
-      href: "https://www.instagram.com/hanjifinance/",
+      href: "https://www.instagram.com/kathacelebrations",
       label: "Instagram",
     },
     {
       icon: <RiYoutubeLine className="text-[27px]" />,
       href: "https://www.youtube.com/hanjifinance/",
       label: "YouTube",
+    },
+    {
+      icon: <FaWhatsapp className="text-2xl" />,
+      href: "https://wa.me/919420784505",
+      label: "WhatsApp",
     },
   ];
 
@@ -39,7 +44,7 @@ const Footer = () => {
     },
     {
       label: "Order In Bulk",
-      path: "/order-in-bulk",
+      path: "/bulk-orders",
     },
     {
       label: "Cart",
@@ -54,31 +59,31 @@ const Footer = () => {
   const occasions = [
     {
       label: "Wedding",
-      path: "/occasions/wedding",
+      path: "/products?occasion=Wedding",
     },
     {
       label: "Anniversary",
-      path: "/occasions/anniversary",
+      path: "/products?occasion=Anniversary",
     },
     {
       label: "Baby Shower",
-      path: "/occasions/baby-shower",
+      path: "/products?occasion=Baby Shower",
     },
     {
       label: "Birthday",
-      path: "/occasions/birthday",
+      path: "/products?occasion=Birthday",
     },
     {
       label: "Farewell",
-      path: "/occasions/farewell",
+      path: "/products?occasion=Farewell",
     },
     {
       label: "Festival",
-      path: "/occasions/festival",
+      path: "/products?occasion=Festival",
     },
     {
       label: "Housewarming",
-      path: "/occasions/housewarming",
+      path: "/products?occasion=Housewarming",
     },
   ];
 
@@ -216,15 +221,29 @@ const Footer = () => {
           <img src={IMAGES.footerDivider} alt="" className="w-full my-6" />
           <div className="flex items-center justify-between">
             <p className="text-neutral-10 font-semibold text-sm leading-5">
-            All rights reserved © Katha 2026
-          </p>
+              All rights reserved © Katha 2026
+            </p>
 
-          <div className="flex items-center gap-6">
-            <Link to="/terms-and-conditions" className="text-neutral-10 font-semibold text-sm leading-5 hover:underline">Terms and Conditions</Link>
-            <Link to="/privacy-policy" className="text-neutral-10 font-semibold text-sm leading-5 hover:underline">Privacy Policy</Link>
-            <Link to="/return-and-refund-policy" className="text-neutral-10 font-semibold text-sm leading-5 hover:underline">Return and Refund Policy</Link>
-
-          </div>
+            <div className="flex items-center gap-6">
+              <Link
+                to="/terms-and-conditions"
+                className="text-neutral-10 font-semibold text-sm leading-5 hover:underline"
+              >
+                Terms and Conditions
+              </Link>
+              <Link
+                to="/privacy-policy"
+                className="text-neutral-10 font-semibold text-sm leading-5 hover:underline"
+              >
+                Privacy Policy
+              </Link>
+              <Link
+                to="/return-and-refund-policy"
+                className="text-neutral-10 font-semibold text-sm leading-5 hover:underline"
+              >
+                Return and Refund Policy
+              </Link>
+            </div>
           </div>
         </div>
       </Container>

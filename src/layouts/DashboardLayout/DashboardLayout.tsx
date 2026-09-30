@@ -3,10 +3,12 @@ import SideNavigation from "../../components/DashboardComponents/SideNavigation/
 import Navbar from "../../components/Shared/Navbar/Navbar";
 import Footer from "../../components/Shared/Footer/Footer";
 import Container from "../../components/Reusable/Container/Container";
+import ScrollToTop from "../../components/ScrollToTop/ScrollToTop";
 
 const DashboardLayout = () => {
   return (
     <div className="bg-neutral-20">
+      <ScrollToTop/>
       <Navbar />
       <Container>
         <div className="flex gap-10 w-full h-screen overflow-x-hidden py-10">

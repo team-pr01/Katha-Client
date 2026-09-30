@@ -32,7 +32,7 @@ type TCartContext = {
   cartData: TCartItem[]; // Alias for backward compatibility
   addToCart: (item: TCartItem) => void;
   removeFromCart: (productId: string, variantId?: string) => void;
-  updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
+  updateQuantity: (productId: string, quantity: number, variantId: string) => void;
   clearCart: () => void;
   getCartTotal: () => number;
   getCartItemCount: () => number;
