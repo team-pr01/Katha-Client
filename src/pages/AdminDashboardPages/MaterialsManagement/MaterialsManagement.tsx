@@ -25,7 +25,11 @@ import {
   useUpdateMaterialMutation,
 } from "../../../redux/Features/Material/materialApi";
 import type { TDataTableColumn } from "../../../types/dataTable.types";
-import type { TMaterials, TMaterialVariant } from "../../../types/materials.type";
+import type {
+  TMaterials,
+  TMaterialVariant,
+} from "../../../types/materials.type";
+import ManageCategoriesDrawer from "../../../components/AdminDashboardComponents/MaterialsManagementPage/ManageCategoriesDrawer/ManageCategoriesDrawer";
 
 const MaterialsManagement = () => {
   // ─── State ───────────────────────────────────────────
@@ -67,9 +71,10 @@ const MaterialsManagement = () => {
   const meta = materialsData?.data?.meta || {};
   const materials: TMaterials[] = materialsData?.data?.data || [];
 
-  const [deleteMaterial, { isLoading: isDeleting }] = useDeleteMaterialMutation();
+  const [deleteMaterial, { isLoading: isDeleting }] =
+    useDeleteMaterialMutation();
   const [updateMaterial] = useUpdateMaterialMutation();
-//   const [deleteVariant] = useDeleteVariantMutation();
+  //   const [deleteVariant] = useDeleteVariantMutation();
 
   // ─── Handlers ────────────────────────────────────────
   const handleAddMaterial = () => {
@@ -121,26 +126,26 @@ const MaterialsManagement = () => {
     setIsVariantModalOpen(true);
   };
 
-//   const handleEditVariant = (
-//     materialId: string,
-//     variant: TMaterialVariant,
-//     index: number,
-//   ) => {
-//     setActiveMaterialId(materialId);
-//     setEditingVariant(variant);
-//     setEditingVariantIndex(index);
-//     setIsVariantModalOpen(true);
-//   };
+  //   const handleEditVariant = (
+  //     materialId: string,
+  //     variant: TMaterialVariant,
+  //     index: number,
+  //   ) => {
+  //     setActiveMaterialId(materialId);
+  //     setEditingVariant(variant);
+  //     setEditingVariantIndex(index);
+  //     setIsVariantModalOpen(true);
+  //   };
 
-//   const handleDeleteVariant = async (materialId: string, index: number) => {
-//     if (!window.confirm("Delete this variant?")) return;
-//     try {
-//       await deleteVariant({ id: materialId, variantIndex: index }).unwrap();
-//       toast.success("Variant deleted successfully!");
-//     } catch (err: any) {
-//       toast.error(err?.data?.message || "Failed to delete variant");
-//     }
-//   };
+  //   const handleDeleteVariant = async (materialId: string, index: number) => {
+  //     if (!window.confirm("Delete this variant?")) return;
+  //     try {
+  //       await deleteVariant({ id: materialId, variantIndex: index }).unwrap();
+  //       toast.success("Variant deleted successfully!");
+  //     } catch (err: any) {
+  //       toast.error(err?.data?.message || "Failed to delete variant");
+  //     }
+  //   };
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
@@ -193,10 +198,7 @@ const MaterialsManagement = () => {
       key: "variants",
       header: "Variants",
       render: (material) => (
-        <MaterialVariantChips
-          items={material.variants || []}
-          maxVisible={2}
-        />
+        <MaterialVariantChips items={material.variants || []} maxVisible={2} />
       ),
     },
     {
@@ -227,9 +229,7 @@ const MaterialsManagement = () => {
             }
           `}
           title={
-            material.isActive
-              ? "Click to deactivate"
-              : "Click to activate"
+            material.isActive ? "Click to deactivate" : "Click to activate"
           }
         >
           <span
@@ -277,6 +277,8 @@ const MaterialsManagement = () => {
     },
   ];
 
+   const [isManageCategoriesDrawerOpen, setIsManageCategoriesDrawerOpen] = useState(false);
+
   return (
     <div className="space-y-5 font-Manrope">
       {/* Header */}
@@ -285,13 +287,21 @@ const MaterialsManagement = () => {
         title="Materials Management"
         description="Manage raw materials and their variants."
         actions={
-          <button
-            onClick={handleAddMaterial}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-10 text-white text-sm font-medium hover:bg-[#d4892a] transition-all shadow-md shadow-primary-10/20"
-          >
-            <FiPlus size={16} />
-            Add Material
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsManageCategoriesDrawerOpen(true)}
+              className="px-4 py-2.5 rounded-xl bg-white hover:text-white text-neutral-5 text-sm font-medium hover:bg-[#d4892a] transition-all shadow-md"
+            >
+              Manage Categories
+            </button>
+            <button
+              onClick={handleAddMaterial}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-10 text-white text-sm font-medium hover:bg-[#d4892a] transition-all shadow-md shadow-primary-10/20"
+            >
+              <FiPlus size={16} />
+              Add Material
+            </button>
+          </div>
         }
       />
 
@@ -423,6 +433,11 @@ const MaterialsManagement = () => {
         description="Are you sure you want to delete this material? All its variants will also be removed. This action cannot be undone."
         confirmText="Yes, Delete"
         isLoading={isDeleting}
+      />
+
+      <ManageCategoriesDrawer
+        isOpen={isManageCategoriesDrawerOpen}
+        onClose={() => setIsManageCategoriesDrawerOpen(false)}
       />
     </div>
   );

@@ -8,8 +8,11 @@ import {
   useUpdateMaterialMutation,
 } from "../../../../redux/Features/Material/materialApi";
 import type { TMaterials } from "../../../../types/materials.type";
-import TextInput from './../../../Reusable/TextInput/TextInput';
+import TextInput from "./../../../Reusable/TextInput/TextInput";
 import Button from "../../../Reusable/Button/Button";
+import SelectDropdownWithSearch from "../../../Reusable/SelectDropdownWithSearch/SelectDropdownWithSearch";
+import { useGetAllMaterialCategoriesQuery } from "../../../../redux/Features/Material/materialCategoryApi";
+import type { TMaterialCategory } from "../../../../types/materialCategory.types";
 
 // ─── Types ────────────────────────────────────────────────
 type TMaterialForm = {
@@ -30,7 +33,11 @@ const AddOrEditMaterialModal = ({
   onClose,
   material,
 }: AddOrEditMaterialModalProps) => {
+  const { data } = useGetAllMaterialCategoriesQuery({});
+  const categories: TMaterialCategory[] = data?.data?.data || [];
+
   const isEditMode = Boolean(material?._id);
+  const [showValidation, setShowValidation] = useState<boolean>(false);
 
   const [addMaterial, { isLoading: isAdding }] = useAddMaterialMutation();
   const [updateMaterial, { isLoading: isUpdating }] =
@@ -44,6 +51,8 @@ const AddOrEditMaterialModal = ({
     handleSubmit,
     reset,
     formState: { errors },
+    setValue,
+    watch,
   } = useForm<TMaterialForm>({
     defaultValues: {
       name: "",
@@ -53,7 +62,48 @@ const AddOrEditMaterialModal = ({
     },
   });
 
-  // ─── Prefill ─────────────────────────────────────────
+  const selectedCategory = watch("category");
+  const selectedSubCategory = watch("subCategory");
+
+  // ─── Derived sub-category options ─────────────────────
+  const [subCategoryOptions, setSubCategoryOptions] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!selectedCategory) {
+      setSubCategoryOptions([]);
+      return;
+    }
+
+    const matchedCategory = categories.find(
+      (c: TMaterialCategory) => c.name === selectedCategory,
+    );
+
+    const rawSubs: any[] = matchedCategory?.subCategories || [];
+
+    // Normalize: handles string[] OR { name: string }[] OR JSON string
+    let subs: any[] = rawSubs;
+    if (typeof rawSubs === "string") {
+      try {
+        subs = JSON.parse(rawSubs);
+      } catch {
+        subs = [];
+      }
+    }
+
+    const normalized = subs
+      .map((s) => (typeof s === "string" ? s : s?.name))
+      .filter((s): s is string => Boolean(s));
+
+    setSubCategoryOptions(normalized);
+
+    // Reset sub-category if it's no longer valid for the new category
+    if (selectedSubCategory && !normalized.includes(selectedSubCategory)) {
+      setValue("subCategory", "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategory, categories]);
+
+  // ─── Prefill ──────────────────────────────────────────
   useEffect(() => {
     if (!isOpen) return;
 
@@ -78,6 +128,16 @@ const AddOrEditMaterialModal = ({
   // ─── Submit ──────────────────────────────────────────
   const handleSubmitMaterial = async (formData: TMaterialForm) => {
     setSubmitError(null);
+    setShowValidation(true);
+
+    if (!formData.category) {
+      setSubmitError("Please select a category");
+      return;
+    }
+    if (!formData.subCategory) {
+      setSubmitError("Please select a sub category");
+      return;
+    }
 
     try {
       const payload = {
@@ -107,6 +167,28 @@ const AddOrEditMaterialModal = ({
       toast.error(errorMessage);
     }
   };
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (isEditMode && material) {
+      reset({
+        name: material.name || "",
+        category: material.category || "",
+        subCategory: material.subCategory || "",
+        isActive: material.isActive ?? true,
+      });
+    } else {
+      reset({
+        name: "",
+        category: "",
+        subCategory: "",
+        isActive: true,
+      });
+    }
+    setSubmitError(null);
+    setShowValidation(false); // 👈 reset on every open
+  }, [isOpen, isEditMode, material, reset]);
 
   if (!isOpen) return null;
 
@@ -153,22 +235,41 @@ const AddOrEditMaterialModal = ({
             })}
           />
 
-          <TextInput
+          {/* Category dropdown */}
+          <SelectDropdownWithSearch
             label="Category"
-            placeholder="e.g. Textiles"
-            error={errors.category}
-            {...register("category", {
-              required: "Category is required",
-            })}
+            name="category"
+            value={selectedCategory}
+            options={categories.map((c: TMaterialCategory) => c.name)}
+            onChange={(value) => setValue("category", value)}
+            error={
+              showValidation && !selectedCategory
+                ? "Please select a category"
+                : undefined
+            }
           />
 
-          <TextInput
+          {/* Sub-category dropdown */}
+          <SelectDropdownWithSearch
             label="Sub Category"
-            placeholder="e.g. Fabrics"
-            error={errors.subCategory}
-            {...register("subCategory", {
-              required: "Sub category is required",
-            })}
+            name="subCategory"
+            value={selectedSubCategory}
+            options={subCategoryOptions}
+            onChange={(value) =>
+              setValue("subCategory", value, { shouldValidate: true })
+            }
+            helperText={
+              !selectedCategory
+                ? "Select a category first"
+                : subCategoryOptions.length === 0
+                  ? "No sub-categories available for this category"
+                  : undefined
+            }
+            error={
+              showValidation && selectedCategory && !selectedSubCategory
+                ? "Please select a sub category"
+                : undefined
+            }
           />
 
           <label className="flex items-center gap-3 cursor-pointer">
