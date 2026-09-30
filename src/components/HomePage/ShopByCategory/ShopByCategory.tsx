@@ -31,7 +31,7 @@ const ShopByCategory = () => {
           </div>
 
           {/* Big heading with italic accent */}
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-neutral-10 leading-[0.95] tracking-tight max-w-4xl">
+          <h2 className="text-4xl md:text-5xl font-bold text-neutral-10 leading-[0.95] tracking-tight max-w-4xl">
             Explore our
             <span className="block italic font-light text-primary-10 mt-2">
               curated collections

@@ -29,7 +29,7 @@ const ShopByOccasion = () => {
                 Shop by Occasion
               </span>
             </div>
-            <h2 className="text-6xl font-bold text-neutral-10 leading-[0.95] tracking-tight">
+            <h2 className="text-4xl md:text-5xl font-bold text-neutral-10 leading-[0.95] tracking-tight">
               Gifts for
               <span className="block italic font-light text-primary-10">
                 every moment

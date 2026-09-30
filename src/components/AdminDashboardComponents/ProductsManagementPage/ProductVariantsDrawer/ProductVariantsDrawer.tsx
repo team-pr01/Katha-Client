@@ -1,17 +1,14 @@
-import {
-  FiX,
-  FiPlus,
-  FiEdit2,
-  FiTrash2,
-  FiPackage,
-  FiTag,
-  FiBox,
-} from "react-icons/fi";
+import { FiX, FiPlus, FiPackage } from "react-icons/fi";
 import type { TProduct, TProductVariant } from "../../../../types/product.type";
-import { hasDiscount } from "../../../../utils/productHelpers";
-import { useDeleteVariantMutation } from "../../../../redux/Features/Product/productVariantApi";
+import {
+  useDeleteProductVariantMutation,
+  useGetAllVariantsByProductIdQuery,
+} from "../../../../redux/Features/Product/productVariantApi";
 import { useState } from "react";
 import AddOrEditVariantModal from "../AddOrEditVariantModal/AddOrEditVariantModal";
+import VariantCardSkeletonLoader from "../../../Loaders/VariantCardSkeletonLoader/VariantCardSkeletonLoader";
+import ProductVariantCard from "./ProductVariantCard";
+import DeleteConfirmationModal from "../../../Reusable/DeleteConfirmationModal/DeleteConfirmationModal";
 
 interface ProductVariantsDrawerProps {
   isOpen: boolean;
@@ -26,20 +23,25 @@ const ProductVariantsDrawer = ({
   product,
   onAddVariant,
 }: ProductVariantsDrawerProps) => {
+  const { data, isLoading: isVariantsLoading } =
+    useGetAllVariantsByProductIdQuery(product?._id);
+  const variants = data?.data?.variants || [];
   const [isAddOrEditVariantModalOpen, setIsAddOrEditVariantModalOpen] =
     useState<boolean>(false);
   const [selectedVariant, setSelectedVariant] =
     useState<TProductVariant | null>(null);
-  // const [updateVariant] = useUpdateVariantMutation();
 
-  const [deleteVariant] = useDeleteVariantMutation();
-
-  const handleDeleteVariant = async (variantId: string) => {
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [deleteProductVariant, { isLoading: isDeleting }] =
+    useDeleteProductVariantMutation();
+  const handleDeleteVariant = async () => {
     try {
-      await deleteVariant({
+      await deleteProductVariant({
         productId: product?._id,
-        variantId: variantId,
+        variantId: selectedVariant?._id,
       }).unwrap();
+      setIsDeleteModalOpen(false);
+      setSelectedVariant(null);
     } catch (error) {
       console.error("Error deleting variant:", error);
     }
@@ -92,137 +94,45 @@ const ProductVariantsDrawer = ({
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto p-5 space-y-3">
-          {product?.variants.map((variant) => (
-            <div
-              key={variant._id}
-              className="bg-white rounded-2xl border border-neutral-20 overflow-hidden hover:border-primary-10/40 transition-all group"
-            >
-              <div className="flex gap-4 p-4">
-                {/* Image */}
-                <div className="size-20 rounded-xl bg-neutral-20 overflow-hidden shrink-0">
-                  {variant.images?.[0] ? (
-                    <img
-                      src={variant.images[0]}
-                      alt={variant.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <FiPackage size={24} className="text-neutral-45" />
-                    </div>
-                  )}
-                </div>
+          {/* Skeleton while loading */}
+          {isVariantsLoading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <VariantCardSkeletonLoader key={i} />
+            ))
+          ) : (
+            <>
+              {/* Real variants */}
+              {variants?.map((variant: TProductVariant) => (
+                <ProductVariantCard
+                  key={variant?._id}
+                  productId={product?._id as string}
+                  variant={variant}
+                  onEdit={() => {
+                    setSelectedVariant(variant);
+                    setIsAddOrEditVariantModalOpen(true);
+                  }}
+                  onDelete={() => {
+                    setSelectedVariant(variant);
+                    setIsDeleteModalOpen(true);
+                  }}
+                />
+              ))}
 
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-semibold text-neutral-10 truncate">
-                    {variant.name}
+              {/* Empty state */}
+              {product?.variants.length === 0 && (
+                <div className="text-center py-12">
+                  <div className="size-16 rounded-full bg-neutral-20 flex items-center justify-center mx-auto mb-4">
+                    <FiPackage size={24} className="text-neutral-45" />
+                  </div>
+                  <h3 className="text-sm font-bold text-neutral-10">
+                    No variants yet
                   </h3>
-                  <p className="text-xs text-neutral-45 mt-0.5 line-clamp-2">
-                    {variant.description}
+                  <p className="text-xs text-neutral-45 mt-1">
+                    Add the first variant to start selling this product.
                   </p>
-
-                  {/* Meta tags */}
-                  <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-neutral-20 text-neutral-10">
-                      {variant.size}
-                    </span>
-                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-neutral-20 text-neutral-10">
-                      {variant.color}
-                    </span>
-                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-neutral-20 text-neutral-10">
-                      {variant.design}
-                    </span>
-                    {variant.packSize && (
-                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-neutral-20 text-neutral-10">
-                        {variant.packSize}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Price + stock */}
-                  <div className="flex items-center justify-between gap-3 mt-3">
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-base font-bold text-neutral-10">
-                        ₹
-                        {(
-                          variant.discountedPrice ?? variant.basePrice
-                        ).toLocaleString("en-IN")}
-                      </span>
-                      {hasDiscount(variant) && (
-                        <span className="text-xs text-neutral-45 line-through">
-                          ₹{variant.basePrice.toLocaleString("en-IN")}
-                        </span>
-                      )}
-                    </div>
-                    <span
-                      className={`
-                        text-[10px] font-semibold px-2 py-0.5 rounded-full
-                        ${
-                          variant.stock === 0
-                            ? "bg-red-50 text-red-600"
-                            : variant.stock <= 10
-                              ? "bg-amber-50 text-amber-700"
-                              : "bg-green-50 text-green-700"
-                        }
-                      `}
-                    >
-                      {variant.stock === 0
-                        ? "Out of stock"
-                        : `${variant.stock} in stock`}
-                    </span>
-                  </div>
                 </div>
-              </div>
-
-              {/* Actions footer */}
-              <div className="flex items-center justify-between px-4 py-2.5 bg-neutral-20/50 border-t border-neutral-20">
-                <div className="flex items-center gap-3 text-[10px] text-neutral-45">
-                  <span className="flex items-center gap-1">
-                    <FiBox size={10} />
-                    {variant.dimensions.length}×{variant.dimensions.width}×
-                    {variant.dimensions.height} {variant.dimensions.unit}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <FiTag size={10} />
-                    {variant.weight}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => {
-                      setSelectedVariant(variant);
-                      setIsAddOrEditVariantModalOpen(true);
-                    }}
-                    className="p-1.5 rounded-lg text-neutral-45 hover:text-primary-10 hover:bg-primary-10/10 transition-all"
-                    aria-label="Edit variant"
-                  >
-                    <FiEdit2 size={13} />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteVariant(variant?._id)}
-                    className="p-1.5 rounded-lg text-neutral-45 hover:text-red-500 hover:bg-red-50 transition-all"
-                    aria-label="Delete variant"
-                  >
-                    <FiTrash2 size={13} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {product?.variants.length === 0 && (
-            <div className="text-center py-12">
-              <div className="size-16 rounded-full bg-neutral-20 flex items-center justify-center mx-auto mb-4">
-                <FiPackage size={24} className="text-neutral-45" />
-              </div>
-              <h3 className="text-sm font-bold text-neutral-10">
-                No variants yet
-              </h3>
-              <p className="text-xs text-neutral-45 mt-1">
-                Add the first variant to start selling this product.
-              </p>
-            </div>
+              )}
+            </>
           )}
         </div>
 
@@ -243,6 +153,15 @@ const ProductVariantsDrawer = ({
         onClose={() => setIsAddOrEditVariantModalOpen(false)}
         productId={product?._id || null}
         variant={selectedVariant || null}
+      />
+      <DeleteConfirmationModal
+        isModalOpen={isDeleteModalOpen}
+        setIsModalOpen={setIsDeleteModalOpen}
+        onConfirm={handleDeleteVariant}
+        title="Delete this variant?"
+        description="Are you sure you want to delete this variant? This action cannot be undone."
+        confirmText="Yes, Delete"
+        isLoading={isDeleting}
       />
     </>
   );

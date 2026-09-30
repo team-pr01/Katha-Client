@@ -38,7 +38,6 @@ const AddOrEditProduct = () => {
       skip: !slug,
     });
   const singleProductData = singleProduct?.data || {};
-  console.log(singleProductData);
   const [addProduct, { isLoading: isAddingProduct }] = useAddProductMutation();
   const [updateProduct, { isLoading: isUpdatingProduct }] =
     useUpdateProductMutation();
@@ -645,7 +644,7 @@ const AddOrEditProduct = () => {
           </button>
           <Button
             type="submit"
-            label="Add Product"
+            label={isEditMode ? "Update Product" : "Add Product"}
             variant="primary"
             className="w-full sm:w-auto px-8 py-3"
             icon={true}

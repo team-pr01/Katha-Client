@@ -5,8 +5,8 @@ import { FiX, FiPlus, FiImage, FiTrash2 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import TextInput from "../../../Reusable/TextInput/TextInput";
 import {
-  useAddVariantMutation,
-  useUpdateVariantMutation,
+  useAddProductVariantMutation,
+  useUpdateProductVariantMutation,
 } from "../../../../redux/Features/Product/productVariantApi";
 import { useGetAllMaterialsQuery } from "../../../../redux/Features/Material/materialApi";
 import type { TProductVariant } from "../../../../types/product.type";
@@ -57,10 +57,11 @@ const AddOrEditVariantModal = ({
   variant,
 }: AddOrEditVariantModalProps) => {
   const isEditMode = Boolean(variant?._id);
+  console.log(productId);
 
-  const [addVariant, { isLoading: isAddingVariant }] = useAddVariantMutation();
-  const [updateVariant, { isLoading: isUpdatingVariant }] =
-    useUpdateVariantMutation();
+  const [addProductVariant, { isLoading: isAddingVariant }] = useAddProductVariantMutation();
+  const [updateProductVariant, { isLoading: isUpdatingVariant }] =
+    useUpdateProductVariantMutation();
 
   const { data: materialsData } = useGetAllMaterialsQuery({});
   const materials: any[] = materialsData?.data?.data || [];
@@ -314,14 +315,14 @@ const AddOrEditVariantModal = ({
       }
 
       if (isEditMode && variant?._id) {
-        await updateVariant({
+        await updateProductVariant({
           productId,
           variantId: variant?._id,
           data: formDataPayload,
         }).unwrap();
         toast.success("Variant updated successfully!");
       } else {
-        await addVariant({ id: productId, data: formDataPayload }).unwrap();
+        await addProductVariant({ id: productId, data: formDataPayload }).unwrap();
         toast.success("Variant added successfully!");
       }
 

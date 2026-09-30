@@ -312,7 +312,6 @@ const AddOrEditCategoryModal = ({
             <div>
               <label className="block text-sm font-medium text-neutral-10 mb-3">
                 Sub Categories{" "}
-                <span className="text-red-500 font-normal">*</span>
               </label>
 
               {subCategories.length > 0 && (
