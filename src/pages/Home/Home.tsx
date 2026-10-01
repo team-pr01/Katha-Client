@@ -7,7 +7,7 @@ const Home = () => {
   return (
     <div>
       <Hero />
-      <ShopByCategory/>
+      <ShopByCategory />
       <ShopByOccasion />
       <BestSeller />
     </div>

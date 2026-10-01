@@ -19,10 +19,13 @@ import DeleteConfirmationModal from "../../../components/Reusable/DeleteConfirma
 import {
   useGetAllCategoriesQuery,
   useDeleteCategoryMutation,
+  useUpdateCategoryMutation,
 } from "../../../redux/Features/Category/categoryApi";
 import type { TDataTableColumn } from "../../../types/dataTable.types";
 import type { TCategories } from "../../../types/categories.types";
-import SubItemsPopover, { type TSubItem } from "../../../components/Reusable/SubItemsPopover/SubItemsPopover";
+import SubItemsPopover, {
+  type TSubItem,
+} from "../../../components/Reusable/SubItemsPopover/SubItemsPopover";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -49,6 +52,9 @@ const CategoriesManagement = () => {
     null,
   );
 
+  const [updateCategory, { isLoading: isUpdatingCategory }] =
+      useUpdateCategoryMutation();
+
   const {
     data: categoryData,
     isLoading: isCategoriesLoading,
@@ -57,6 +63,24 @@ const CategoriesManagement = () => {
   const meta = categoryData?.data?.meta || {};
 
   const categories: TCategories[] = categoryData?.data?.data || [];
+
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const handleToggleActive = async (category: TCategories) => {
+    setTogglingId(category._id);
+    try {
+      await updateCategory({
+        id: category._id,
+        data: { isActive: !category.isActive },
+      }).unwrap();
+      toast.success(
+        `Category ${!category.isActive ? "activated" : "deactivated"}`,
+      );
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to update status");
+    } finally {
+      setTogglingId(null);
+    }
+  };
 
   // ─── Helpers ─────────────────────────────────────────
   const getSubCategories = (category: TCategories): string[] => {
@@ -159,24 +183,24 @@ const CategoriesManagement = () => {
       ),
     },
     {
-  key: "subCategories",
-  header: "Sub-categories",
-  render: (category) => {
-    const items: TSubItem[] = (category.subCategories || []).map(
-      (sub: any) => ({
-        label: typeof sub === "string" ? sub : sub?.name,
-      }),
-    );
+      key: "subCategories",
+      header: "Sub-categories",
+      render: (category) => {
+        const items: TSubItem[] = (category.subCategories || []).map(
+          (sub: any) => ({
+            label: typeof sub === "string" ? sub : sub?.name,
+          }),
+        );
 
-    return (
-      <SubItemsPopover
-        items={items}
-        maxVisible={2}
-        itemLabel="sub-categories"
-      />
-    );
-  },
-},
+        return (
+          <SubItemsPopover
+            items={items}
+            maxVisible={2}
+            itemLabel="sub-categories"
+          />
+        );
+      },
+    },
     {
       key: "count",
       header: "Count",
@@ -192,20 +216,40 @@ const CategoriesManagement = () => {
       key: "status",
       header: "Status",
       render: (category) => (
-        <span
-          className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full ${
-            category.isActive
-              ? "bg-green-50 text-green-700"
-              : "bg-neutral-20 text-neutral-45"
-          }`}
+         <button
+          type="button"
+          onClick={() => handleToggleActive(category)}
+          disabled={isUpdatingCategory}
+          className={`
+    inline-flex items-center gap-1.5 text-[11px] font-medium 
+    px-2.5 py-1 rounded-full transition-all cursor-pointer
+    disabled:opacity-60 disabled:cursor-not-allowed
+    ${
+      category.isActive
+        ? "bg-green-50 text-green-700 hover:bg-green-100"
+        : "bg-neutral-20 text-neutral-45 hover:bg-neutral-45/20"
+    }
+  `}
+          title={
+            category.isActive ? "Click to deactivate" : "Click to activate"
+          }
         >
-          <span
-            className={`size-1.5 rounded-full ${
-              category.isActive ? "bg-green-500" : "bg-neutral-45"
-            }`}
-          />
-          {category.isActive ? "Active" : "Inactive"}
-        </span>
+          {togglingId === category._id ? (
+            <>
+              <span className="size-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              Loading...
+            </>
+          ) : (
+            <>
+              <span
+                className={`size-1.5 rounded-full ${
+                  category.isActive ? "bg-green-500" : "bg-neutral-45"
+                }`}
+              />
+              {category.isActive ? "Active" : "Inactive"}
+            </>
+          )}
+        </button>
       ),
     },
     {

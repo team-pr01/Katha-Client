@@ -73,7 +73,8 @@ const MaterialsManagement = () => {
 
   const [deleteMaterial, { isLoading: isDeleting }] =
     useDeleteMaterialMutation();
-  const [updateMaterial] = useUpdateMaterialMutation();
+  const [updateMaterial, { isLoading: isUpdatingMaterial }] =
+    useUpdateMaterialMutation();
   //   const [deleteVariant] = useDeleteVariantMutation();
 
   // ─── Handlers ────────────────────────────────────────
@@ -104,7 +105,9 @@ const MaterialsManagement = () => {
     }
   };
 
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const handleToggleActive = async (material: TMaterials) => {
+    setTogglingId(material._id);
     try {
       await updateMaterial({
         id: material._id,
@@ -115,9 +118,12 @@ const MaterialsManagement = () => {
       );
     } catch (err: any) {
       toast.error(err?.data?.message || "Failed to update status");
+    } finally {
+      setTogglingId(null);
     }
   };
 
+  
   // Variant handlers
   const handleAddVariant = (materialId: string) => {
     setActiveMaterialId(materialId);
@@ -219,25 +225,36 @@ const MaterialsManagement = () => {
         <button
           type="button"
           onClick={() => handleToggleActive(material)}
+          disabled={isUpdatingMaterial}
           className={`
-            inline-flex items-center gap-1.5 text-[11px] font-medium 
-            px-2.5 py-1 rounded-full transition-all cursor-pointer
-            ${
-              material.isActive
-                ? "bg-green-50 text-green-700 hover:bg-green-100"
-                : "bg-neutral-20 text-neutral-45 hover:bg-neutral-45/20"
-            }
-          `}
+    inline-flex items-center gap-1.5 text-[11px] font-medium 
+    px-2.5 py-1 rounded-full transition-all cursor-pointer
+    disabled:opacity-60 disabled:cursor-not-allowed
+    ${
+      material.isActive
+        ? "bg-green-50 text-green-700 hover:bg-green-100"
+        : "bg-neutral-20 text-neutral-45 hover:bg-neutral-45/20"
+    }
+  `}
           title={
             material.isActive ? "Click to deactivate" : "Click to activate"
           }
         >
-          <span
-            className={`size-1.5 rounded-full ${
-              material.isActive ? "bg-green-500" : "bg-neutral-45"
-            }`}
-          />
-          {material.isActive ? "Active" : "Inactive"}
+          {togglingId === material._id ? (
+            <>
+              <span className="size-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              Loading...
+            </>
+          ) : (
+            <>
+              <span
+                className={`size-1.5 rounded-full ${
+                  material.isActive ? "bg-green-500" : "bg-neutral-45"
+                }`}
+              />
+              {material.isActive ? "Active" : "Inactive"}
+            </>
+          )}
         </button>
       ),
     },
@@ -277,7 +294,8 @@ const MaterialsManagement = () => {
     },
   ];
 
-   const [isManageCategoriesDrawerOpen, setIsManageCategoriesDrawerOpen] = useState(false);
+  const [isManageCategoriesDrawerOpen, setIsManageCategoriesDrawerOpen] =
+    useState(false);
 
   return (
     <div className="space-y-5 font-Manrope">

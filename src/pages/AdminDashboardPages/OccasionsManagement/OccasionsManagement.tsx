@@ -18,6 +18,7 @@ import DeleteConfirmationModal from "../../../components/Reusable/DeleteConfirma
 import {
   useDeleteOccasionMutation,
   useGetAllOccasionsQuery,
+  useUpdateOccasionMutation,
 } from "../../../redux/Features/Occation/occasionApi";
 import type { TDataTableColumn } from "../../../types/dataTable.types";
 import type { TOccasion } from "../../../types/occasion.type";
@@ -44,6 +45,8 @@ const OccasionsManagement = () => {
     null,
   );
 
+  const [updateOccasion, { isLoading: isUpdatingOccasion }] =
+    useUpdateOccasionMutation();
   const {
     data: occasionData,
     isLoading: isOccasionsLoading,
@@ -54,6 +57,24 @@ const OccasionsManagement = () => {
 
   const [deleteOccasion, { isLoading: isDeleting }] =
     useDeleteOccasionMutation();
+
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const handleToggleActive = async (occasion: TOccasion) => {
+    setTogglingId(occasion._id);
+    try {
+      await updateOccasion({
+        id: occasion._id,
+        data: { isActive: !occasion.isActive },
+      }).unwrap();
+      toast.success(
+        `Occasion ${!occasion.isActive ? "activated" : "deactivated"}`,
+      );
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to update status");
+    } finally {
+      setTogglingId(null);
+    }
+  };
 
   // ─── Handlers ────────────────────────────────────────
   const handleAddOccasion = () => {
@@ -174,20 +195,40 @@ const OccasionsManagement = () => {
       key: "status",
       header: "Status",
       render: (occasion) => (
-        <span
-          className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full ${
-            occasion.isActive
-              ? "bg-green-50 text-green-700"
-              : "bg-neutral-20 text-neutral-45"
-          }`}
+        <button
+          type="button"
+          onClick={() => handleToggleActive(occasion)}
+          disabled={isUpdatingOccasion}
+          className={`
+    inline-flex items-center gap-1.5 text-[11px] font-medium 
+    px-2.5 py-1 rounded-full transition-all cursor-pointer
+    disabled:opacity-60 disabled:cursor-not-allowed
+    ${
+      occasion.isActive
+        ? "bg-green-50 text-green-700 hover:bg-green-100"
+        : "bg-neutral-20 text-neutral-45 hover:bg-neutral-45/20"
+    }
+  `}
+          title={
+            occasion.isActive ? "Click to deactivate" : "Click to activate"
+          }
         >
-          <span
-            className={`size-1.5 rounded-full ${
-              occasion.isActive ? "bg-green-500" : "bg-neutral-45"
-            }`}
-          />
-          {occasion.isActive ? "Active" : "Inactive"}
-        </span>
+          {togglingId === occasion._id ? (
+            <>
+              <span className="size-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              Loading...
+            </>
+          ) : (
+            <>
+              <span
+                className={`size-1.5 rounded-full ${
+                  occasion.isActive ? "bg-green-500" : "bg-neutral-45"
+                }`}
+              />
+              {occasion.isActive ? "Active" : "Inactive"}
+            </>
+          )}
+        </button>
       ),
     },
     {

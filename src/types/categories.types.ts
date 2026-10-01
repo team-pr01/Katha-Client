@@ -1,6 +1,6 @@
 
 export type TCategories = {
-  _id?: string;
+  _id: string;
   name: string;
   areaName?: string; // e.g., "Handicraft", "Clothing", "Home Decor"
   imageUrl: string;

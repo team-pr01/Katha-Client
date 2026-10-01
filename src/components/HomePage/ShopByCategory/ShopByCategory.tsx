@@ -17,7 +17,7 @@ const ShopByCategory = () => {
   const loading = isLoading || isFetching;
 
   return (
-    <section className="bg-neutral-20 font-Manrope py-16 md:py-24 overflow-hidden">
+    <section className="font-Manrope py-16 md:py-24 overflow-hidden">
       <Container>
         {/* Header — centered editorial style */}
         <div className="flex flex-col items-center text-center mb-14 md:mb-20">
