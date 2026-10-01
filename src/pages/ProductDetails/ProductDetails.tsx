@@ -1,8 +1,14 @@
-import React, { useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState, useEffect } from "react";
 import { FiShoppingCart, FiShare2, FiMinus, FiPlus } from "react-icons/fi";
 import Container from "../../components/Reusable/Container/Container";
 import PackagingStyle from "../../components/ProductDetailsPage/PackagingStyle/PackagingStyle";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { useGetSingleProductBySlugQuery } from "../../redux/Features/Product/productApi";
 import Breadcrumb from "../../components/Reusable/Breadcrumb/Breadcrumb";
 import ProductImages from "../../components/ProductDetailsPage/ProductImages/ProductImages";
@@ -17,6 +23,7 @@ import { useCart } from "../../providers/CartProvider/CartProvider";
 import toast from "react-hot-toast";
 import ProductDetailsSkeletonLoader from "../../components/ProductDetailsPage/ProductDetailsSkeletonLoader/ProductDetailsSkeletonLoader";
 
+// ─── Types ────────────────────────────────────────────────
 export type TPackagingOption = {
   id: string;
   name: string;
@@ -59,10 +66,26 @@ const packagingOptions: TPackagingOption[] = [
   },
 ];
 
+// ─── Helpers ──────────────────────────────────────────────
+/**
+ * Uses variant.slug if available, otherwise slugifies the name.
+ */
+const getVariantSlug = (variant: TProductVariant): string => {
+  if ((variant as any).slug) return (variant as any).slug.toLowerCase();
+
+  return (variant.name || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+};
+
 const ProductDetails: React.FC = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data, isLoading } = useGetSingleProductBySlugQuery(slug);
   const productData = data?.data || {};
 
@@ -76,12 +99,51 @@ const ProductDetails: React.FC = () => {
 
   const variants: TProductVariant[] = productData?.variants || [];
 
-  // Set default variant when component loads
-  React.useEffect(() => {
-    if (variants.length > 0 && !selectedVariant) {
-      setSelectedVariant(variants[0]);
+  // ─── Select variant + write slug to URL ──────────────
+  const selectVariant = (variant: TProductVariant) => {
+    setSelectedVariant(variant);
+
+    const params = new URLSearchParams(searchParams);
+    const variantSlug = getVariantSlug(variant);
+
+    if (variantSlug) {
+      params.set("variant", variantSlug);
+    } else {
+      params.delete("variant");
     }
-  }, [variants]);
+
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
+
+  // ─── On load: read variant slug from URL, else default ───
+  useEffect(() => {
+    if (variants.length === 0) return;
+
+    const variantParam = searchParams.get("variant");
+
+    let matched: TProductVariant | undefined;
+
+    if (variantParam) {
+      matched = variants.find(
+        (v) => getVariantSlug(v) === variantParam.toLowerCase(),
+      );
+    }
+
+    // Fallback to first variant
+    if (!matched) {
+      matched = variants[0];
+    }
+
+    selectVariant(matched);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variants.length, productData?._id]);
+
+  // ─── User clicks a variant card ──────────────────────
+  const handleVariantSelect = (variant: TProductVariant) => {
+    selectVariant(variant);
+  };
 
   const dimensions = selectedVariant?.dimensions;
 
@@ -93,10 +155,7 @@ const ProductDetails: React.FC = () => {
       label: "Item Dimensions L x W x H",
       value: `${dimensions?.width} x ${dimensions?.height} x ${dimensions?.length} ${dimensions?.unit}`,
     },
-    {
-      label: "Item Weight",
-      value: selectedVariant?.weight,
-    },
+    { label: "Item Weight", value: selectedVariant?.weight },
     {
       label: "Material",
       value:
@@ -117,17 +176,12 @@ const ProductDetails: React.FC = () => {
       label: "Care Instructions",
       value: productData?.careInstructions?.join(", ") || "All",
     },
-    // {
-    //   label: "Tags",
-    //   value: productData?.tags?.join(", ") || "All",
-    // },
   ];
 
   const handleQuantityChange = (delta: number): void => {
     setQuantity((prev) => Math.max(1, prev + delta));
   };
 
-  // Check if variant is in stock
   const isInStock = (variant: TProductVariant): boolean => {
     return variant.stock > 0;
   };
@@ -156,7 +210,47 @@ const ProductDetails: React.FC = () => {
     variant === "buy" && navigate("/cart");
   };
 
+  const handleShare = async () => {
+  const variantSlug = selectedVariant
+    ? getVariantSlug(selectedVariant)
+    : null;
+
+  const url = `${window.location.origin}${window.location.pathname}${
+    variantSlug ? `?variant=${variantSlug}` : ""
+  }`;
+
+  const shareData: ShareData = {
+    title: productData?.name || "Check this out",
+    text: `Check out ${productData?.name || "this product"} on Katha`,
+    url,
+  };
+
+  try {
+    // Try native share first (mobile, and Windows/Edge on desktop)
+    if (navigator.share) {
+      await navigator.share(shareData);
+      return;
+    }
+
+    // Fallback: copy URL to clipboard
+    await navigator.clipboard.writeText(url);
+    toast.success("Link copied to clipboard!");
+  } catch (err: any) {
+    // User cancelled the share dialog — do nothing
+    if (err?.name === "AbortError") return;
+
+    // Any other failure → fallback to clipboard
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied to clipboard!");
+    } catch {
+      toast.error("Couldn't share. Please copy the URL manually.");
+    }
+  }
+};
+
   if (isLoading) return <ProductDetailsSkeletonLoader />;
+
   return (
     <div className="bg-neutral-20 min-h-screen py-8 font-Manrope">
       <Container>
@@ -180,13 +274,12 @@ const ProductDetails: React.FC = () => {
               />
 
               <div className="flex justify-between items-start mb-2">
-                {/* Title */}
                 <h1 className="text-2xl md:text-3xl font-bold text-neutral-10 max-w-[75%]">
                   {productData?.name}
                 </h1>
 
                 <div className="flex gap-2">
-                  <button className="p-2 border border-neutral-50 rounded-lg hover:bg-neutral-20 transition-colors">
+                  <button onClick={handleShare} className="p-2 border border-neutral-50 rounded-lg hover:bg-neutral-20 transition-colors">
                     <FiShare2 size={16} />
                   </button>
                 </div>
@@ -208,12 +301,11 @@ const ProductDetails: React.FC = () => {
                 </span>
               </div>
 
-              {/* Description */}
               <p className="text-neutral-10 text-sm leading-relaxed mb-4">
                 {productData?.description}
               </p>
 
-              {/* Price - Dynamic based on selected variant */}
+              {/* Price */}
               {selectedVariant && (
                 <div className="mb-4">
                   <div className="flex items-center gap-3">
@@ -262,7 +354,7 @@ const ProductDetails: React.FC = () => {
                     <VariantCard
                       key={variant._id}
                       variant={variant}
-                      setSelectedVariant={setSelectedVariant}
+                      setSelectedVariant={handleVariantSelect}
                       selectedVariant={selectedVariant}
                     />
                   ))}
@@ -308,7 +400,7 @@ const ProductDetails: React.FC = () => {
               <div className="flex flex-wrap gap-3 mb-6">
                 <button
                   onClick={() => handleAddProductToCart("cart")}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all bg-white border-neutral-50 text-neutral-10 hover:border-primary-10`}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all bg-white border-neutral-50 text-neutral-10 hover:border-primary-10"
                 >
                   <FiShoppingCart />
                   Add to Cart
@@ -323,7 +415,7 @@ const ProductDetails: React.FC = () => {
                 </button>
               </div>
 
-              {/* Customize Button - Placed Separately */}
+              {/* Customize Button */}
               <div className="mb-6">
                 <Link
                   to={`/product/customize/${productData?._id || slug}`}
@@ -337,7 +429,7 @@ const ProductDetails: React.FC = () => {
                 </Link>
               </div>
 
-              {/* Attributes  */}
+              {/* Attributes */}
               <ProductAttributes productAttributes={productAttributes} />
 
               {/* Packaging Options */}

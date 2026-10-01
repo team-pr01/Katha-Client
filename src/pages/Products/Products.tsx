@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect, useState, useCallback } from "react";
 import { FiSliders, FiChevronDown, FiX, FiPackage } from "react-icons/fi";
 import Filters from "../../components/ProductsPage/Filters/Filters";
 import ProductCard from "../../components/HomePage/BestSeller/ProductCard";
@@ -6,46 +7,122 @@ import Container from "../../components/Reusable/Container/Container";
 import { useGetAllProductsQuery } from "../../redux/Features/Product/productApi";
 import type { TProduct } from "../../types/product.type";
 import ProductCardSkeletonLoader from "../../components/SkeletonLoaders/ProductCardSkeletonLoader/ProductCardSkeletonLoader";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
-// Types
 interface SortOption {
   value: string;
   label: string;
 }
 
 const Products: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [searchParams] = useSearchParams();
-  const query = searchParams.get("query");
-  const occasion = searchParams.get("occasion");
-  const category = searchParams.get("category");
-  // Filter states
-  const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // ─── Read from URL ───────────────────────────────────
+  const queryParam = searchParams.get("query") || "";
+  const occasionParam = searchParams.get("occasion") || "";
+  const subOccasionParam = searchParams.get("subOccasion") || "";
+  const categoryParam = searchParams.get("category") || "";
+  const subCategoryParam = searchParams.get("subCategory") || "";
+  const materialParam = searchParams.get("material") || "";
+  const colorParam = searchParams.get("color") || "";
+  const minPriceParam = searchParams.get("minPrice") || "";
+  const maxPriceParam = searchParams.get("maxPrice") || "";
+  const sortByParam = searchParams.get("sortBy") || "latest";
+
+  // ─── Local filter states (initialized from URL) ──────
+  const [selectedOccasions, setSelectedOccasions] = useState<string[]>(
+    occasionParam ? occasionParam.split(",").filter(Boolean) : [],
+  );
   const [selectedSubOccasions, setSelectedSubOccasions] = useState<string[]>(
-    [],
+    subOccasionParam ? subOccasionParam.split(",").filter(Boolean) : [],
   );
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    categoryParam ? categoryParam.split(",").filter(Boolean) : [],
+  );
   const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>(
-    [],
+    subCategoryParam ? subCategoryParam.split(",").filter(Boolean) : [],
   );
-  const [minPrice, setMinPrice] = useState<string>("");
-  const [maxPrice, setMaxPrice] = useState<string>("");
+  const [selectedMaterials, setSelectedMaterials] = useState<string[]>(
+    materialParam ? materialParam.split(",").filter(Boolean) : [],
+  );
+  const [selectedColors, setSelectedColors] = useState<string[]>(
+    colorParam ? colorParam.split(",").filter(Boolean) : [],
+  );
+  const [minPrice, setMinPrice] = useState<string>(minPriceParam);
+  const [maxPrice, setMaxPrice] = useState<string>(maxPriceParam);
+  const [sortBy, setSortBy] = useState<string>(sortByParam);
+  const [searchQuery, setSearchQuery] = useState<string>(queryParam);
+
   const [selectedAvailability, setSelectedAvailability] = useState<string[]>(
     [],
   );
-  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
-  const [selectedColors, setSelectedColors] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<string>("latest");
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>(query || "");
 
+  // ─── Sync filters → URL ───────────────────────────────
   useEffect(() => {
-    setSearchQuery(query || "");
-    setSelectedOccasions(occasion ? [occasion] : []);
-    setSelectedCategories(category ? [category] : []);
-  }, [query]);
+    const params = new URLSearchParams();
+
+    if (searchQuery) params.set("query", searchQuery);
+    if (selectedOccasions.length)
+      params.set("occasion", selectedOccasions.join(","));
+    if (selectedSubOccasions.length)
+      params.set("subOccasion", selectedSubOccasions.join(","));
+    if (selectedCategories.length)
+      params.set("category", selectedCategories.join(","));
+    if (selectedSubCategories.length)
+      params.set("subCategory", selectedSubCategories.join(","));
+    if (selectedMaterials.length)
+      params.set("material", selectedMaterials.join(","));
+    if (selectedColors.length)
+      params.set("color", selectedColors.join(","));
+    if (minPrice) params.set("minPrice", minPrice);
+    if (maxPrice) params.set("maxPrice", maxPrice);
+    if (sortBy && sortBy !== "latest") params.set("sortBy", sortBy);
+
+    // Only update if the query string actually changed
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    searchQuery,
+    selectedOccasions,
+    selectedSubOccasions,
+    selectedCategories,
+    selectedSubCategories,
+    selectedMaterials,
+    selectedColors,
+    minPrice,
+    maxPrice,
+    sortBy,
+  ]);
+
+  // ─── Sync URL → filters (browser back/forward, external links) ──
+  useEffect(() => {
+    setSearchQuery(queryParam);
+    setSelectedOccasions(
+      occasionParam ? occasionParam.split(",").filter(Boolean) : [],
+    );
+    setSelectedSubOccasions(
+      subOccasionParam ? subOccasionParam.split(",").filter(Boolean) : [],
+    );
+    setSelectedCategories(
+      categoryParam ? categoryParam.split(",").filter(Boolean) : [],
+    );
+    setSelectedSubCategories(
+      subCategoryParam ? subCategoryParam.split(",").filter(Boolean) : [],
+    );
+    setSelectedMaterials(
+      materialParam ? materialParam.split(",").filter(Boolean) : [],
+    );
+    setSelectedColors(
+      colorParam ? colorParam.split(",").filter(Boolean) : [],
+    );
+    setMinPrice(minPriceParam);
+    setMaxPrice(maxPriceParam);
+    setSortBy(sortByParam);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams.toString()]);
 
   const sortOptions: SortOption[] = [
     { value: "latest", label: "Latest" },
@@ -84,7 +161,7 @@ const Products: React.FC = () => {
     );
   };
 
-  const clearAllFilters = (): void => {
+  const clearAllFilters = useCallback((): void => {
     setSelectedCategories([]);
     setSelectedSubCategories([]);
     setSearchQuery("");
@@ -95,8 +172,9 @@ const Products: React.FC = () => {
     setSelectedAvailability([]);
     setSelectedMaterials([]);
     setSelectedColors([]);
-    navigate(location.pathname, { replace: true });
-  };
+    setSortBy("latest");
+    // Sync effect will clear the URL automatically
+  }, []);
 
   return (
     <div className="bg-neutral-20 min-h-screen font-Manrope">
@@ -111,7 +189,6 @@ const Products: React.FC = () => {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              {/* Mobile Filter Toggle */}
               <button
                 onClick={() => setIsMobileFilterOpen(true)}
                 className="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-white border border-neutral-50 rounded-xl text-sm font-medium text-neutral-10 hover:bg-neutral-20 transition-colors"
@@ -125,16 +202,13 @@ const Products: React.FC = () => {
                 )}
               </button>
 
-              {/* Sort Dropdown */}
               <div className="relative">
                 <select
                   value={sortBy}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                    setSortBy(e.target.value)
-                  }
+                  onChange={(e) => setSortBy(e.target.value)}
                   className="appearance-none bg-white border border-neutral-50 rounded-xl px-4 py-2.5 pr-10 text-sm font-medium text-neutral-10 focus:outline-none focus:ring-2 focus:ring-primary-10 focus:border-transparent cursor-pointer transition-all"
                 >
-                  {sortOptions.map((option: SortOption) => (
+                  {sortOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       Sort by: {option.label}
                     </option>
@@ -183,12 +257,10 @@ const Products: React.FC = () => {
             <div className="flex-1">
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
                 {isLoading || isFetching ? (
-                  // Show skeleton loaders
                   Array.from({ length: 6 }).map((_, index) => (
                     <ProductCardSkeletonLoader key={index} />
                   ))
                 ) : products?.length === 0 ? (
-                  // Show no products found
                   <div className="col-span-1 sm:col-span-2 xl:col-span-3 flex flex-col items-center justify-center py-12 px-4 text-center">
                     <div className="w-20 h-20 rounded-full bg-neutral-20 flex items-center justify-center mb-4">
                       <FiPackage className="text-neutral-45 text-3xl" />
@@ -201,7 +273,6 @@ const Products: React.FC = () => {
                     </p>
                   </div>
                 ) : (
-                  // Show products
                   products?.map((product: TProduct) => (
                     <ProductCard key={product?._id} product={product} />
                   ))
@@ -268,29 +339,19 @@ const Products: React.FC = () => {
 
       <style>{`
         @keyframes slide-in {
-          from {
-            transform: translateX(100%);
-          }
-          to {
-            transform: translateX(0);
-          }
+          from { transform: translateX(100%); }
+          to { transform: translateX(0); }
         }
         .animate-slide-in {
           animation: slide-in 0.3s ease-out;
         }
-        /* Range input styling */
         input[type="range"] {
           -webkit-appearance: none;
           appearance: none;
           background: transparent;
           cursor: pointer;
         }
-        input[type="range"]::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          appearance: none;
-          width: 0;
-          height: 0;
-        }
+        input[type="range"]::-webkit-slider-thumb,
         input[type="range"]::-moz-range-thumb {
           width: 0;
           height: 0;

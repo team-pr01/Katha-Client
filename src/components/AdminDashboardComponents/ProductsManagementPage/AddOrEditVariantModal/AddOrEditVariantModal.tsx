@@ -28,6 +28,7 @@ type TMaterialRefForm = {
 
 type TVariantForm = {
   name: string;
+  slug: string;
   description: string;
   design: string;
   size: string;
@@ -57,7 +58,6 @@ const AddOrEditVariantModal = ({
   variant,
 }: AddOrEditVariantModalProps) => {
   const isEditMode = Boolean(variant?._id);
-  console.log(productId);
 
   const [addProductVariant, { isLoading: isAddingVariant }] = useAddProductVariantMutation();
   const [updateProductVariant, { isLoading: isUpdatingVariant }] =
@@ -90,6 +90,7 @@ const AddOrEditVariantModal = ({
   } = useForm<TVariantForm>({
     defaultValues: {
       name: "",
+      slug : "",
       description: "",
       design: "",
       size: "",
@@ -113,6 +114,7 @@ const AddOrEditVariantModal = ({
     if (isEditMode && variant) {
       reset({
         name: variant.name || "",
+        slug: variant.slug || "",
         description: variant.description || "",
         design: variant.design || "",
         size: variant.size || "",
@@ -256,6 +258,7 @@ const AddOrEditVariantModal = ({
       // Simple fields
       formDataPayload.append("productId", productId);
       formDataPayload.append("name", formData.name.trim());
+      formDataPayload.append("slug", formData.slug.trim());
       formDataPayload.append("description", formData.description.trim());
       formDataPayload.append("design", formData.design.trim());
       formDataPayload.append("size", formData.size.trim());
@@ -434,6 +437,15 @@ const AddOrEditVariantModal = ({
                   error={errors.name}
                   {...register("name", {
                     required: "Variant name is required",
+                    minLength: { value: 2, message: "Min 2 characters" },
+                  })}
+                />
+                <TextInput
+                  label="Slug"
+                  placeholder="e.g. floral-wall-art-small"
+                  error={errors.slug}
+                  {...register("slug", {
+                    required: "Slug is required",
                     minLength: { value: 2, message: "Min 2 characters" },
                   })}
                 />

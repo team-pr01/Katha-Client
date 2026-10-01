@@ -13,11 +13,11 @@ import FiltersSkeletonLoader from "../../SkeletonLoaders/FiltersSkeletonLoader/F
 import { useGetAllMaterialsQuery } from "../../../redux/Features/Material/materialApi";
 
 // Types
-interface FilterOption {
-  label: string;
-  count: number;
-  id?: string; // Add optional id for materials
-}
+// interface FilterOption {
+//   label: string;
+//   count: number;
+//   id?: string;
+// }
 
 interface SubItem {
   name: string;
@@ -304,15 +304,15 @@ const Filters: React.FC<FiltersProps> = ({
   setMaxPrice,
   selectedMaterials,
   setSelectedMaterials,
-  selectedColors,
-  setSelectedColors,
+  // selectedColors,
+  // setSelectedColors,
   onClearFilters,
   activeFilterCount,
 }) => {
   const [showAllOccasions, setShowAllOccasions] = useState(false);
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showAllMaterials, setShowAllMaterials] = useState(false);
-  const [showAllColors, setShowAllColors] = useState(false);
+  // const [showAllColors, setShowAllColors] = useState(false);
 
   const { data: occasionData, isLoading: isOccasionsLoading } =
     useGetAllOccasionsQuery({});
@@ -331,17 +331,17 @@ const Filters: React.FC<FiltersProps> = ({
     count: material.productCount || 0,
   })) || [];
 
-  const colors: FilterOption[] = [
-    { label: "Red", count: 136 },
-    { label: "Blue", count: 136 },
-    { label: "Green", count: 136 },
-    { label: "Brown", count: 11 },
-    { label: "Yellow", count: 136 },
-    { label: "Purple", count: 85 },
-    { label: "Orange", count: 100 },
-    { label: "Teal", count: 50 },
-    { label: "White", count: 90 },
-  ];
+  // const colors: FilterOption[] = [
+  //   { label: "Red", count: 136 },
+  //   { label: "Blue", count: 136 },
+  //   { label: "Green", count: 136 },
+  //   { label: "Brown", count: 11 },
+  //   { label: "Yellow", count: 136 },
+  //   { label: "Purple", count: 85 },
+  //   { label: "Orange", count: 100 },
+  //   { label: "Teal", count: 50 },
+  //   { label: "White", count: 90 },
+  // ];
 
   const handleCheckboxChange = (
     selected: string[],
@@ -528,7 +528,7 @@ const Filters: React.FC<FiltersProps> = ({
       </FilterSection>
 
       {/* Color Filter */}
-      <FilterSection title="Color">
+      {/* <FilterSection title="Color">
         {colors
           .slice(0, showAllColors ? colors.length : 7)
           .map((item: FilterOption) => (
@@ -555,7 +555,7 @@ const Filters: React.FC<FiltersProps> = ({
             {showAllColors ? "Show less" : `+${colors.length - 7} more`}
           </button>
         )}
-      </FilterSection>
+      </FilterSection> */}
 
       
     </div>

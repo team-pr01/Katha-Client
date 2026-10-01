@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Container from "../../components/Reusable/Container/Container";
 import OrderSummary from "../../components/CheckoutPage/OrderSummary/OrderSummary";
 import CheckoutForm, { type CheckoutFormRef } from "../../components/CheckoutPage/CheckoutForm/CheckoutForm";
 
 const Checkout: React.FC = () => {
+  const [loading, setLoading] = useState<boolean>(false);
   const formRef = useRef<CheckoutFormRef>(null);
 
   // SEO Structured Data
@@ -52,10 +53,10 @@ const Checkout: React.FC = () => {
 
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Left Column - Form */}
-            <CheckoutForm ref={formRef} />
+            <CheckoutForm ref={formRef} setLoading={setLoading} />
 
             {/* Right Column - Order Summary */}
-            <OrderSummary formRef={formRef} />
+            <OrderSummary formRef={formRef} loading={loading} />
           </div>
         </Container>
       </div>

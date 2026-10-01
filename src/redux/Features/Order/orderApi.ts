@@ -2,6 +2,15 @@ import { baseApi } from "../../Api/baseApi";
 
 const orderApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+     getRazorpayKey: builder.query({
+      query: () => ({
+        url: "/get-key",
+        method: "GET",
+        credentials: "include",
+      }),
+      providesTags: ["user"],
+    }),
+
     getAllOrders: builder.query({
       query: ({ keyword, orderStatus, page }: { keyword?: string; orderStatus?: string; page?: number }) => {
         const params = new URLSearchParams();
@@ -29,9 +38,19 @@ const orderApi = baseApi.injectEndpoints({
         body: data,
         credentials: "include",
       }),
-      invalidatesTags: ["couponCode"],
+      invalidatesTags: ["orders"],
+    }),
+
+    verifyPayment: builder.mutation({
+      query: ({id, data}) => ({
+        url: `/order/verify-payment/${id}`,
+        method: "PATCH",
+        body: data,
+        credentials: "include",
+      }),
+      invalidatesTags: ["orders"],
     }),
   }),
 });
 
-export const { useGetAllOrdersQuery, useCheckoutMutation } = orderApi;
+export const { useGetRazorpayKeyQuery, useGetAllOrdersQuery, useCheckoutMutation, useVerifyPaymentMutation } = orderApi;

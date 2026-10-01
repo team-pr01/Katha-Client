@@ -1,13 +1,11 @@
 import { FiCheck, FiPackage, FiClock, FiPhone } from "react-icons/fi";
 import { BsWhatsapp } from "react-icons/bs";
 import Container from "../../Reusable/Container/Container";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Button from "../../Reusable/Button/Button";
 
 const OrderSuccess = () => {
-  const location = useLocation();
   const { orderId } = useParams();
-  const totalAmount = location.state?.totalAmount || 0;
 
   return (
     <>
@@ -71,14 +69,6 @@ const OrderSuccess = () => {
                       </span>
                       <span className="text-neutral-10 font-semibold text-sm">
                         #{orderId}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b border-neutral-50">
-                      <span className="text-neutral-45 text-sm">
-                        Total Amount
-                      </span>
-                      <span className="font-bold text-xl text-primary-10">
-                        ₹{totalAmount.toFixed(0)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-neutral-50">

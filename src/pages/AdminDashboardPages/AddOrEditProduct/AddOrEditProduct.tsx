@@ -23,6 +23,7 @@ type TFormData = {
   category: string;
   subCategory: string;
   processingTime: string;
+  slug: string;
   isCustomizationAvailable: boolean;
   isFeatured: boolean;
 };
@@ -61,6 +62,7 @@ const AddOrEditProduct = () => {
   } = useForm<TFormData>({
     defaultValues: {
       name: "",
+      slug: "",
       category: "",
       subCategory: "",
       processingTime: "",
@@ -98,6 +100,7 @@ const AddOrEditProduct = () => {
     // Populate RHF fields
     reset({
       name: singleProductData?.name || "",
+      slug: singleProductData?.slug || "",
       category: singleProductData?.category || "",
       subCategory: singleProductData?.subCategory || "",
       processingTime: singleProductData?.processingTime || "",
@@ -123,6 +126,7 @@ const AddOrEditProduct = () => {
 
     reset({
       name: singleProductData?.name || "",
+      slug: singleProductData?.slug || "",
       category: singleProductData?.category || "",
       subCategory: singleProductData?.subCategory || "",
       processingTime: singleProductData?.processingTime || "",
@@ -273,6 +277,7 @@ const AddOrEditProduct = () => {
 
       const payload = {
         name: formData.name.trim(),
+        slug: formData.slug,
         category: formData.category.trim(),
         subCategory: formData.subCategory.trim(),
         occasionNames: selectedOccasions,
@@ -388,6 +393,15 @@ const AddOrEditProduct = () => {
                   value: 3,
                   message: "Name must be at least 3 characters",
                 },
+              })}
+            />
+
+            <TextInput
+              label="Slug"
+              placeholder="e.g. handcrafted-wooden-wall-art"
+              error={errors.slug}
+              {...register("slug", {
+                required: "Slug is required",
               })}
             />
 

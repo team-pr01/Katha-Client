@@ -14,9 +14,10 @@ import { useValidateCouponCodeMutation } from "../../../redux/Features/CouponCod
 
 interface OrderSummaryProps {
   formRef: React.RefObject<CheckoutFormRef | null>;
+  loading: boolean;
 }
 
-const OrderSummary = ({ formRef }: OrderSummaryProps) => {
+const OrderSummary = ({ formRef, loading }: OrderSummaryProps) => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const { cartItems, getSubTotal, getPackagingTotal } = useCart();
@@ -217,17 +218,17 @@ const OrderSummary = ({ formRef }: OrderSummaryProps) => {
         {/* Place Order Button */}
         <button
           onClick={handlePlaceOrder}
-          disabled={isSubmitting}
+          disabled={isSubmitting || loading}
           className={`
             w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2
             ${
-              isSubmitting
+              isSubmitting || loading
                 ? "bg-neutral-50 text-neutral-45 cursor-not-allowed"
                 : "bg-primary-10 text-white hover:bg-[#d4892a] shadow-md hover:shadow-lg"
             }
           `}
         >
-          {isSubmitting ? (
+          {isSubmitting || loading ? (
             <>
               <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               Processing...

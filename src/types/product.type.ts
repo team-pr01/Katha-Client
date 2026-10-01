@@ -10,6 +10,7 @@ export type TDimensions = {
 export type TProductVariant = {
   _id: string;
   name: string;
+  slug: string;
   images: string[];
   description: string;
   packageContents: string[];
