@@ -2,7 +2,45 @@ import { baseApi } from "../../Api/baseApi";
 
 const orderApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-     getRazorpayKey: builder.query({
+    getAllOrdersForAdmin: builder.query<
+      any,
+      {
+        keyword?: string;
+        status?: string;
+        skip?: number;
+        limit?: number;
+      }
+    >({
+      query: (filters) => {
+        const params = new URLSearchParams();
+
+        // Keyword search
+        if (filters.keyword) params.append("keyword", filters.keyword);
+
+        // Pagination
+        if (filters.skip !== undefined && filters.skip !== null) {
+          params.append("skip", String(filters.skip));
+        }
+        if (filters.limit !== undefined && filters.limit !== null) {
+          params.append("limit", String(filters.limit));
+        }
+
+        if (filters.status) {
+          filters.status === "all" ? params.append("status", "") : params.append("status", filters.status);
+        }
+
+        return {
+          url: `/order?${params.toString()}`,
+          method: "GET",
+          credentials: "include",
+        };
+      },
+      providesTags: ["orders"],
+    }),
+
+
+
+    getRazorpayKey: builder.query({
       query: () => ({
         url: "/get-key",
         method: "GET",
@@ -42,8 +80,18 @@ const orderApi = baseApi.injectEndpoints({
     }),
 
     verifyPayment: builder.mutation({
-      query: ({id, data}) => ({
+      query: ({ id, data }) => ({
         url: `/order/verify-payment/${id}`,
+        method: "PATCH",
+        body: data,
+        credentials: "include",
+      }),
+      invalidatesTags: ["orders"],
+    }),
+
+    updateOrderStatus: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/order/status/${id}`,
         method: "PATCH",
         body: data,
         credentials: "include",
@@ -53,4 +101,4 @@ const orderApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetRazorpayKeyQuery, useGetAllOrdersQuery, useCheckoutMutation, useVerifyPaymentMutation } = orderApi;
+export const { useGetAllOrdersForAdminQuery, useGetRazorpayKeyQuery, useGetAllOrdersQuery, useCheckoutMutation, useVerifyPaymentMutation, useUpdateOrderStatusMutation } = orderApi;

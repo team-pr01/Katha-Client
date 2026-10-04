@@ -28,6 +28,7 @@ import AddOrEditProduct from "../pages/AdminDashboardPages/AddOrEditProduct/AddO
 import CategoriesManagement from "../pages/AdminDashboardPages/CategoriesManagement/CategoriesManagement";
 import OccasionsManagement from "../pages/AdminDashboardPages/OccasionsManagement/OccasionsManagement";
 import MaterialsManagement from "../pages/AdminDashboardPages/MaterialsManagement/MaterialsManagement";
+import HeroManagement from "../pages/AdminDashboardPages/HeroManagement/HeroManagement";
 
 export const router = createBrowserRouter([
   {
@@ -165,6 +166,10 @@ export const router = createBrowserRouter([
       {
         path: "materials-management",
         element: <MaterialsManagement />,
+      },
+      {
+        path: "hero-management",
+        element: <HeroManagement />,
       },
       {
         path: "*",

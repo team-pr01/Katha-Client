@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useGetActiveHeroesQuery } from "../../../redux/Features/Hero/heroApi";
 import HeroSkeletonLoader from "../../Loaders/HeroSkeletonLoader/HeroSkeletonLoader";
 import Container from "../../Reusable/Container/Container";
+import { Link } from "react-router-dom";
 
 const Hero = () => {
   const { data, isLoading } = useGetActiveHeroesQuery({});
@@ -49,15 +50,17 @@ const Hero = () => {
         {/* Slides — all images rendered, opacity toggled for smooth crossfade */}
         <div className="relative w-full h-full rounded-3xl overflow-hidden">
           {heroes.map((h: any, idx: number) => (
+            <Link to={h?.link}>
             <img
               key={h._id}
               src={h.image}
-              alt={h.title || `Hero ${idx + 1}`}
+              alt={h.alt}
               loading={idx === 0 ? "eager" : "lazy"}
               className={`absolute inset-0 w-full h-full object-cover block transition-opacity duration-1000 ease-in-out ${
                 idx === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
               }`}
             />
+            </Link>
           ))}
         </div>
 

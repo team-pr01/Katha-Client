@@ -59,9 +59,9 @@ export const adminNavGroups: TAdminNavGroup[] = [
     id: "content",
     label: "Content",
     icon: <FiLayers size={20} />,
-    defaultPath: "/admin/dashboard/heroes",
+    defaultPath: "/admin/dashboard/hero-management",
     items: [
-      { label: "Hero Banners", path: "/admin/heroes" },
+      { label: "Hero Banners", path: "/admin/dashboard/hero-management" },
       { label: "Media", path: "/admin/media" },
     ],
   },
