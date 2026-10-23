@@ -19,7 +19,7 @@ const DataTablePagination = ({
   onPageChange,
   limit,
   setLimit,
-  limitOptions = [5,10, 20, 50, 100],
+  limitOptions = [5, 10, 20, 50, 100],
 }: DataTablePaginationProps) => {
   const start = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
   const end = Math.min(currentPage * itemsPerPage, totalItems);
@@ -85,13 +85,14 @@ const DataTablePagination = ({
               </option>
             ))}
           </select>
-          <span className="text-xs text-neutral-45">entries</span>
         </div>
 
         <p className="text-xs text-neutral-45">
           Showing <span className="font-semibold text-neutral-10">{start}</span>{" "}
           to <span className="font-semibold text-neutral-10">{end}</span> of{" "}
-          <span className="font-semibold text-neutral-10">{totalItems}</span>
+          <span className="font-semibold text-neutral-10">
+            {totalItems} orders
+          </span>
         </p>
       </div>
 

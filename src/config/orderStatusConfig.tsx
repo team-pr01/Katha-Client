@@ -57,7 +57,7 @@ export const orderStatusConfig: Record<
 };
 
 export const orderStatusOptions: { value: TOrderStatus | "all"; label: string }[] = [
-  { value: "all", label: "All statuses" },
+  { value: "all", label: "All Statuses" },
   { value: "pending", label: "Pending" },
   { value: "confirmed", label: "Confirmed" },
   { value: "processing", label: "Processing" },

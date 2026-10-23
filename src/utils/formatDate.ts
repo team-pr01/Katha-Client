@@ -23,5 +23,5 @@ export const formatDateTime = (dateString: string) => {
   hours = hours % 12 || 12; // convert 0,13,14.. → 12-hour format
   hours = hours.toString().padStart(2, "0");
 
-  return `${day} ${month}, ${year} | ${hours}:${minutes} ${ampm}`;
+  return `${day} ${month}, ${year} at ${hours}:${minutes} ${ampm}`;
 };

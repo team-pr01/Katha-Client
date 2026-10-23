@@ -1,16 +1,35 @@
 import { FiSearch } from "react-icons/fi";
+import { useEffect, useState } from "react";
 
 interface SearchFieldProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  delay?: number;
 }
 
 const SearchField = ({
   value,
   onChange,
   placeholder = "Search…",
+  delay = 500,
 }: SearchFieldProps) => {
+  const [localValue, setLocalValue] = useState(value);
+
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  useEffect(() => {
+    if (localValue === value) return;
+
+    const timer = setTimeout(() => {
+      onChange(localValue);
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [localValue, delay]);
+
   return (
     <div className="relative flex-1 min-w-0">
       <FiSearch
@@ -19,8 +38,8 @@ const SearchField = ({
       />
       <input
         type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        value={localValue}
+        onChange={(e) => setLocalValue(e.target.value)}
         placeholder={placeholder}
         className="
           w-full pl-10 pr-4 py-2.5 rounded-xl 

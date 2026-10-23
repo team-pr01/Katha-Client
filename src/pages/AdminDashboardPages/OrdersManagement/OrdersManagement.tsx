@@ -1,8 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { FiPlus, FiEye, FiPackage, FiTruck, FiXCircle } from "react-icons/fi";
 import { Link } from "react-router-dom";
-import type { TOrder, TOrdersKPI, TOrderStatus } from "../../../types/orders.types";
+import type {
+  TOrder,
+  TOrdersKPI,
+  TOrderStatus,
+} from "../../../types/orders.types";
 import OrderStatusBadge from "../../../components/AdminDashboardComponents/OrdersManagementPage/OrderStatusBadge/OrderStatusBadge";
 import OrderDetailsModal from "../../../components/AdminDashboardComponents/OrdersManagementPage/OrderDetailsModal/OrderDetailsModal";
 import AdminPageHeader from "../../../components/Reusable/AdminReusable/AdminPageHeader/AdminPageHeader";
@@ -16,22 +20,31 @@ import DataTablePagination from "../../../components/Reusable/DataTable/DataTabl
 import type { TKPIItem } from "../../../types/kpi.types";
 import type { TDataTableColumn } from "../../../types/dataTable.types";
 import { useGetAllOrdersForAdminQuery } from "../../../redux/Features/Order/orderApi";
+import { formatDateTime } from "../../../utils/formatDate";
 
-const ITEMS_PER_PAGE = 10;
+// const dateRangeOptions = [
+//   { value: "all", label: "All Time" },
+//   { value: "today", label: "Today" },
+//   { value: "week", label: "This Week" },
+//   { value: "month", label: "This Month" },
+// ];
 
-const dateRangeOptions = [
-  { value: "all", label: "All time" },
-  { value: "today", label: "Today" },
-  { value: "week", label: "This week" },
-  { value: "month", label: "This month" },
+const paymentStatusOptions = [
+  { value: "all", label: "All Payments" },
+  { value: "pending", label: "Pending" },
+  { value: "paid", label: "Paid" },
+  { value: "failed", label: "Failed" },
+  { value: "refunded", label: "Refunded" },
 ];
 
 const OrdersManagement = () => {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState<number>(1);
-    const [limit, setLimit] = useState<number>(10);
-    const skip = (page - 1) * limit;
+  const [limit, setLimit] = useState<number>(10);
+  const skip = (page - 1) * limit;
+
   const [status, setStatus] = useState<TOrderStatus | "all">("all");
+  const [paymentStatus, setPaymentStatus] = useState("all");
   const [dateRange, setDateRange] = useState("all");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -39,8 +52,17 @@ const OrdersManagement = () => {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
-  const { data } = useGetAllOrdersForAdminQuery({ keyword: search, skip, limit });
+  // Pass paymentStatus to the query
+  const { data } = useGetAllOrdersForAdminQuery({
+    keyword: search,
+    orderStatus: status,
+    paymentStatus: paymentStatus, // Make sure your backend/API supports this param
+    skip,
+    limit,
+  });
+
   const orders: TOrder[] = data?.data?.data || [];
+  const meta = data?.data?.meta || {};
 
   const openDetails = (orderId: string) => {
     setSelectedOrderId(orderId);
@@ -95,36 +117,6 @@ const OrdersManagement = () => {
       accent: "bg-neutral-20 text-neutral-10",
     },
   ];
-
-  // ─── Filtering ───────────────────────────────────────
-  const filteredOrders = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return orders.filter((order) => {
-      if (status !== "all" && order.orderStatus !== status) return false;
-      if (q) {
-        const matches =
-          order.orderId.toLowerCase().includes(q) ||
-          order.customer?.name?.toLowerCase().includes(q) ||
-          order.customer?.email?.toLowerCase().includes(q) ||
-          order.customer?.phone?.includes(q);
-        if (!matches) return false;
-      }
-      if (dateRange !== "all") {
-        const created = new Date(order.createdAt).getTime();
-        const now = Date.now();
-        const ranges: Record<string, number> = {
-          today: 24 * 60 * 60 * 1000,
-          week: 7 * 24 * 60 * 60 * 1000,
-          month: 30 * 24 * 60 * 60 * 1000,
-        };
-        if (now - created > ranges[dateRange]) return false;
-      }
-      return true;
-    });
-  }, [orders, search, status, dateRange]);
-
-  // ─── Pagination ──────────────────────────────────────
-  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / ITEMS_PER_PAGE));
 
   // ─── Columns ─────────────────────────────────────────
   const columns: TDataTableColumn<TOrder>[] = [
@@ -212,7 +204,10 @@ const OrdersManagement = () => {
             className={`text-[11px] capitalize mt-0.5 ${
               order.paymentStatus === "paid"
                 ? "text-green-600"
-                : "text-amber-600"
+                : order.paymentStatus === "failed" ||
+                    order.paymentStatus === "refunded"
+                  ? "text-red-500"
+                  : "text-amber-600"
             }`}
           >
             {order.paymentStatus}
@@ -224,6 +219,15 @@ const OrdersManagement = () => {
       key: "status",
       header: "Status",
       render: (order: any) => <OrderStatusBadge status={order.orderStatus} />,
+    },
+    {
+      key: "createdAt",
+      header: "Placed On",
+      render: (order: any) => (
+        <p className="text-xs text-neutral-10">
+          {formatDateTime(order.createdAt)}
+        </p>
+      ),
     },
     {
       key: "total",
@@ -242,7 +246,7 @@ const OrdersManagement = () => {
       widthClass: "w-12",
       render: (order: any) => (
         <button
-          onClick={() => openDetails(order)}
+          onClick={() => openDetails(order._id)}
           className="p-1.5 rounded-lg text-neutral-45 hover:text-primary-10 hover:bg-primary-10/10 transition-all"
           title="View details"
           aria-label="View details"
@@ -257,12 +261,16 @@ const OrdersManagement = () => {
   const handleClearFilters = () => {
     setSearch("");
     setStatus("all");
+    setPaymentStatus("all");
     setDateRange("all");
     setPage(1);
   };
 
   const hasActiveFilters =
-    search.trim() !== "" || status !== "all" || dateRange !== "all";
+    search.trim() !== "" ||
+    status !== "all" ||
+    paymentStatus !== "all" ||
+    dateRange !== "all";
 
   return (
     <div className="space-y-5 font-Manrope">
@@ -303,14 +311,23 @@ const OrdersManagement = () => {
             options: orderStatusOptions,
           },
           {
-            id: "range",
-            value: dateRange,
+            id: "paymentStatus",
+            value: paymentStatus,
             onChange: (v) => {
-              setDateRange(v);
+              setPaymentStatus(v);
               setPage(1);
             },
-            options: dateRangeOptions,
+            options: paymentStatusOptions,
           },
+          // {
+          //   id: "range",
+          //   value: dateRange,
+          //   onChange: (v) => {
+          //     setDateRange(v);
+          //     setPage(1);
+          //   },
+          //   options: dateRangeOptions,
+          // },
         ]}
         hasActiveFilters={hasActiveFilters}
         onClear={handleClearFilters}
@@ -342,7 +359,7 @@ const OrdersManagement = () => {
         ]}
       />
 
-      {filteredOrders.length === 0 ? (
+      {orders?.length === 0 ? (
         <DataTableEmpty
           icon={<FiPackage size={32} />}
           title="No orders found"
@@ -358,7 +375,7 @@ const OrdersManagement = () => {
       ) : (
         <>
           <DataTable
-            rows={filteredOrders}
+            rows={orders}
             columns={columns}
             rowKey={(o: any) => o._id}
             selectable
@@ -371,15 +388,15 @@ const OrdersManagement = () => {
               )
             }
             onSelectAll={(checked) =>
-              setSelectedIds(checked ? filteredOrders.map((o: any) => o._id) : [])
+              setSelectedIds(checked ? orders?.map((o: any) => o._id) : [])
             }
           />
 
           <DataTablePagination
             currentPage={page}
-            totalPages={totalPages}
-            totalItems={filteredOrders.length}
-            itemsPerPage={ITEMS_PER_PAGE}
+            totalPages={meta?.pages ?? 1}
+            totalItems={meta?.total ?? orders?.length ?? 0}
+            itemsPerPage={limit}
             onPageChange={setPage}
             limit={limit}
             setLimit={setLimit}

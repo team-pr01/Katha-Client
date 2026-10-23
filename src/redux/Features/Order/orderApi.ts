@@ -3,40 +3,51 @@ import { baseApi } from "../../Api/baseApi";
 const orderApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllOrdersForAdmin: builder.query<
-      any,
-      {
-        keyword?: string;
-        status?: string;
-        skip?: number;
-        limit?: number;
-      }
-    >({
-      query: (filters) => {
-        const params = new URLSearchParams();
+  any,
+  {
+    keyword?: string;
+    orderStatus?: string;
+    paymentStatus?: string;
+    skip?: number;
+    limit?: number;
+    page?: number;        // 👈 Added page
+  }
+>({
+  query: (filters) => {
+    const params = new URLSearchParams();
 
-        // Keyword search
-        if (filters.keyword) params.append("keyword", filters.keyword);
+    // Keyword search
+    if (filters.keyword) params.append("keyword", filters.keyword);
 
-        // Pagination
-        if (filters.skip !== undefined && filters.skip !== null) {
-          params.append("skip", String(filters.skip));
-        }
-        if (filters.limit !== undefined && filters.limit !== null) {
-          params.append("limit", String(filters.limit));
-        }
+    // Pagination
+    if (typeof filters.skip === "number") {
+      params.append("skip", String(filters.skip));
+    }
+    if (typeof filters.limit === "number") {
+      params.append("limit", String(filters.limit));
+    }
+    if (typeof filters.page === "number") {
+      params.append("page", String(filters.page));
+    }
 
-        if (filters.status) {
-          filters.status === "all" ? params.append("status", "") : params.append("status", filters.status);
-        }
+    // Order Status (Only append if it's not "all")
+    if (filters.orderStatus && filters.orderStatus !== "all") {
+      params.append("orderStatus", filters.orderStatus);
+    }
 
-        return {
-          url: `/order?${params.toString()}`,
-          method: "GET",
-          credentials: "include",
-        };
-      },
-      providesTags: ["orders"],
-    }),
+    // Payment Status (Only append if it's not "all")
+    if (filters.paymentStatus && filters.paymentStatus !== "all") {
+      params.append("paymentStatus", filters.paymentStatus);
+    }
+
+    return {
+      url: `/order?${params.toString()}`,
+      method: "GET",
+      credentials: "include",
+    };
+  },
+  providesTags: ["orders"],
+}),
 
     getRazorpayKey: builder.query({
       query: () => ({
@@ -48,14 +59,31 @@ const orderApi = baseApi.injectEndpoints({
     }),
 
     getAllOrders: builder.query({
-      query: ({ keyword, orderStatus, page }: { keyword?: string; orderStatus?: string; page?: number }) => {
+      query: ({
+        keyword,
+        orderStatus,   // 👈 change from `status` to `orderStatus`
+        limit,
+        page,
+        skip
+      }: {
+        keyword?: string;
+        orderStatus?: string;   // 👈 change this
+        limit?: number;
+        page?: number;
+        skip?: number;
+      }) => {
         const params = new URLSearchParams();
 
         if (keyword) params.append("keyword", keyword);
-        if (orderStatus) {
-          orderStatus === "all" ? params.append("orderStatus", "") : params.append("orderStatus", orderStatus);
+
+        // ✅ Only append if it's a real status (not "all" and not empty)
+        if (orderStatus && orderStatus !== "all") {
+          params.append("orderStatus", orderStatus);
         }
-        if (page) params.append("page", page.toString());
+
+        if (typeof limit === "number") params.append("limit", limit.toString());
+        if (typeof page === "number") params.append("page", page.toString());
+        if (typeof skip === "number") params.append("skip", skip.toString());
 
         return {
           url: `/order/my-orders${params.toString() ? `?${params.toString()}` : ""}`,
@@ -66,7 +94,7 @@ const orderApi = baseApi.injectEndpoints({
       providesTags: ["orders"],
     }),
 
-     getSingleORderBySlug: builder.query({
+    getSingleORderBySlug: builder.query({
       query: (id) => ({
         url: `/order/${id}`,
         method: "GET",
