@@ -36,14 +36,14 @@ const OrdersManagement = () => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   // Details modal
-  const [selectedOrder, setSelectedOrder] = useState<TOrder | null>(null);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   const { data } = useGetAllOrdersForAdminQuery({ keyword: search, skip, limit });
   const orders: TOrder[] = data?.data?.data || [];
 
-  const openDetails = (order: TOrder) => {
-    setSelectedOrder(order);
+  const openDetails = (orderId: string) => {
+    setSelectedOrderId(orderId);
     setIsDetailsModalOpen(true);
   };
 
@@ -134,7 +134,7 @@ const OrdersManagement = () => {
       render: (order: any) => (
         <div>
           <button
-            onClick={() => openDetails(order)}
+            onClick={() => openDetails(order?._id)}
             className="text-sm font-semibold text-neutral-10 hover:text-primary-10 transition-colors"
           >
             #{order.orderId}
@@ -392,9 +392,9 @@ const OrdersManagement = () => {
         isOpen={isDetailsModalOpen}
         onClose={() => {
           setIsDetailsModalOpen(false);
-          setSelectedOrder(null);
+          setSelectedOrderId(null);
         }}
-        order={selectedOrder}
+        orderId={selectedOrderId as string}
       />
     </div>
   );

@@ -19,7 +19,7 @@ const DataTablePagination = ({
   onPageChange,
   limit,
   setLimit,
-  limitOptions = [10, 20, 50, 100],
+  limitOptions = [5,10, 20, 50, 100],
 }: DataTablePaginationProps) => {
   const start = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
   const end = Math.min(currentPage * itemsPerPage, totalItems);

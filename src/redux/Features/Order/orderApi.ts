@@ -38,8 +38,6 @@ const orderApi = baseApi.injectEndpoints({
       providesTags: ["orders"],
     }),
 
-
-
     getRazorpayKey: builder.query({
       query: () => ({
         url: "/get-key",
@@ -65,6 +63,15 @@ const orderApi = baseApi.injectEndpoints({
           credentials: "include",
         };
       },
+      providesTags: ["orders"],
+    }),
+
+     getSingleORderBySlug: builder.query({
+      query: (id) => ({
+        url: `/order/${id}`,
+        method: "GET",
+        credentials: "include",
+      }),
       providesTags: ["orders"],
     }),
 
@@ -101,4 +108,4 @@ const orderApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetAllOrdersForAdminQuery, useGetRazorpayKeyQuery, useGetAllOrdersQuery, useCheckoutMutation, useVerifyPaymentMutation, useUpdateOrderStatusMutation } = orderApi;
+export const { useGetAllOrdersForAdminQuery, useGetRazorpayKeyQuery, useGetAllOrdersQuery, useGetSingleORderBySlugQuery, useCheckoutMutation, useVerifyPaymentMutation, useUpdateOrderStatusMutation } = orderApi;
