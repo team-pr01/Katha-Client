@@ -29,6 +29,7 @@ import CategoriesManagement from "../pages/AdminDashboardPages/CategoriesManagem
 import OccasionsManagement from "../pages/AdminDashboardPages/OccasionsManagement/OccasionsManagement";
 import MaterialsManagement from "../pages/AdminDashboardPages/MaterialsManagement/MaterialsManagement";
 import HeroManagement from "../pages/AdminDashboardPages/HeroManagement/HeroManagement";
+import AddOrder from "../pages/AdminDashboardPages/AddOrder/AddOrder";
 
 export const router = createBrowserRouter([
   {
@@ -138,6 +139,10 @@ export const router = createBrowserRouter([
       {
         path: "orders-management",
         element: <OrdersManagement />,
+      },
+      {
+        path: "order/add",
+        element: <AddOrder />,
       },
       {
         path: "products-management",

@@ -6,7 +6,6 @@ import {
   FiTrash2,
   FiStar,
   FiLayers,
-  FiSearch,
   FiCheckCircle,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
@@ -24,11 +23,19 @@ import type { TDataTableColumn } from "../../../types/dataTable.types";
 import type { TOccasion } from "../../../types/occasion.type";
 import AddOrEditOccasionModal from "../../../components/AdminDashboardComponents/CategoriesManagementPage/OccasionsManagementPage/AddOrEditOccasionModal/AddOrEditOccasionModal";
 import SubItemsPopover from "../../../components/Reusable/SubItemsPopover/SubItemsPopover";
+import DataFilters from "../../../components/Reusable/DataFilters/DataFilters";
+
+const statusOptions = [
+  { value: "all", label: "All" },
+  { value: "true", label: "Active" },
+  { value: "false", label: "Inactive" },
+];
 
 const OccasionsManagement = () => {
   // ─── State ───────────────────────────────────────────
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [status, setStatus] = useState<any>("all");
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
   const skip = (page - 1) * limit;
@@ -47,11 +54,18 @@ const OccasionsManagement = () => {
 
   const [updateOccasion, { isLoading: isUpdatingOccasion }] =
     useUpdateOccasionMutation();
+    
   const {
     data: occasionData,
     isLoading: isOccasionsLoading,
     isFetching,
-  } = useGetAllOccasionsQuery({ keyword: search, skip, limit });
+  } = useGetAllOccasionsQuery({ 
+    keyword: search, 
+    skip, 
+    limit, 
+    isActive: status 
+  });
+  
   const meta = occasionData?.data?.meta || {};
   const occasions: TOccasion[] = occasionData?.data?.data || [];
 
@@ -109,11 +123,6 @@ const OccasionsManagement = () => {
     setEditingOccasion(null);
   };
 
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-    setPage(1); // reset to page 1 on search
-  };
-
   const handleSelectToggle = (id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
@@ -128,8 +137,11 @@ const OccasionsManagement = () => {
     );
   };
 
-  const handleLimitChange = (newLimit: number) => {
-    setLimit(newLimit);
+  const hasActiveFilters = search.trim() !== "" || status !== "all";
+
+  const handleClearFilters = () => {
+    setSearch("");
+    setStatus("all");
     setPage(1);
   };
 
@@ -200,15 +212,15 @@ const OccasionsManagement = () => {
           onClick={() => handleToggleActive(occasion)}
           disabled={isUpdatingOccasion}
           className={`
-    inline-flex items-center gap-1.5 text-[11px] font-medium 
-    px-2.5 py-1 rounded-full transition-all cursor-pointer
-    disabled:opacity-60 disabled:cursor-not-allowed
-    ${
-      occasion.isActive
-        ? "bg-green-50 text-green-700 hover:bg-green-100"
-        : "bg-neutral-20 text-neutral-45 hover:bg-neutral-45/20"
-    }
-  `}
+            inline-flex items-center gap-1.5 text-[11px] font-medium 
+            px-2.5 py-1 rounded-full transition-all cursor-pointer
+            disabled:opacity-60 disabled:cursor-not-allowed
+            ${
+              occasion.isActive
+                ? "bg-green-50 text-green-700 hover:bg-green-100"
+                : "bg-neutral-20 text-neutral-45 hover:bg-neutral-45/20"
+            }
+          `}
           title={
             occasion.isActive ? "Click to deactivate" : "Click to activate"
           }
@@ -276,7 +288,7 @@ const OccasionsManagement = () => {
       />
 
       {/* Stats strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <StatCard
           label="Total Occasions"
           value={meta?.total ?? occasions.length}
@@ -298,38 +310,33 @@ const OccasionsManagement = () => {
           icon={<FiCheckCircle size={18} />}
           accent="bg-green-50 text-green-600"
         />
-        <StatCard
-          label="Avg Sub-occasions"
-          value={
-            occasions.length
-              ? (
-                  occasions.reduce(
-                    (sum, o) => sum + (o.subOccasions?.length || 0),
-                    0,
-                  ) / occasions.length
-                ).toFixed(1)
-              : "0"
-          }
-          icon={<FiLayers size={18} />}
-          accent="bg-amber-50 text-amber-600"
-        />
       </div>
 
-      {/* Search filter */}
-      <div className="bg-white rounded-2xl border border-neutral-20 p-4">
-        <div className="relative flex-1">
-          <FiSearch
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-45"
-            size={16}
-          />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Search occasions or sub-occasions…"
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-neutral-20/60 border border-transparent text-sm focus:outline-none focus:bg-white focus:border-primary-10/40 transition-all"
-          />
-        </div>
+      {/* Search and Filter */}
+      <div className="pt-2">
+        <DataFilters
+          search={{
+            value: search,
+            onChange: (v) => {
+              setSearch(v);
+              setPage(1);
+            },
+            placeholder: "Search by occasion name or sub-occasion name…",
+          }}
+          selects={[
+            {
+              id: "status",
+              value: status,
+              onChange: (v) => {
+                setStatus(v || "all");
+                setPage(1);
+              },
+              options: statusOptions,
+            },
+          ]}
+          hasActiveFilters={hasActiveFilters}
+          onClear={handleClearFilters}
+        />
       </div>
 
       {/* Table */}
@@ -338,15 +345,17 @@ const OccasionsManagement = () => {
       ) : occasions.length === 0 ? (
         <DataTableEmpty
           icon={<FiStar size={32} />}
-          title={search ? "No matching occasions" : "No occasions yet"}
+          title={
+            hasActiveFilters ? "No matching occasions" : "No occasions yet"
+          }
           description={
-            search
-              ? "No occasions match your search. Try a different term."
+            hasActiveFilters
+              ? "No occasions match your current filters. Try adjusting them."
               : "Get started by adding your first occasion."
           }
-          variant={search ? "no-match" : "no-data"}
-          actionLabel={search ? "Clear search" : "Add Occasion"}
-          onAction={search ? () => setSearch("") : handleAddOccasion}
+          variant={hasActiveFilters ? "no-match" : "no-data"}
+          actionLabel={hasActiveFilters ? "Clear filters" : "Add Occasion"}
+          onAction={hasActiveFilters ? handleClearFilters : handleAddOccasion}
         />
       ) : (
         <>
@@ -368,7 +377,10 @@ const OccasionsManagement = () => {
             itemsPerPage={limit}
             onPageChange={setPage}
             limit={limit}
-            setLimit={handleLimitChange}
+            setLimit={(v) => {
+              setLimit(v);
+              setPage(1);
+            }}
           />
         </>
       )}

@@ -6,6 +6,7 @@ import CheckoutForm, { type CheckoutFormRef } from "../../components/CheckoutPag
 
 const Checkout: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
+  const [shippingCharge, setShippingCharge] = useState(0);
   const formRef = useRef<CheckoutFormRef>(null);
 
   // SEO Structured Data
@@ -53,10 +54,10 @@ const Checkout: React.FC = () => {
 
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Left Column - Form */}
-            <CheckoutForm ref={formRef} setLoading={setLoading} />
+            <CheckoutForm ref={formRef} setLoading={setLoading} setShippingCharge={setShippingCharge} />
 
             {/* Right Column - Order Summary */}
-            <OrderSummary formRef={formRef} loading={loading} />
+            <OrderSummary formRef={formRef} loading={loading} shippingCharge={shippingCharge} />
           </div>
         </Container>
       </div>

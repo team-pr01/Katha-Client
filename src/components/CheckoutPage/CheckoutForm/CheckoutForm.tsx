@@ -8,6 +8,7 @@ import {
   FiMapPin,
   FiTruck,
   FiUser,
+  FiPackage,
 } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import TextInput from "../../Reusable/TextInput/TextInput";
@@ -23,6 +24,7 @@ import {
   useCurrentUser,
   type TLoggedInUser,
 } from "../../../redux/Features/Auth/authSlice";
+import { useCalculateRatesMutation } from "../../../redux/Features/Shipping/shippingApi";
 
 // ─── Types ────────────────────────────────────────────────
 type TCheckoutFormData = {
@@ -43,6 +45,13 @@ type TPaymentMethod = {
   icon: React.ReactNode;
 };
 
+type TShippingOption = {
+  courier_name: string;
+  rate: number;
+  estimated_delivery_days: string;
+  courier_id?: string;
+};
+
 export type CheckoutFormRef = {
   submitForm: () => void;
   triggerValidation: () => Promise<boolean>;
@@ -57,10 +66,11 @@ declare global {
 
 interface CheckoutFormProps {
   setLoading: (loading: boolean) => void;
+  setShippingCharge: (charge: number) => void;
 }
 
 const CheckoutForm = forwardRef<CheckoutFormRef, CheckoutFormProps>(
-  ({ setLoading }, ref) => {
+  ({ setLoading, setShippingCharge }, ref) => {
     const user = useSelector(useCurrentUser) as TLoggedInUser;
     const navigate = useNavigate();
     const { cartItems, clearCart } = useCart();
@@ -70,13 +80,20 @@ const CheckoutForm = forwardRef<CheckoutFormRef, CheckoutFormProps>(
 
     const [selectedPayment, setSelectedPayment] = useState<string>("COD");
     const [couponCode, setCouponCode] = useState<string>("");
-
     const [isRazorpayLoaded, setIsRazorpayLoaded] = useState<boolean>(false);
+
+    const [shippingOptions, setShippingOptions] = useState<TShippingOption[]>(
+      [],
+    );
+    const [selectedShipping, setSelectedShipping] =
+      useState<TShippingOption | null>(null);
+    const [pinCode, setPinCode] = useState<string>("");
 
     const {
       register,
       handleSubmit,
       trigger,
+      watch,
       formState: { errors },
     } = useForm<TCheckoutFormData>({
       defaultValues: {
@@ -92,18 +109,94 @@ const CheckoutForm = forwardRef<CheckoutFormRef, CheckoutFormProps>(
       },
     });
 
+    // Watch the pinCode field
+    const watchedPinCode = watch("pinCode");
+
+    // Update state when pincode changes
+    useEffect(() => {
+      setPinCode(watchedPinCode || "");
+    }, [watchedPinCode]);
+
+    const [calculateRates, { isLoading: isCalculatingRates }] =
+      useCalculateRatesMutation();
+
+    // Calculate total weight (mock: 500g per item for now)
+    const totalWeightInGrams = cartItems.reduce(
+      (sum, item) => sum + item.quantity * 500,
+      0,
+    );
+    const cartTotal = cartItems.reduce(
+      (sum, item) =>
+        sum + (item.discountedPrice || item.basePrice) * item.quantity,
+      0,
+    );
+
+    // Trigger rate calculation when pincode is valid
+    // Trigger rate calculation when pincode is valid
+    useEffect(() => {
+      if (pinCode?.length === 6) {
+        calculateRates({
+          origin: "431001", // Your warehouse pincode
+          deliveryPincode: pinCode, // Frontend sends 'destination', which your backend maps
+          payment_method: selectedPayment === "COD" ? "cod" : "prepaid",
+          order_amount: cartTotal,
+          weight: totalWeightInGrams > 0 ? totalWeightInGrams : 500,
+          length: 10,
+          breadth: 10, // Frontend sends 'breadth'
+          height: 10,
+        })
+          .unwrap()
+          .then((res: any) => {
+            // ✅ Map the Nimbus V2 structure to your TShippingOption structure
+            const availableCouriers = res?.data?.data?.available || [];
+
+            const mappedOptions: TShippingOption[] = availableCouriers.map(
+              (courier: any) => ({
+                courier_name: courier.courierName,
+                courier_id: courier.courierId,
+                // Nimbus sends total in Paise, convert to Rupees
+                rate: courier.result.totalPaise / 100,
+                // Nimbus sends Tat (Turnaround Time) in days
+                estimated_delivery_days: `${courier.tatDays}`,
+              }),
+            );
+
+            setShippingOptions(mappedOptions);
+
+            // Auto-select the cheapest option
+            if (mappedOptions.length > 0) {
+              const cheapest = mappedOptions.reduce((prev, curr) =>
+                prev.rate < curr.rate ? prev : curr,
+              );
+              setSelectedShipping(cheapest);
+              setShippingCharge(cheapest.rate);
+            }
+          })
+          .catch((err) => {
+            console.error("Rate calculation failed:", err);
+            setShippingOptions([]);
+            setSelectedShipping(null);
+            setShippingCharge(0);
+          });
+      } else {
+        setShippingOptions([]);
+        setSelectedShipping(null);
+        setShippingCharge(0);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pinCode, selectedPayment, cartTotal, totalWeightInGrams]);
+
     const { data: razorpayKeyData } = useGetRazorpayKeyQuery({});
     const razorpayKey = razorpayKeyData?.key;
 
     // ─── Expose methods to parent via ref ────────────────
     useImperativeHandle(ref, () => ({
       submitForm: () => {
-        // Submit → validate + route based on payment method
         handleSubmit((data) => {
           if (selectedPayment === "UPI") {
-            handlePlaceOrder(data); // Razorpay flow
+            handlePlaceOrder(data);
           } else {
-            onSubmit(data); // COD flow
+            onSubmit(data);
           }
         })();
       },
@@ -155,6 +248,13 @@ const CheckoutForm = forwardRef<CheckoutFormRef, CheckoutFormProps>(
 
     // ─── COD Order (direct) ──────────────────────────────
     const onSubmit = async (data: TCheckoutFormData) => {
+      if (!selectedShipping) {
+        toast.error(
+          "Please wait for delivery charges to calculate or check your pincode.",
+        );
+        return;
+      }
+
       setLoading(true);
       try {
         const orderedItems = cartItems.map((item) => ({
@@ -169,6 +269,7 @@ const CheckoutForm = forwardRef<CheckoutFormRef, CheckoutFormProps>(
           couponCode: couponCode,
           orderedItems,
           paymentMethod: "COD",
+          shippingCharge: selectedShipping.rate,
           shippingAddress: {
             firstName: data.firstName,
             lastName: data.lastName,
@@ -216,6 +317,11 @@ const CheckoutForm = forwardRef<CheckoutFormRef, CheckoutFormProps>(
         return;
       }
 
+      if (!selectedShipping) {
+        toast.error("Please wait for delivery charges to calculate.");
+        return;
+      }
+
       setLoading(true);
 
       try {
@@ -231,6 +337,7 @@ const CheckoutForm = forwardRef<CheckoutFormRef, CheckoutFormProps>(
           couponCode: couponCode,
           orderedItems,
           paymentMethod: "UPI",
+          shippingCharge: selectedShipping.rate,
           shippingAddress: {
             firstName: data.firstName,
             lastName: data.lastName,
@@ -244,7 +351,6 @@ const CheckoutForm = forwardRef<CheckoutFormRef, CheckoutFormProps>(
           },
         };
 
-        // Create order + razorpay order in backend
         const orderResponse = await checkout(payload).unwrap();
 
         if (!orderResponse?.success) {
@@ -274,16 +380,7 @@ const CheckoutForm = forwardRef<CheckoutFormRef, CheckoutFormProps>(
           },
           handler: function (response: any) {
             const paymentId = response.razorpay_payment_id;
-            // const razorpayOrderId =
-            //   response.razorpay_order_id || razorpayOrder?.id;
-            // const signature = response.razorpay_signature || "";
-
-            handleVerifyPayment(
-              // razorpayOrderId,
-              paymentId,
-              // signature,
-              orderId,
-            );
+            handleVerifyPayment(paymentId, orderId);
           },
         };
 
@@ -300,9 +397,7 @@ const CheckoutForm = forwardRef<CheckoutFormRef, CheckoutFormProps>(
 
     // ─── Verify Razorpay payment ─────────────────────────
     const handleVerifyPayment = async (
-      // razorpayOrderId: string,
       razorpayPaymentId: string,
-      // razorpaySignature: string,
       orderId: string,
     ) => {
       try {
@@ -453,6 +548,76 @@ const CheckoutForm = forwardRef<CheckoutFormRef, CheckoutFormProps>(
                 </div>
               </div>
             </div>
+
+            {/* Delivery / Shipping Options */}
+            {pinCode?.length === 6 && (
+              <div className="mb-6">
+                <h2 className="text-sm font-semibold text-neutral-10 uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <FiPackage className="text-primary-10" />
+                  Delivery Options
+                </h2>
+
+                {isCalculatingRates ? (
+                  <div className="flex items-center gap-3 p-4 bg-neutral-20/50 rounded-xl">
+                    <span className="w-4 h-4 border-2 border-primary-10 border-t-transparent rounded-full animate-spin" />
+                    <p className="text-sm text-neutral-45">
+                      Calculating delivery charges...
+                    </p>
+                  </div>
+                ) : shippingOptions.length > 0 ? (
+                  <div className="space-y-2">
+                    {shippingOptions.map((option, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setSelectedShipping(option);
+                          setShippingCharge(option.rate);
+                        }}
+                        className={`
+                          w-full flex items-center justify-between p-3 border-2 rounded-xl transition-all
+                          ${
+                            selectedShipping?.courier_name ===
+                            option.courier_name
+                              ? "border-primary-10 bg-primary-10/5 shadow-md"
+                              : "border-neutral-50 hover:border-primary-10"
+                          }
+                        `}
+                      >
+                        <div className="flex items-center gap-3">
+                          <FiTruck className="text-neutral-45" size={18} />
+                          <div className="text-left">
+                            <p className="text-sm font-medium text-neutral-10">
+                              {option.courier_name}
+                            </p>
+                            <p className="text-xs text-neutral-45">
+                              Est. delivery: {option.estimated_delivery_days}{" "}
+                              days
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-bold text-neutral-10">
+                            ₹{option.rate}
+                          </span>
+                          {selectedShipping?.courier_name ===
+                            option.courier_name && (
+                            <FiCheck className="text-primary-10" size={18} />
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+                    <p className="text-sm text-red-600">
+                      Delivery is not available for this PIN code. Please try a
+                      different address.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Payment Method */}
             <div className="mb-6">

@@ -15,9 +15,10 @@ import { useValidateCouponCodeMutation } from "../../../redux/Features/CouponCod
 interface OrderSummaryProps {
   formRef: React.RefObject<CheckoutFormRef | null>;
   loading: boolean;
+  shippingCharge: number;
 }
 
-const OrderSummary = ({ formRef, loading }: OrderSummaryProps) => {
+const OrderSummary = ({ formRef, loading, shippingCharge  }: OrderSummaryProps) => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const { cartItems, getSubTotal, getPackagingTotal } = useCart();
@@ -75,7 +76,7 @@ const OrderSummary = ({ formRef, loading }: OrderSummaryProps) => {
 
   const subtotal = getSubTotal();
   const packagingTotal = getPackagingTotal();
-  const deliveryCharge: number = 50;
+  const deliveryCharge: number = shippingCharge || 0;
   const discountedPrice = Math.floor((subtotal * discount) / 100);
   const total = subtotal + packagingTotal + deliveryCharge - discountedPrice;
 

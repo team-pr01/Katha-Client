@@ -8,6 +8,7 @@ const materialApi = baseApi.injectEndpoints({
         keyword?: string;
         category?: string[];
         subCategory?: string[];
+        isActive?: boolean;
         skip?: number;
         limit?: number;
       }
@@ -17,6 +18,11 @@ const materialApi = baseApi.injectEndpoints({
 
         // Keyword search
         if (filters.keyword) params.append("keyword", filters.keyword);
+
+        // Handle isActive
+        if (filters.isActive !== undefined) {
+          params.append("isActive", String(filters.isActive));
+        }
 
         // Array filters - join with comma
         if (filters.category && filters.category.length > 0) {

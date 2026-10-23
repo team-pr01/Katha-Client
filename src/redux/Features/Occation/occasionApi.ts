@@ -7,17 +7,22 @@ const occasionApi = baseApi.injectEndpoints({
         limit,
         page,
         skip,
-        keyword
+        keyword,
+        isActive
       }: {
         limit?: number;
         page?: number;
         skip?: number;
-        keyword?: string
+        keyword?: string;
+        isActive?: boolean
       } = {}) => {
         const params = new URLSearchParams();
 
         // Keyword search
         if (keyword) params.append("keyword", keyword);
+
+        // Handle isActive
+        if (isActive !== undefined) params.append("isActive", String(isActive));
         // Handle limit
         if (typeof limit === "number") params.append("limit", limit.toString());
 

@@ -335,7 +335,7 @@ const OrdersManagement = () => {
             </div>
 
             <Link
-              to="/admin/orders/new"
+              to="/admin/dashboard/order/add"
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-10 text-white text-sm font-medium hover:bg-[#d4892a] transition-all shadow-md shadow-primary-10/20"
             >
               <FiPlus size={16} />

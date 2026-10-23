@@ -6,7 +6,6 @@ import {
   FiTrash2,
   FiPackage,
   FiLayers,
-  FiSearch,
   FiCheckCircle,
   FiPlusCircle,
 } from "react-icons/fi";
@@ -30,11 +29,19 @@ import type {
   TMaterialVariant,
 } from "../../../types/materials.type";
 import ManageCategoriesDrawer from "../../../components/AdminDashboardComponents/MaterialsManagementPage/ManageCategoriesDrawer/ManageCategoriesDrawer";
+import DataFilters from "../../../components/Reusable/DataFilters/DataFilters";
+
+const statusOptions = [
+  { value: "all", label: "All" },
+  { value: "true", label: "Active" },
+  { value: "false", label: "Inactive" },
+];
 
 const MaterialsManagement = () => {
   // ─── State ───────────────────────────────────────────
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [status, setStatus] = useState<any>("all");
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
   const skip = (page - 1) * limit;
@@ -66,7 +73,12 @@ const MaterialsManagement = () => {
     data: materialsData,
     isLoading: isMaterialsLoading,
     isFetching,
-  } = useGetAllMaterialsQuery({ keyword: search, skip, limit });
+  } = useGetAllMaterialsQuery({ 
+    keyword: search, 
+    skip, 
+    limit, 
+    isActive: status 
+  });
 
   const meta = materialsData?.data?.meta || {};
   const materials: TMaterials[] = materialsData?.data?.data || [];
@@ -75,7 +87,6 @@ const MaterialsManagement = () => {
     useDeleteMaterialMutation();
   const [updateMaterial, { isLoading: isUpdatingMaterial }] =
     useUpdateMaterialMutation();
-  //   const [deleteVariant] = useDeleteVariantMutation();
 
   // ─── Handlers ────────────────────────────────────────
   const handleAddMaterial = () => {
@@ -123,39 +134,12 @@ const MaterialsManagement = () => {
     }
   };
 
-  
   // Variant handlers
   const handleAddVariant = (materialId: string) => {
     setActiveMaterialId(materialId);
     setEditingVariant(null);
     setEditingVariantIndex(null);
     setIsVariantModalOpen(true);
-  };
-
-  //   const handleEditVariant = (
-  //     materialId: string,
-  //     variant: TMaterialVariant,
-  //     index: number,
-  //   ) => {
-  //     setActiveMaterialId(materialId);
-  //     setEditingVariant(variant);
-  //     setEditingVariantIndex(index);
-  //     setIsVariantModalOpen(true);
-  //   };
-
-  //   const handleDeleteVariant = async (materialId: string, index: number) => {
-  //     if (!window.confirm("Delete this variant?")) return;
-  //     try {
-  //       await deleteVariant({ id: materialId, variantIndex: index }).unwrap();
-  //       toast.success("Variant deleted successfully!");
-  //     } catch (err: any) {
-  //       toast.error(err?.data?.message || "Failed to delete variant");
-  //     }
-  //   };
-
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-    setPage(1);
   };
 
   const handleSelectToggle = (id: string) => {
@@ -172,8 +156,11 @@ const MaterialsManagement = () => {
     );
   };
 
-  const handleLimitChange = (newLimit: number) => {
-    setLimit(newLimit);
+  const hasActiveFilters = search.trim() !== "" || status !== "all";
+
+  const handleClearFilters = () => {
+    setSearch("");
+    setStatus("all");
     setPage(1);
   };
 
@@ -227,15 +214,15 @@ const MaterialsManagement = () => {
           onClick={() => handleToggleActive(material)}
           disabled={isUpdatingMaterial}
           className={`
-    inline-flex items-center gap-1.5 text-[11px] font-medium 
-    px-2.5 py-1 rounded-full transition-all cursor-pointer
-    disabled:opacity-60 disabled:cursor-not-allowed
-    ${
-      material.isActive
-        ? "bg-green-50 text-green-700 hover:bg-green-100"
-        : "bg-neutral-20 text-neutral-45 hover:bg-neutral-45/20"
-    }
-  `}
+            inline-flex items-center gap-1.5 text-[11px] font-medium 
+            px-2.5 py-1 rounded-full transition-all cursor-pointer
+            disabled:opacity-60 disabled:cursor-not-allowed
+            ${
+              material.isActive
+                ? "bg-green-50 text-green-700 hover:bg-green-100"
+                : "bg-neutral-20 text-neutral-45 hover:bg-neutral-45/20"
+            }
+          `}
           title={
             material.isActive ? "Click to deactivate" : "Click to activate"
           }
@@ -324,7 +311,7 @@ const MaterialsManagement = () => {
       />
 
       {/* Stats strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <StatCard
           label="Total Materials"
           value={meta?.total ?? materials.length}
@@ -346,38 +333,33 @@ const MaterialsManagement = () => {
           icon={<FiCheckCircle size={18} />}
           accent="bg-green-50 text-green-600"
         />
-        <StatCard
-          label="Avg Variants"
-          value={
-            materials.length
-              ? (
-                  materials.reduce(
-                    (sum, m) => sum + (m.variants?.length || 0),
-                    0,
-                  ) / materials.length
-                ).toFixed(1)
-              : "0"
-          }
-          icon={<FiLayers size={18} />}
-          accent="bg-amber-50 text-amber-600"
-        />
       </div>
 
-      {/* Search */}
-      <div className="bg-white rounded-2xl border border-neutral-20 p-4">
-        <div className="relative flex-1">
-          <FiSearch
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-45"
-            size={16}
-          />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Search materials…"
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-neutral-20/60 border border-transparent text-sm focus:outline-none focus:bg-white focus:border-primary-10/40 transition-all"
-          />
-        </div>
+      {/* Search and Filter */}
+      <div className="pt-2">
+        <DataFilters
+          search={{
+            value: search,
+            onChange: (v) => {
+              setSearch(v);
+              setPage(1);
+            },
+            placeholder: "Search by material name…",
+          }}
+          selects={[
+            {
+              id: "status",
+              value: status,
+              onChange: (v) => {
+                setStatus(v || "all");
+                setPage(1);
+              },
+              options: statusOptions,
+            },
+          ]}
+          hasActiveFilters={hasActiveFilters}
+          onClear={handleClearFilters}
+        />
       </div>
 
       {/* Table */}
@@ -386,15 +368,15 @@ const MaterialsManagement = () => {
       ) : materials.length === 0 ? (
         <DataTableEmpty
           icon={<FiPackage size={32} />}
-          title={search ? "No matching materials" : "No materials yet"}
+          title={hasActiveFilters ? "No matching materials" : "No materials yet"}
           description={
-            search
-              ? "No materials match your search. Try a different term."
+            hasActiveFilters
+              ? "No materials match your current filters. Try adjusting them."
               : "Get started by adding your first material."
           }
-          variant={search ? "no-match" : "no-data"}
-          actionLabel={search ? "Clear search" : "Add Material"}
-          onAction={search ? () => setSearch("") : handleAddMaterial}
+          variant={hasActiveFilters ? "no-match" : "no-data"}
+          actionLabel={hasActiveFilters ? "Clear filters" : "Add Material"}
+          onAction={hasActiveFilters ? handleClearFilters : handleAddMaterial}
         />
       ) : (
         <>
@@ -416,7 +398,10 @@ const MaterialsManagement = () => {
             itemsPerPage={limit}
             onPageChange={setPage}
             limit={limit}
-            setLimit={handleLimitChange}
+            setLimit={(v) => {
+              setLimit(v);
+              setPage(1);
+            }}
           />
         </>
       )}
