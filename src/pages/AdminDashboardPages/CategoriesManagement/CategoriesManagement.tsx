@@ -7,7 +7,6 @@ import {
   FiTag,
   FiFolder,
   FiLayers,
-  FiSearch,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import AdminPageHeader from "../../../components/Reusable/AdminReusable/AdminPageHeader/AdminPageHeader";
@@ -26,8 +25,15 @@ import type { TCategories } from "../../../types/categories.types";
 import SubItemsPopover, {
   type TSubItem,
 } from "../../../components/Reusable/SubItemsPopover/SubItemsPopover";
+import DataFilters from "../../../components/Reusable/DataFilters/DataFilters";
 
 const ITEMS_PER_PAGE = 10;
+
+const statusOptions = [
+  { value: "all", label: "All" },
+  { value: "true", label: "Active" },
+  { value: "false", label: "Inactive" },
+];
 
 const CategoriesManagement = () => {
   const [deleteCategory, { isLoading: isDeleting }] =
@@ -36,6 +42,7 @@ const CategoriesManagement = () => {
   // ─── State ───────────────────────────────────────────
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [status, setStatus] = useState<any>("all");
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
   const skip = (page - 1) * limit;
@@ -53,13 +60,13 @@ const CategoriesManagement = () => {
   );
 
   const [updateCategory, { isLoading: isUpdatingCategory }] =
-      useUpdateCategoryMutation();
+    useUpdateCategoryMutation();
 
   const {
     data: categoryData,
     isLoading: isCategoriesLoading,
     isFetching,
-  } = useGetAllCategoriesQuery({ keyword: search, skip, limit });
+  } = useGetAllCategoriesQuery({ keyword: search, skip, limit, isActive: status });
   const meta = categoryData?.data?.meta || {};
 
   const categories: TCategories[] = categoryData?.data?.data || [];
@@ -216,7 +223,7 @@ const CategoriesManagement = () => {
       key: "status",
       header: "Status",
       render: (category) => (
-         <button
+        <button
           type="button"
           onClick={() => handleToggleActive(category)}
           disabled={isUpdatingCategory}
@@ -278,6 +285,14 @@ const CategoriesManagement = () => {
     },
   ];
 
+  const hasActiveFilters = search.trim() !== "" || status !== "all";
+
+  const handleClearFilters = () => {
+    setSearch("");
+    setStatus("all");
+    setPage(1);
+  };
+
   return (
     <div className="space-y-5 font-Manrope">
       {/* Header */}
@@ -297,7 +312,7 @@ const CategoriesManagement = () => {
       />
 
       {/* Stats strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <StatCard
           label="Total Categories"
           value={categories.length}
@@ -321,40 +336,33 @@ const CategoriesManagement = () => {
           icon={<FiLayers size={18} />}
           accent="bg-green-50 text-green-600"
         />
-        <StatCard
-          label="Avg Sub-categories"
-          value={
-            categories.length
-              ? (
-                  categories.reduce(
-                    (sum, c) => sum + getSubCategories(c).length,
-                    0,
-                  ) / categories.length
-                ).toFixed(1)
-              : "0"
-          }
-          icon={<FiFolder size={18} />}
-          accent="bg-amber-50 text-amber-600"
-        />
       </div>
 
-      {/* Search filter */}
-      <div className="bg-white rounded-2xl border border-neutral-20 p-4">
-        <div className="relative flex-1">
-          <FiSearch
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-45"
-            size={16}
-          />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-            }}
-            placeholder="Search categories or sub-categories…"
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-neutral-20/60 border border-transparent text-sm focus:outline-none focus:bg-white focus:border-primary-10/40 transition-all"
-          />
-        </div>
+      {/* Search and Filter */}
+      <div className="pt-2">
+        <DataFilters
+          search={{
+            value: search,
+            onChange: (v) => {
+              setSearch(v);
+              setPage(1);
+            },
+            placeholder: "Search by category name or sub-category name…",
+          }}
+          selects={[
+            {
+              id: "status",
+              value: status,
+              onChange: (v) => {
+                setStatus(v || "all");
+                setPage(1);
+              },
+              options: statusOptions,
+            },
+          ]}
+          hasActiveFilters={hasActiveFilters}
+          onClear={handleClearFilters}
+        />
       </div>
 
       {/* Table */}

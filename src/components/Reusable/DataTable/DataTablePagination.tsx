@@ -91,7 +91,7 @@ const DataTablePagination = ({
           Showing <span className="font-semibold text-neutral-10">{start}</span>{" "}
           to <span className="font-semibold text-neutral-10">{end}</span> of{" "}
           <span className="font-semibold text-neutral-10">
-            {totalItems} orders
+            {totalItems} items
           </span>
         </p>
       </div>
