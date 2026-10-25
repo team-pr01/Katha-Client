@@ -6,7 +6,8 @@ import type { FetchArgs } from "@reduxjs/toolkit/query/react";
 import { setUser } from "../Features/Auth/authSlice";
 import type { RootState } from "../store";
 
-export const backendBaseUrl = "http://localhost:5000";
+// export const backendBaseUrl = "http://localhost:5000";
+export const backendBaseUrl = "https://apikatha.vercel.app";  // Production
 // export const backendBaseUrl = "https://katha-server.vercel.app";
 const baseQuery = fetchBaseQuery({
   baseUrl: `${backendBaseUrl}/api/v1`,
