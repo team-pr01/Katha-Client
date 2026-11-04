@@ -30,26 +30,10 @@ const UserDropdown = ({
   const pathname = location.pathname;
 
   const navLinks = [
-    {
-      label: "Dashboard",
-      path: "/dashboard",
-      icon: <FiGrid size={18} />,
-    },
-    {
-      label: "My Orders",
-      path: "/dashboard/my-orders",
-      icon: <FiPackage size={18} />,
-    },
-    {
-      label: "Track Order",
-      path: "/dashboard/track-order",
-      icon: <FiTruck size={18} />,
-    },
-    {
-      label: "Address",
-      path: "/dashboard/address",
-      icon: <FiMapPin size={18} />,
-    },
+    { label: "Dashboard", path: "/dashboard", icon: <FiGrid size={18} /> },
+    { label: "My Orders", path: "/dashboard/my-orders", icon: <FiPackage size={18} /> },
+    { label: "Track Order", path: "/dashboard/track-order", icon: <FiTruck size={18} /> },
+    { label: "Address", path: "/dashboard/address", icon: <FiMapPin size={18} /> },
   ];
 
   // Close dropdown when clicking outside
@@ -62,11 +46,8 @@ const UserDropdown = ({
         setIsOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Close dropdown on route change
@@ -90,28 +71,32 @@ const UserDropdown = ({
         onClick={() => setIsOpen(!isOpen)}
         className={`
           bg-neutral-20 rounded-3xl text-neutral-10 text-sm 
-          flex items-center gap-2 p-2 pr-1.5
+          flex items-center gap-2
           hover:bg-neutral-50 transition-all duration-200
+          p-1 lg:p-2 lg:pr-1.5
           ${isOpen ? "bg-neutral-50 ring-2 ring-primary-10/20" : ""}
         `}
         aria-expanded={isOpen}
         aria-haspopup="true"
+        aria-label="User menu"
       >
-        <div className="size-7 rounded-full flex items-center justify-center bg-neutral-45 overflow-hidden">
+        <div className="size-8 lg:size-7 rounded-full flex items-center justify-center bg-neutral-45 overflow-hidden shrink-0">
           <img
             src={userImage}
             alt={userName}
             className="w-full h-full object-cover rounded-full"
           />
         </div>
-        <span className="font-medium">
+
+        {/* Name + chevron only on desktop */}
+        <span className="font-medium hidden lg:inline">
           {user?.name?.slice(0, 9).concat("...")}
         </span>
         <img
           src={ICONS.arrowRight}
           alt=""
           className={`
-            w-6 transition-transform duration-300
+            w-6 hidden lg:block transition-transform duration-300
             ${isOpen ? "rotate-269" : "rotate-90"}
           `}
         />
@@ -173,14 +158,11 @@ const UserDropdown = ({
                     `}
                   >
                     <span
-                      className={`
-                        transition-colors duration-200
-                        ${
-                          isActive
-                            ? "text-white"
-                            : "text-neutral-45 group-hover:text-primary-10"
-                        }
-                      `}
+                      className={`transition-colors duration-200 ${
+                        isActive
+                          ? "text-white"
+                          : "text-neutral-45 group-hover:text-primary-10"
+                      }`}
                     >
                       {link.icon}
                     </span>

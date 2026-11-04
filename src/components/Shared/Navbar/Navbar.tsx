@@ -10,6 +10,7 @@ import { useCart } from "../../../providers/CartProvider/CartProvider";
 import UserDropdown from "./UserDropdown";
 import { useSelector } from "react-redux";
 import { useCurrentUser } from "../../../redux/Features/Auth/authSlice";
+import HamburgerMenu from "./HamburgerMenu";
 
 const Navbar = () => {
   const user = useSelector(useCurrentUser);
@@ -19,6 +20,7 @@ const Navbar = () => {
     "login",
   );
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   // Search state
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -46,29 +48,13 @@ const Navbar = () => {
   const staticPrefix = "Search for ";
 
   const navLinks = [
-    {
-      label: "Home",
-      path: "/",
-    },
-    {
-      label: "Products",
-      path: "/products",
-    },
-    {
-      label: "Personalized Orders",
-      path: "/personalized-orders",
-    },
-    // {
-    //   label: "Order In Bulk",
-    //   path: "/bulk-orders",
-    // },
-    {
-      label: "Track Order",
-      path: "/track-order",
-    },
+    { label: "Home", path: "/" },
+    { label: "Products", path: "/products" },
+    { label: "Personalized Orders", path: "/personalized-orders" },
+    // { label: "Order In Bulk", path: "/bulk-orders" },
+    { label: "Track Order", path: "/track-order" },
   ];
 
-  // Handle search on Enter key
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -81,7 +67,6 @@ const Navbar = () => {
     }
   };
 
-  // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
@@ -149,7 +134,6 @@ const Navbar = () => {
     };
   }, [displayText, isDeleting, isPaused, productIndex, productNames]);
 
-  // Reset animation when component mounts
   useEffect(() => {
     setDisplayText("Search for ");
     setProductIndex(0);
@@ -163,24 +147,29 @@ const Navbar = () => {
     <div className="bg-white shadow-navbar font-Manrope py-4 sticky top-0 z-99">
       <Container>
         <div className="flex items-center justify-between bg-white">
+          {/* Logo (always visible) */}
           <Link to="/">
-            <img src={IMAGES.logo} alt="Logo" className="w-40" />
+            <img src={IMAGES.logo} alt="Logo" className="w-30 md:w-40" />
           </Link>
 
-          <div className="flex items-center gap-8">
+          {/* Desktop nav (hidden on mobile) */}
+          <div className="hidden lg:flex items-center gap-8">
             <div className="flex items-center gap-4">
               {navLinks.map((link) => (
                 <Link
                   key={link?.label}
                   to={link?.path}
-                  className={`text-sm transition duration-300 hover hover:text-primary-10 ${pathname === link?.path ? "text-primary-10 underline font-semibold" : "font-medium text-neutral-10"}`}
+                  className={`text-sm transition duration-300 hover hover:text-primary-10 ${
+                    pathname === link?.path
+                      ? "text-primary-10 underline font-semibold"
+                      : "font-medium text-neutral-10"
+                  }`}
                 >
                   {link?.label}
                 </Link>
               ))}
             </div>
 
-            {/* Search with animated placeholder and Enter key support */}
             <div className="flex py-2.5 items-center rounded-md bg-neutral-20 px-4 w-75 relative overflow-hidden">
               <img src={ICONS.search} alt="Search" className="shrink-0" />
               <input
@@ -192,7 +181,6 @@ const Navbar = () => {
                 className="w-full text-sm bg-transparent text-neutral-10 outline-none placeholder:text-neutral-500 ml-1 relative z-10"
                 aria-label="Search for handcrafted products"
               />
-              {/* Animated placeholder overlay - only show when input is empty */}
               {!searchTerm && (
                 <div className="absolute left-10 text-sm text-neutral-500 pointer-events-none whitespace-nowrap">
                   <span className="inline-block">
@@ -210,7 +198,6 @@ const Navbar = () => {
             </div>
 
             <div className="flex items-center gap-4">
-              {/* Cart */}
               <Link
                 to="/cart"
                 className="bg-neutral-20 size-10 rounded-full flex justify-center items-center text-sm font-medium text-neutral-10 hover:bg-neutral-50 transition-colors relative"
@@ -237,8 +224,44 @@ const Navbar = () => {
               )}
             </div>
           </div>
+
+          {/* Mobile: user menu + hamburger */}
+          <div className="flex lg:hidden items-center gap-3">
+            {user && <UserDropdown />}
+            <button
+              onClick={() => setIsMenuOpen(true)}
+              aria-label="Open menu"
+              aria-expanded={isMenuOpen}
+              className="bg-neutral-20 size-10 rounded-full flex justify-center items-center text-neutral-10 hover:bg-neutral-50 transition-colors"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
+          </div>
         </div>
       </Container>
+
+      {/* Mobile hamburger drawer */}
+      <HamburgerMenu
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        onLoginClick={() => {
+          setAuthModalType("login");
+          setIsAuthModalOpen(true);
+        }}
+      />
 
       <Modal isModalOpen={isAuthModalOpen} setIsModalOpen={setIsAuthModalOpen}>
         <h2 className="text-2xl font-Satoshi font-semibold text-center text-neutral-5">
