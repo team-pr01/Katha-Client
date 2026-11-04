@@ -105,7 +105,7 @@ const Footer = () => {
   ];
 
   return (
-    <div className="py-14 font-Manrope relative h-120">
+    <div className="py-14 font-Manrope relative h-fit lg:h-120">
       <img
         src={IMAGES.footerBg}
         alt="Footer Background"
@@ -116,7 +116,7 @@ const Footer = () => {
           <div className="flex flex-col lg:flex-row gap-10 lg:gap-8 xl:gap-19 justify-between">
             {/* Left Column - Brand */}
             <div className="max-w-[320px]">
-              <img src={IMAGES.logo} alt="Hanjifinance" className="w-70" />
+              <img src={IMAGES.logo} alt="Hanjifinance" className="w-70 md:mx-0 mx-auto" />
               <p className="text-neutral-90 text-sm leading-5 mt-8">
                 At Katha, every handcrafted piece tells a story of India's rich
                 heritage and skilled craftsmanship. We create timeless designs
@@ -219,12 +219,12 @@ const Footer = () => {
           </div>
 
           <img src={IMAGES.footerDivider} alt="" className="w-full my-6" />
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-6 lg:gap-0 lg:flex-row items-start md:items-center justify-between">
             <p className="text-neutral-10 font-semibold text-sm leading-5">
               All rights reserved © Katha 2026
             </p>
 
-            <div className="flex items-center gap-6">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
               <Link
                 to="/terms-and-conditions"
                 className="text-neutral-10 font-semibold text-sm leading-5 hover:underline"

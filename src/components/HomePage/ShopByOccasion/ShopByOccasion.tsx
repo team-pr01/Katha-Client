@@ -30,7 +30,7 @@ const ShopByOccasion = () => {
                   Shop by Occasion
                 </span>
               </div>
-              <h2 className="text-4xl md:text-5xl font-bold text-neutral-10 leading-[0.95] tracking-tight">
+              <h2 className="text-3xl md:text-5xl font-bold text-neutral-10 leading-[0.95] tracking-tight">
                 Gifts for
                 <span className="block italic font-light text-primary-10">
                   every moment
@@ -47,7 +47,7 @@ const ShopByOccasion = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => swiperRef.current?.slidePrev()}
-                  className={`w-12 h-12 rounded-full border flex items-center justify-center transition-all duration-300
+                  className={`size-8 md:size-12 rounded-full border flex items-center justify-center transition-all duration-300
                          border-neutral-10 text-neutral-10 hover:bg-neutral-10 hover:text-white`}
                   aria-label="Scroll left"
                 >
@@ -55,7 +55,7 @@ const ShopByOccasion = () => {
                 </button>
                 <button
                   onClick={() => swiperRef.current?.slideNext()}
-                  className={`w-12 h-12 rounded-full border flex items-center justify-center transition-all duration-300
+                  className={`size-8 md:size-12 rounded-full border flex items-center justify-center transition-all duration-300
                          border-primary-10 text-primary-10 hover:bg-primary-10 hover:text-white`}
                   aria-label="Scroll right"
                 >
@@ -116,7 +116,7 @@ const ShopByOccasion = () => {
                     {/* Content */}
                     <div className="absolute bottom-0 left-0 right-0 z-10 flex items-end justify-between gap-4 px-6 py-5">
                       <div>
-                        <h3 className="text-xl font-semibold text-white">
+                        <h3 className="text-base md:text-xl font-semibold text-white">
                           {occasion?.name}
                         </h3>
 
@@ -138,7 +138,7 @@ const ShopByOccasion = () => {
                       </div>
 
                       <Link to={`/products?occasion=${occasion?.name}`}>
-                        <Button label="View" />
+                        <Button label="View" className="py-1" />
                       </Link>
                     </div>
                   </div>

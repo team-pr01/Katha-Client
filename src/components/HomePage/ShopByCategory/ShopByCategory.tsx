@@ -17,7 +17,7 @@ const ShopByCategory = () => {
   const loading = isLoading || isFetching;
 
   return (
-    <section className="font-Manrope py-16 md:py-24 overflow-hidden">
+    <section className="font-Manrope py-10 md:py-24 overflow-hidden">
       <Container>
         {/* Header — centered editorial style */}
         <div className="flex flex-col items-center text-center mb-14 md:mb-20">
@@ -31,7 +31,7 @@ const ShopByCategory = () => {
           </div>
 
           {/* Big heading with italic accent */}
-          <h2 className="text-4xl md:text-5xl font-bold text-neutral-10 leading-[0.95] tracking-tight max-w-4xl">
+          <h2 className="text-3xl md:text-5xl font-bold text-neutral-10 leading-[0.95] tracking-tight max-w-4xl">
             Explore our
             <span className="block italic font-light text-primary-10 mt-2">
               curated collections
@@ -39,7 +39,7 @@ const ShopByCategory = () => {
           </h2>
 
           {/* Subtitle */}
-          <p className="text-sm md:text-base text-neutral-45 mt-6 max-w-xl">
+          <p className="text-sm md:text-base text-neutral-45 mt-4 md:mt-6 max-w-xl">
             From timeless brass to hand-carved wood — discover crafts that tell
             a story.
           </p>

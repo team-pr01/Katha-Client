@@ -154,7 +154,7 @@ const Navbar = () => {
 
           {/* Desktop nav (hidden on mobile) */}
           <div className="hidden lg:flex items-center gap-8">
-            <div className="flex items-center gap-4">
+            <div className="hidden xl:flex items-center gap-4">
               {navLinks.map((link) => (
                 <Link
                   key={link?.label}
@@ -222,6 +222,28 @@ const Navbar = () => {
                   label="Login"
                 />
               )}
+
+              <button
+              onClick={() => setIsMenuOpen(true)}
+              aria-label="Open menu"
+              aria-expanded={isMenuOpen}
+              className="xl:hidden bg-neutral-20 size-10 rounded-full flex justify-center items-center text-neutral-10 hover:bg-neutral-50 transition-colors"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
             </div>
           </div>
 

@@ -176,7 +176,7 @@ const HamburgerMenu = ({ isOpen, onClose, onLoginClick }: HamburgerMenuProps) =>
     <>
       {/* Overlay */}
       <div
-        className={`fixed inset-0 bg-black/40 z-999 transition-opacity duration-300 lg:hidden ${
+        className={`fixed inset-0 bg-black/40 z-999 transition-opacity duration-300 xl:hidden ${
           isOpen ? "opacity-100 visible" : "opacity-0 invisible"
         }`}
         onClick={onClose}
@@ -185,7 +185,7 @@ const HamburgerMenu = ({ isOpen, onClose, onLoginClick }: HamburgerMenuProps) =>
 
       {/* Drawer */}
       <aside
-        className={`fixed top-0 right-0 h-full w-[80%] max-w-xs bg-white z-999 shadow-xl transition-transform duration-300 ease-in-out lg:hidden flex flex-col ${
+        className={`fixed top-0 right-0 h-full w-[80%] max-w-xs bg-white z-999 shadow-xl transition-transform duration-300 ease-in-out xl:hidden flex flex-col ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
         aria-label="Mobile navigation menu"

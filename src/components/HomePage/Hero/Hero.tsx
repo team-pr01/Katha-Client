@@ -30,7 +30,7 @@ const Hero = () => {
   if (isLoading) {
     return (
       <Container>
-        <div className="w-full h-[500px] sm:h-[600px] md:h-[700px] lg:h-[800px] xl:h-[600px] font-Inter py-10">
+        <div className="w-full h-[280px] sm:h-[600px] md:h-[700px] lg:h-[800px] xl:h-[600px] font-Inter py-10">
           <HeroSkeletonLoader />
         </div>
       </Container>
@@ -43,23 +43,28 @@ const Hero = () => {
   return (
     <Container>
       <div
-        className="relative w-full h-[500px] sm:h-[600px] md:h-[700px] lg:h-[800px] xl:h-[600px] font-Inter py-10"
+        className="relative w-full h-fit font-Inter py-10"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
         {/* Slides — all images rendered, opacity toggled for smooth crossfade */}
-        <div className="relative w-full h-full rounded-3xl overflow-hidden">
+        <div className="relative w-full aspect-video rounded-3xl overflow-hidden">
           {heroes.map((h: any, idx: number) => (
-            <Link to={h?.link}>
-            <img
+            <Link
               key={h._id}
-              src={h.image}
-              alt={h.alt}
-              loading={idx === 0 ? "eager" : "lazy"}
-              className={`absolute inset-0 w-full h-full object-cover block transition-opacity duration-1000 ease-in-out ${
-                idx === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+              to={h?.link}
+              className={`absolute inset-0 w-full h-full block transition-opacity duration-1000 ease-in-out ${
+                idx === currentIndex
+                  ? "opacity-100 z-10"
+                  : "opacity-0 z-0 pointer-events-none"
               }`}
-            />
+            >
+              <img
+                src={h.image}
+                alt={h.alt}
+                loading={idx === 0 ? "eager" : "lazy"}
+                className="w-full h-full object-cover block"
+              />
             </Link>
           ))}
         </div>
