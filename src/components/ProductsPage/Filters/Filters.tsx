@@ -12,13 +12,6 @@ import { useGetAllCategoriesQuery } from "../../../redux/Features/Category/categ
 import FiltersSkeletonLoader from "../../SkeletonLoaders/FiltersSkeletonLoader/FiltersSkeletonLoader";
 import { useGetAllMaterialsQuery } from "../../../redux/Features/Material/materialApi";
 
-// Types
-// interface FilterOption {
-//   label: string;
-//   count: number;
-//   id?: string;
-// }
-
 interface SubItem {
   name: string;
   productCount: number;
@@ -127,7 +120,7 @@ const FilterCheckbox: React.FC<FilterCheckboxProps> = ({
         className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
           checked
             ? "bg-primary-10 border-primary-10"
-            : "bg-white border-[#b0b0b0] group-hover:border-primary-10"
+            : "bg-white border-neutral-55 group-hover:border-primary-10"
         }`}
       >
         {checked && (
@@ -395,9 +388,8 @@ const Filters: React.FC<FiltersProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-6 font-Manrope">
+    <div className="bg-none lg:bg-white rounded-none lg:rounded-2xl shadow-none lg:shadow-sm p-0 lg:p-6 font-Manrope">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-neutral-10">Filters</h2>
         {/* Clear Filters */}
       {totalActiveFilters > 0 && (
         <button

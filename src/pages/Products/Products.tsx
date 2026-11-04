@@ -73,8 +73,7 @@ const Products: React.FC = () => {
       params.set("subCategory", selectedSubCategories.join(","));
     if (selectedMaterials.length)
       params.set("material", selectedMaterials.join(","));
-    if (selectedColors.length)
-      params.set("color", selectedColors.join(","));
+    if (selectedColors.length) params.set("color", selectedColors.join(","));
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
     if (sortBy && sortBy !== "latest") params.set("sortBy", sortBy);
@@ -115,9 +114,7 @@ const Products: React.FC = () => {
     setSelectedMaterials(
       materialParam ? materialParam.split(",").filter(Boolean) : [],
     );
-    setSelectedColors(
-      colorParam ? colorParam.split(",").filter(Boolean) : [],
-    );
+    setSelectedColors(colorParam ? colorParam.split(",").filter(Boolean) : []);
     setMinPrice(minPriceParam);
     setMaxPrice(maxPriceParam);
     setSortBy(sortByParam);
@@ -206,7 +203,7 @@ const Products: React.FC = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="appearance-none bg-white border border-neutral-50 rounded-xl px-4 py-2.5 pr-10 text-sm font-medium text-neutral-10 focus:outline-none focus:ring-2 focus:ring-primary-10 focus:border-transparent cursor-pointer transition-all"
+                  className="appearance-none bg-white border border-neutral-50 rounded-xl px-4 py-2.5 pr-3 text-sm font-medium text-neutral-10 focus:outline-none focus:ring-2 focus:ring-primary-10 focus:border-transparent cursor-pointer transition-all"
                 >
                   {sortOptions.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -285,7 +282,7 @@ const Products: React.FC = () => {
 
       {/* Mobile Filter Overlay */}
       {isMobileFilterOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="fixed inset-0 z-9999 lg:hidden">
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setIsMobileFilterOpen(false)}
